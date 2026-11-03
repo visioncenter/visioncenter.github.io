@@ -3032,10 +3032,17 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
           label = "출석부";
           rows = list.slice().sort((a, b) => ko(a.name, b.name) || ko(a.dept, b.dept));
           const n = Math.max(1, Math.min(5, +f.roDays.value || 1));
-          const signW = n <= 2 ? 1230 : n === 3 ? 1100 : n === 4 ? 1000 : 900;
-          cols = [{ key: "no", head: "No", w: 567 }, { key: "corp", head: "법인", w: 1418 },
-            { key: "dept", head: "부서", w: 10354 - 567 - 1418 - 1230 - signW * n, align: "left" }, { key: "name", head: "이름", w: 1230 }];
-          for (let i = 1; i <= n; i++) cols.push({ key: "_sign", head: n === 1 ? "서명" : `서명(${i}일차)`, w: signW });
+          if (n === 1) {
+            // 하루 교육: 이름 · 직급 · 서명
+            cols = [{ key: "no", head: "No", w: 567 }, { key: "corp", head: "법인", w: 1418 },
+              { key: "dept", head: "부서", w: 10354 - 567 - 1418 - 1230 - 1000 - 1500, align: "left" },
+              { key: "name", head: "이름", w: 1230 }, { key: "rank", head: "직급", w: 1000 }, { key: "_sign", head: "서명", w: 1500 }];
+          } else {
+            const signW = n === 2 ? 1230 : n === 3 ? 1100 : n === 4 ? 1000 : 900;
+            cols = [{ key: "no", head: "No", w: 567 }, { key: "corp", head: "법인", w: 1418 },
+              { key: "dept", head: "부서", w: 10354 - 567 - 1418 - 1230 - signW * n, align: "left" }, { key: "name", head: "이름", w: 1230 }];
+            for (let i = 1; i <= n; i++) cols.push({ key: "_sign", head: `서명(${i}일차)`, w: signW });
+          }
           headH = 267; rowH = 550;
         } else {
           label = "학습자 명단";
