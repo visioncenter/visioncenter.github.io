@@ -1294,7 +1294,16 @@
       <div class="card no-print" id="stPreviewCard">
         <div class="section-title">📊 법인별 배분 결과</div>
         <div id="stSummary" class="rs-info"></div>
-        <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:12px 0 10px;">
+        <label class="field" for="stView" style="margin-top:12px;">표 형식 (복사·미리보기)</label>
+        <select id="stView">
+          <option value="internal">내부용 — 구분 열 + 법인 약칭 (결과 품의서와 같음)</option>
+          <option value="vendor">교육업체 발송용 — 구분 열 없이, 한글 법인명</option>
+        </select>
+        <div class="checks" style="margin-top:6px;">
+          <label><input type="checkbox" id="stOptGubun" checked /> 구분 열 (강사료+보조강사료)</label>
+          <label><input type="checkbox" id="stOptKor" /> 한글 법인명</label>
+        </div>
+        <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:10px 0 10px;">
           <button type="button" class="btn-sm solid" id="stDownload">⬇ 엑셀 다운로드</button>
           <button type="button" class="btn-sm" id="stCopyRich">✨ 표 서식째 복사</button>
           <button type="button" class="btn-sm" id="stCopyCode">📋 배분표 HTML 복사</button>
@@ -4281,19 +4290,22 @@ background:
       const TD = (w, inner, bg, attrs = "") => `<td${attrs} style="${TDS(w, bg)}">\n${inner}</td>`;
       const TBL = (w, rows) => `<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: ${w}px; background-color: rgb(255, 255, 255); font-family: 'malgun gothic';">\n<tbody>\n${rows.map((r) => `<tr>\n${r.join("\n")}\n</tr>`).join("\n")}\n</tbody>\n</table>`;
       const GRAY = "rgb(208, 208, 208)", LGRAY = "rgb(232, 232, 232)", YEL = "rgb(255, 255, 204)", CREAM = "rgb(255, 242, 204)";
-      function allocTableHtml(R) {
+      // o.gubun: 구분 열 넣기(기본 true), o.kor: 법인 약칭 → 한글 법인명(담당자 목록 기준)
+      const corpLabel = (code, kor) => (kor ? dir.find((d) => d.code === code)?.name || code : code);
+      function allocTableHtml(R, o = {}) {
         if (!R.rows.length) return "";
-        const rows = [["구분", 64], ["법인", 50], ["인원", 41], ["공급가액", 90], ["부가세", 86], ["합계", 90], ["담당자", 75], ["이메일", 162]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY));
+        const gub = o.gubun !== false, kor = !!o.kor, cw = kor ? 150 : 50;
+        const rows = [...(gub ? [["구분", 64]] : []), ["법인", cw], ["인원", 41], ["공급가액", 90], ["부가세", 86], ["합계", 90], ["담당자", 75], ["이메일", 162]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY));
         const out = [rows];
         const gubun = R.allocNames.length ? R.allocNames.map((n) => CP(esc(n))).join(`\n${CP("+")}\n`) : CP("교육비");
         R.rows.forEach((r, i) => {
           const tr = [];
-          if (i === 0) tr.push(TD(64, gubun, "", ` rowspan="${R.rows.length}"`));
-          tr.push(TD(50, CP(esc(r.corp))), TD(41, CP(String(r.count))), TD(90, CP(won(r.supply) + "&nbsp;", "right")), TD(86, CP(won(r.vat) + "&nbsp;", "right")), TD(90, CP(won(r.total) + "&nbsp;", "right")), TD(75, CP(esc(r.manager) || "<br />")), TD(162, CP(esc(r.email) || "<br />")));
+          if (gub && i === 0) tr.push(TD(64, gubun, "", ` rowspan="${R.rows.length}"`));
+          tr.push(TD(cw, CP(esc(corpLabel(r.corp, kor)))), TD(41, CP(String(r.count))), TD(90, CP(won(r.supply) + "&nbsp;", "right")), TD(86, CP(won(r.vat) + "&nbsp;", "right")), TD(90, CP(won(r.total) + "&nbsp;", "right")), TD(75, CP(esc(r.manager) || "<br />")), TD(162, CP(esc(r.email) || "<br />")));
           out.push(tr);
         });
-        out.push([TD(115, CP("합계", "center", true), LGRAY, ` colspan="2"`), TD(41, CP(String(R.ctot.count), "center", true), LGRAY), TD(90, CP(won(R.ctot.supply) + "&nbsp;", "right", true), YEL), TD(86, CP(won(R.ctot.vat) + "&nbsp;", "right", true), YEL), TD(90, CP(won(R.ctot.total) + "&nbsp;", "right", true), YEL), TD(75, CP("<br />"), LGRAY), TD(162, CP("<br />"), LGRAY)]);
-        return TBL(667, out);
+        out.push([gub ? TD(64 + cw, CP("합계", "center", true), LGRAY, ` colspan="2"`) : TD(cw, CP("합계", "center", true), LGRAY), TD(41, CP(String(R.ctot.count), "center", true), LGRAY), TD(90, CP(won(R.ctot.supply) + "&nbsp;", "right", true), YEL), TD(86, CP(won(R.ctot.vat) + "&nbsp;", "right", true), YEL), TD(90, CP(won(R.ctot.total) + "&nbsp;", "right", true), YEL), TD(75, CP("<br />"), LGRAY), TD(162, CP("<br />"), LGRAY)]);
+        return TBL(gub ? 568 + cw : 504 + cw, out);
       }
       function usageTableHtml(R) {
         const out = [[["항목", 171], ["공급가액", 123], ["부가세", 123], ["합계", 123], ["비고", 123]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY))];
@@ -4336,7 +4348,7 @@ background:
             + (R.ctot.vat !== vatOf(R.ctot.supply) ? `<br /><span class="warn">ℹ️ 부가세를 법인별로 버림 계산해서 합계가 전체 부가세(${won(vatOf(R.ctot.supply))})와 ${won(vatOf(R.ctot.supply) - R.ctot.vat)}원 달라요.</span>` : "")
             + (R.ctot.supply !== R.tot.supply ? `<br />배분에서 뺀 항목: ${esc(R.items.filter((c) => !c.alloc).map((c) => c.item).join(", "))}` : "");
         }
-        const html = allocTableHtml(R);
+        const html = allocTableHtml(R, viewOpts());
         $("stCode").value = html;
         $("stPreview").srcdoc = previewDoc(html || `<p style="color:#888;font-size:13px;">배분 결과가 여기에 표로 나와요.</p>`);
         saveJ(ST_KEY, R.s);
@@ -4448,14 +4460,25 @@ background:
         updateSettle();
       };
       $("stGoResult").onclick = () => goTab("result");
+      const VIEW_KEY = "edu_settle_view_v1";
+      const viewOpts = () => ({ gubun: $("stOptGubun").checked, kor: $("stOptKor").checked });
+      (() => { const v = loadJ(VIEW_KEY, null); if (v) { $("stOptGubun").checked = v.gubun !== false; $("stOptKor").checked = !!v.kor; } syncView(); })();
+      function syncView() { const o = viewOpts(); $("stView").value = o.gubun && !o.kor ? "internal" : !o.gubun && o.kor ? "vendor" : ""; }
+      $("stView").addEventListener("change", () => {
+        const vendor = $("stView").value === "vendor";
+        $("stOptGubun").checked = !vendor; $("stOptKor").checked = vendor;
+        saveJ(VIEW_KEY, viewOpts()); updateSettle();
+      });
+      ["stOptGubun", "stOptKor"].forEach((k) => $(k).addEventListener("change", () => { syncView(); saveJ(VIEW_KEY, viewOpts()); updateSettle(); }));
       $("stCopyCode").onclick = () => { const h = $("stCode").value; if (h) copyTo(h, null, $("stCopyStatus"), "✓ 배분표 HTML을 복사했어요"); };
       // Outlook·그룹웨어 메일 본문에 표 그대로 붙여넣기 (일반 텍스트로 붙는 곳엔 탭 구분 → 엑셀에도 붙음)
       $("stCopyRich").onclick = () => {
-        const R = computeSettle(), h = allocTableHtml(R);
+        const R = computeSettle(), o = viewOpts(), h = allocTableHtml(R, o);
         if (!h) { $("stCopyStatus").textContent = "배분 결과가 없어요."; return; }
-        const tsv = [["구분", "법인", "인원", "공급가액", "부가세", "합계", "담당자", "이메일"],
-          ...R.rows.map((r, i) => [i ? "" : R.allocNames.join(" + "), r.corp, r.count, won(r.supply), won(r.vat), won(r.total), r.manager, r.email]),
-          ["합계", "", R.ctot.count, won(R.ctot.supply), won(R.ctot.vat), won(R.ctot.total), "", ""]].map((r) => r.join("\t")).join("\n");
+        const g = (a) => (o.gubun ? a : a.slice(1));
+        const tsv = [g(["구분", "법인", "인원", "공급가액", "부가세", "합계", "담당자", "이메일"]),
+          ...R.rows.map((r, i) => g([i ? "" : R.allocNames.join(" + "), corpLabel(r.corp, o.kor), r.count, won(r.supply), won(r.vat), won(r.total), r.manager, r.email])),
+          o.gubun ? ["합계", "", R.ctot.count, won(R.ctot.supply), won(R.ctot.vat), won(R.ctot.total), "", ""] : ["합계", R.ctot.count, won(R.ctot.supply), won(R.ctot.vat), won(R.ctot.total), "", ""]].map((r) => r.join("\t")).join("\n");
         copyTo(tsv, `<div style="font-family: 'malgun gothic';">${h}</div>`, $("stCopyStatus"), "✓ 표를 복사했어요. 메일 본문에 Ctrl+V 하세요");
       };
       $("stDownload").onclick = () => {
