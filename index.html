@@ -473,6 +473,9 @@
     .en-item input[type="text"] { font-size: 14px; padding: 10px 12px; }
     .en-preview { width: 100%; border: 1px solid var(--line); border-radius: 12px; background: #f5f7fa; min-height: 420px; margin-top: 10px; display: block; }
     #enrollFormCard button.btn-sm, #enrollPreviewCard button.btn-sm { margin-top: 0; }
+    .en-copyrow { display: flex; gap: 6px; align-items: flex-start; }
+    .en-copyrow input, .en-copyrow textarea { flex: 1; }
+    .en-copyrow .btn-sm { white-space: nowrap; margin-top: 4px !important; }
 
     /* --- 출석부·명단 --- */
     .ro-form input[type="date"], .ro-form input[type="time"] {
@@ -813,6 +816,11 @@
       <div class="card no-print en-form" id="enrollFormCard">
         <div class="section-title">✉️ 입과 안내 HTML 만들기</div>
         <div class="hint" style="margin-bottom:6px;">입력하면 오른쪽 미리보기가 바로 바뀝니다. 입력값은 이 브라우저에 자동 저장돼요.</div>
+        <div id="enDrop" class="pdf-dropzone" tabindex="0" role="button" aria-label="수강생 엑셀 업로드" style="margin-top:4px;">
+          📥 Cen-Class 수강생 엑셀(.xls)을 넣으면 과정 정보·받는 사람 메일주소가 자동으로 채워져요
+          <input type="file" id="enFile" accept=".xls,.xlsx,.csv" style="display:none;" />
+        </div>
+        <div id="enFileStatus" class="hint"></div>
 
         <label class="field" for="enTitle">과정명</label>
         <input type="text" id="enTitle" placeholder="예: AI 활용 프로젝트 관리 실무 과정" />
@@ -887,6 +895,17 @@
 
       <div class="card no-print" id="enrollPreviewCard">
         <div class="section-title">👀 미리보기</div>
+        <label class="field" for="enSubject" style="margin-top:0;">메일 제목</label>
+        <div class="en-copyrow">
+          <input type="text" id="enSubject" />
+          <button type="button" class="btn-sm" id="enCopySubject">복사</button>
+        </div>
+        <label class="field" for="enRcpt">받는 사람 <span id="enRcptCount" class="hint" style="font-weight:400;"></span></label>
+        <div class="en-copyrow">
+          <textarea id="enRcpt" placeholder="수강생 엑셀을 넣으면 '이름<이메일>; ' 형식으로 채워져요" style="min-height:60px; font-size:13px;"></textarea>
+          <button type="button" class="btn-sm" id="enCopyRcpt">복사</button>
+        </div>
+        <div class="hint" style="margin:4px 0 12px;">수강취소 상태인 사람은 빠져요. 메일주소는 저장되지 않습니다.</div>
         <div class="minirow" style="gap:6px; flex-wrap:wrap; margin-bottom:10px;">
           <button type="button" class="btn-sm solid" id="enCopyCode">📋 HTML 코드 복사</button>
           <button type="button" class="btn-sm" id="enCopyRich">✨ 서식째 복사</button>
@@ -2610,8 +2629,24 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         try { localStorage.setItem(ENROLL_KEY, JSON.stringify(data)); } catch (e) {}
       }
 
+      // [교육] 과목명(차수) 교육 참석 안내 (11/12(목)~11/13(금) 09:00~17:00)
+      const subjectEl = $("enSubject"), rcptEl = $("enRcpt"), rcptCountEl = $("enRcptCount");
+      let subjectDirty = false;
+      function subjectText() {
+        const title = el.enTitle.value.trim(), round = el.enRound.value.trim();
+        const s = parseD(el.enDateStart.value); let e = parseD(el.enDateEnd.value);
+        if (e && s && e <= s) e = null;
+        const md = (d) => `${d.getMonth() + 1}/${d.getDate()}(${WD[d.getDay()]})`;
+        let when = s ? (e ? `${md(s)}~${md(e)}` : md(s)) : "";
+        const ts = el.enTimeStart.value, te = el.enTimeEnd.value;
+        if (ts && te) when += `${when ? " " : ""}${ts}~${te}`;
+        return `[교육] ${title || "과목명"}${round ? `(${round})` : ""} 교육 참석 안내${when ? ` (${when})` : ""}`;
+      }
+      subjectEl.addEventListener("input", () => { subjectDirty = subjectEl.value.trim() !== ""; });
+
       function update() {
         if (!hoursDirty) el.enHours.value = autoHours();
+        if (!subjectDirty) subjectEl.value = subjectText();
         noticesEl.querySelectorAll(".en-num").forEach((n, i) => { n.textContent = `항목 ${i + 1}`; });
         const html = buildHtml();
         codeEl.value = html;
@@ -2642,7 +2677,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         if (!confirm("입력한 내용을 모두 지울까요?")) return;
         ids.forEach((k) => { el[k].value = ""; });
         el.enType.value = "집합교육"; el.enTimeStart.value = "09:00"; el.enTimeEnd.value = "17:00";
-        hoursDirty = false; noticesEl.innerHTML = ""; cancelEl.checked = parkingEl.checked = true;
+        hoursDirty = false; noticesEl.innerHTML = ""; cancelEl.checked = parkingEl.checked = true; subjectDirty = false; rcptEl.value = ""; rcptCountEl.textContent = ""; enFileStatusEl.textContent = "";
         update();
       };
 
@@ -2667,6 +2702,69 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         }
         flash("✓ 서식째 복사했어요. 에디터에 붙여넣으세요");
       };
+
+      const copyText = async (text, okMsg, fallbackEl) => {
+        try { await navigator.clipboard.writeText(text); }
+        catch (e) { fallbackEl.select(); document.execCommand("copy"); }
+        flash(okMsg);
+      };
+      $("enCopySubject").onclick = () => copyText(subjectEl.value, "✓ 제목을 복사했어요", subjectEl);
+      $("enCopyRcpt").onclick = () => {
+        if (!rcptEl.value.trim()) { flash("받는 사람이 비어 있어요"); return; }
+        copyText(rcptEl.value, "✓ 받는 사람을 복사했어요", rcptEl);
+      };
+
+      // 수강생 엑셀 → 과정 정보 + 받는 사람
+      const enFileEl = $("enFile"), enDropEl = $("enDrop"), enFileStatusEl = $("enFileStatus");
+      const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      async function loadEnrollFile(file) {
+        if (!file) return;
+        enFileStatusEl.textContent = "읽는 중…";
+        try {
+          const rows = (await readSheetFile(file)).filter((r) => r.some((v) => String(v).trim()));
+          const hi = rows.findIndex((r) => r.includes("이름") && r.includes("이메일"));
+          if (hi < 0) throw new Error("'이름'·'이메일' 열을 찾지 못했어요. Cen-Class 수강생 엑셀이 맞는지 확인해 주세요.");
+          const H = rows[hi], get = (r, n) => (H.indexOf(n) >= 0 ? String(r[H.indexOf(n)] ?? "").trim() : "");
+          const data = rows.slice(hi + 1).filter((r) => get(r, "이름"));
+          const seen = new Set(), list = [];
+          let skipped = 0, noMail = 0;
+          for (const r of data) {
+            if (/취소|반려|거절/.test(get(r, "수강상태"))) { skipped++; continue; }
+            const mail = get(r, "이메일"), name = get(r, "이름");
+            if (!mail) { noMail++; continue; }
+            if (seen.has(mail.toLowerCase())) continue;
+            seen.add(mail.toLowerCase()); list.push(`${name}<${mail}>`);
+          }
+          rcptEl.value = list.length ? list.join("; ") + ";" : "";
+          rcptCountEl.textContent = list.length ? `(${list.length}명)` : "";
+          // 과정 정보 채우기
+          const first = data[0] || [];
+          const title = get(first, "과목명"); if (title) el.enTitle.value = title;
+          const round = get(first, "기수 번호"); if (round) el.enRound.value = `${parseInt(round, 10) || round}차수`;
+          const hours = parseFloat(get(first, "총시수")), startRaw = get(first, "학습시작일"), sd = parseD(startRaw.slice(0, 10));
+          if (sd) {
+            const days = hours > 0 ? Math.max(1, Math.round(hours / 7)) : 1;
+            let ed = new Date(sd), n = days - 1;
+            while (n > 0) { ed.setDate(ed.getDate() + 1); if (ed.getDay() % 6 !== 0) n--; }
+            el.enDateStart.value = ymd(sd); el.enDateEnd.value = days > 1 ? ymd(ed) : "";
+            const tm = /(\d{1,2}):(\d{2})/.exec(startRaw.slice(10));
+            if (tm) el.enTimeStart.value = `${String(+tm[1]).padStart(2, "0")}:${tm[2]}`;
+            const startMin = toMin(el.enTimeStart.value) ?? 540;
+            const dur = hours > 0 && hours < 7 ? hours + (hours >= 6 ? 1 : 0) : 8;
+            const endMin = startMin + Math.round(dur * 60);
+            el.enTimeEnd.value = `${String(Math.floor(endMin / 60) % 24).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}`;
+          }
+          hoursDirty = false; subjectDirty = false;
+          update();
+          enFileStatusEl.textContent = `✓ ${file.name} — 받는 사람 ${list.length}명${skipped ? ` · 수강취소 ${skipped}명 제외` : ""}${noMail ? ` · 메일주소 없음 ${noMail}명` : ""}`;
+        } catch (e) { enFileStatusEl.textContent = "⚠️ " + (e.message || e); }
+      }
+      enDropEl.addEventListener("click", () => enFileEl.click());
+      enDropEl.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); enFileEl.click(); } });
+      enFileEl.addEventListener("change", () => { loadEnrollFile(enFileEl.files[0]); enFileEl.value = ""; });
+      ["dragenter", "dragover"].forEach((ev) => enDropEl.addEventListener(ev, (e) => { e.preventDefault(); enDropEl.classList.add("dragover"); }));
+      ["dragleave", "drop"].forEach((ev) => enDropEl.addEventListener(ev, (e) => { e.preventDefault(); enDropEl.classList.remove("dragover"); }));
+      enDropEl.addEventListener("drop", (e) => loadEnrollFile(e.dataTransfer.files[0]));
 
       // 저장된 입력 복원
       let saved = null;
