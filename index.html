@@ -4347,18 +4347,26 @@ background:
         stFileStatusEl.textContent = "읽는 중…";
         try {
           const rows = (await readSheetFile(file)).filter((r) => r.some((v) => String(v).trim()));
-          const hi = rows.findIndex((r) => r.some((v) => /^법인/.test(String(v).trim())));
-          if (hi < 0) throw new Error("'법인' 열이 있는 머리글을 찾지 못했어요.");
-          const H = rows[hi].map((v) => String(v).trim());
-          const ci = H.findIndex((v) => /^법인/.test(v)), ni = H.findIndex((v) => v === "이름" || v === "성명");
+          // 법인 열 찾기: '법인' 정확히 → 법인명·소속법인·회사 → '법인'이 들어간 열(사번·번호·코드·ID 제외)
+          const corpCol = (H) => {
+            const t = H.map((v) => String(v).trim());
+            for (const n of ["법인", "법인명", "소속법인", "소속 법인", "회사", "회사명", "계열사"]) { const i = t.indexOf(n); if (i >= 0) return i; }
+            return t.findIndex((v) => /법인|회사/.test(v) && !/사번|번호|코드|ID|id|No/.test(v));
+          };
+          const hi = rows.findIndex((r) => corpCol(r) >= 0 && r.some((v) => /^(이름|성명)$/.test(String(v).trim())));
+          const hi2 = hi >= 0 ? hi : rows.findIndex((r) => corpCol(r) >= 0);
+          if (hi2 < 0) throw new Error("'법인' 열이 있는 머리글을 찾지 못했어요.");
+          const H = rows[hi2].map((v) => String(v).trim());
+          const ci = corpCol(H), ni = H.findIndex((v) => v === "이름" || v === "성명");
           const di = H.findIndex((v) => /수료|이수/.test(v) && !/수료증|일자|일시|번호|기준/.test(v)), si = H.indexOf("수강상태");
           const val = (r, i) => (i >= 0 ? String(r[i] ?? "").trim() : "");
-          const data = rows.slice(hi + 1).filter((r) => val(r, ci) && (ni < 0 || val(r, ni)));
+          const data = rows.slice(hi2 + 1).filter((r) => val(r, ci) && (ni < 0 || val(r, ni)));
           const ok = (r) => di >= 0 ? (/^(y|yes|o|○|●|v|✓|수료|이수|완료|pass|true|1)/i.test(val(r, di)) && !/미|불|n/i.test(val(r, di).slice(0, 1)))
             : si >= 0 ? !/취소|반려|거절|미수료|미이수/.test(val(r, si)) : true;
           const counts = new Map(); let off = 0;
           data.forEach((r) => { if (!ok(r)) { off++; return; } const raw = cleanCorp(val(r, ci)); counts.set(raw, (counts.get(raw) || 0) + 1); });
           if (!counts.size) throw new Error("수료자를 한 명도 찾지 못했어요. 엑셀의 수료 표시를 확인해 주세요.");
+          if (counts.size > 4 && counts.size === data.length - off) throw new Error(`'${H[ci]}' 열 값이 사람마다 달라서 법인 열이 아닌 것 같아요. 엑셀의 법인 열 이름을 확인해 주세요.`);
           const list = [...counts].map(([raw, count]) => ({ raw, corp: alias[raw] || dirFind(raw)?.code || raw, count }));
           list.sort((a, b) => corpRank(a.corp) - corpRank(b.corp) || b.count - a.count);
           corpsEl.innerHTML = ""; list.forEach((c) => addCorp({ corp: c.corp, count: c.count, raw: c.raw }));
@@ -4366,7 +4374,7 @@ background:
           if (gi("과목명") >= 0 && val(first, gi("과목명"))) sf.stTitle.value = val(first, gi("과목명"));
           if (gi("기수 번호") >= 0 && val(first, gi("기수 번호"))) sf.stRound.value = `${parseInt(val(first, gi("기수 번호")), 10) || val(first, gi("기수 번호"))}차수`;
           const how = di >= 0 ? `'${H[di]}' 열 기준 수료자` : si >= 0 ? "수강취소 제외" : "전체";
-          stFileStatusEl.textContent = `✓ ${file.name} — ${how} ${data.length - off}명${off ? ` (제외 ${off}명)` : ""}, ${list.length}개 법인`;
+          stFileStatusEl.textContent = `✓ ${file.name} — '${H[ci]}' 열로 집계 · ${how} ${data.length - off}명${off ? ` (제외 ${off}명)` : ""}, ${list.length}개 법인`;
           updateSettle();
         } catch (e) { stFileStatusEl.textContent = "⚠️ " + (e.message || e); }
       }
