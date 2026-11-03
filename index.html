@@ -1277,7 +1277,18 @@
         <div id="stFileStatus" class="hint"></div>
         <div id="stCorps"></div>
         <div class="minirow" style="margin-top:8px;"><button type="button" class="btn-sm" id="stAddCorp">＋ 법인 추가</button></div>
-        <div class="hint">담당자·이메일은 법인별로 이 브라우저에 기억해 둬서 다음 정산 때 자동으로 채워져요. 법인명을 고치면(예: 아이티센엔텍 → ET) 다음부터 그 이름으로 바꿔 넣어요.</div>
+        <datalist id="stCorpList"></datalist>
+        <div class="hint">법인 칸은 드롭다운에서 고르거나 법인명(예: 아이티센엔텍)을 쳐도 약칭으로 바뀌고 담당자·이메일이 채워져요. 엑셀의 법인명도 자동으로 매핑돼요.</div>
+        <details id="stDirBox" class="rs-info" style="margin-top:12px;">
+          <summary style="cursor:pointer; font-weight:700; color:var(--text);">🏢 법인 담당자 목록 <span id="stDirCount" class="hint" style="font-weight:400; margin:0;"></span></summary>
+          <div class="hint" style="margin-top:8px;">한 줄에 한 법인씩 <b>법인명, 약칭, 담당자, 이메일</b> 순서로 붙여넣고 저장하세요. 이 목록은 <b>이 브라우저에만</b> 저장되고 사이트 코드에는 들어가지 않아요(공개 주소라 실명·메일 보호). 팀원과 같이 쓰려면 <b>목록 복사</b>로 보내주세요.</div>
+          <textarea id="stDirText" style="min-height:180px; font-size:13px; margin-top:8px;" placeholder="아이티센엔텍, ET, 홍길동 선임, hong@itcen.com&#10;아이티센글로벌, GLO, 김철수 책임, kim@itcen.com"></textarea>
+          <div class="minirow" style="gap:6px; margin-top:8px;">
+            <button type="button" class="btn-sm solid" id="stDirSave">💾 목록 저장</button>
+            <button type="button" class="btn-sm" id="stDirCopy">📋 목록 복사</button>
+            <span id="stDirStatus" class="hint" style="margin:0;"></span>
+          </div>
+        </details>
       </div>
 
       <div class="card no-print" id="stPreviewCard">
@@ -1418,7 +1429,7 @@
           <ol class="guide-steps">
             <li><b>비용 항목</b>실제 쓴 금액의 <b>공급가액</b>을 넣어요. <b>📝 실시 품의서 교육비 가져오기</b>로 예비비를 뺀 항목을 불러올 수 있어요. 부가세는 공급가액×10%(원 미만 버림)로 자동 계산돼요.</li>
             <li><b>수료자 엑셀 올리기</b>'법인' 열로 인원을 세요. '수료여부'처럼 수료 열이 있으면 수료자만, 없으면 수강취소를 뺀 인원을 세요. 인원은 직접 고치거나 ＋ 법인 추가로 넣어도 돼요.</li>
-            <li><b>담당자·이메일</b>법인별로 한 번 넣으면 기억해서 다음 정산 때 자동으로 채워져요. 엑셀의 법인명을 ET·GLO처럼 고치면 다음부터 그 이름으로 바꿔 넣어요.</li>
+            <li><b>담당자·이메일</b>처음 한 번 <b>🏢 법인 담당자 목록</b>을 펼쳐 "법인명, 약칭, 담당자, 이메일"을 한 줄씩 붙여넣고 저장하세요. 그다음부터 엑셀의 법인명(㈜아이티센엔텍, 클로잇 등)이 약칭으로 바뀌고 담당자·이메일이 자동으로 채워져요. 법인 칸 드롭다운에서 골라도 돼요.</li>
             <li><b>결과 확인</b>법인 공급가액 = 배분 대상 공급가액 × 법인 인원 ÷ 전체 인원(원 미만 버림), 부가세는 법인별 공급가액×10% 버림. <b>⬇ 엑셀 다운로드</b>로 정산표를 받고, 결과 품의서에 자동 반영돼요.</li>
           </ol>
           <div class="guide-tip">
@@ -4154,7 +4165,7 @@ background:
     // --- 교육비 정산(그룹공통 n분의 1) + 결과 품의서: 정산 탭이 비용·인원을 갖고, 결과 품의서가 그 값을 받아 씀 ---
     (function setupSettleAndResult() {
       const ST_KEY = "edu_settle_v1", RS_KEY = "edu_result_v1", CONTACT_KEY = "edu_corp_contacts_v1", ALIAS_KEY = "edu_corp_alias_v1";
-      const CORP_ORDER = ["ET", "GLO", "CLO", "COR", "CTS", "CPF", "PNS", "TKMS", "SON", "SIT", "KDA", "CRD"];
+      const CORP_ORDER = ["ET", "GLO", "CLO", "COR", "CTS", "PNS", "CPF", "TKMS", "SIT", "SON", "ITC-JP", "KDA", "CRD"];
       const WD = ["일", "월", "화", "수", "목", "금", "토"];
       const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
       const toNum = (v) => { const n = parseFloat(String(v ?? "").replace(/[^\d.\-]/g, "")); return isFinite(n) ? n : 0; };
@@ -4179,6 +4190,35 @@ background:
       const sf = Object.fromEntries(["stType", "stTitle", "stRound"].map((k) => [k, $(k)]));
       const costsEl = $("stCosts"), corpsEl = $("stCorps"), stFileStatusEl = $("stFileStatus");
       let contacts = loadJ(CONTACT_KEY, {}), alias = loadJ(ALIAS_KEY, {});
+      // 법인 담당자 목록(브라우저에만 저장): [{ name, code, manager, email }]
+      const DIR_KEY = "edu_corp_dir_v1";
+      let dir = loadJ(DIR_KEY, []);
+      const normC = (x) => cleanCorp(x).replace(/\s/g, "").toUpperCase();
+      const coreC = (x) => x.replace(/^아이티센/, "");
+      function dirFind(raw) {
+        const r = normC(raw); if (!r || !dir.length) return null;
+        return dir.find((d) => normC(d.code) === r || normC(d.name) === r)
+          || dir.find((d) => coreC(r).length >= 2 && coreC(normC(d.name)) === coreC(r))
+          || dir.find((d) => { const n = coreC(normC(d.name)), c = coreC(r); return c.length >= 2 && n.length >= 2 && (n.includes(c) || c.includes(n)); })
+          || null;
+      }
+      function parseDir(text) {
+        return String(text || "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l) => {
+          const toks = l.split(/[,\t]|\s+/).map((t) => t.trim()).filter(Boolean);
+          const email = toks.find((t) => /@/.test(t)) || "";
+          const ci = toks.findIndex((t) => /^[A-Z][A-Z0-9]*(-[A-Z0-9]+)?$/.test(t) && t.length <= 8);
+          if (ci < 1) return null;
+          const manager = toks.slice(ci + 1).filter((t) => t !== email && !/^(이라|칭함|이라칭함|약칭)$/.test(t)).join(" ");
+          return { name: toks.slice(0, ci).join(" "), code: toks[ci], manager, email };
+        }).filter(Boolean);
+      }
+      const dirText = () => dir.map((d) => [d.name, d.code, d.manager, d.email].join(", ")).join("\n");
+      function renderDir() {
+        $("stDirText").value = dirText();
+        $("stDirCount").textContent = dir.length ? `— ${dir.length}개 법인 저장됨` : "— 아직 없음 (펼쳐서 붙여넣기)";
+        $("stCorpList").innerHTML = dir.map((d) => `<option value="${esc(d.code)}">${esc(d.name)}${d.manager ? " · " + esc(d.manager) : ""}</option>`).join("");
+      }
+      const corpRank = (code) => { const i = dir.findIndex((d) => d.code.toUpperCase() === String(code).toUpperCase()); if (i >= 0) return i; const j = CORP_ORDER.indexOf(String(code).toUpperCase()); return j < 0 ? 99 : 50 + j; };
 
       function addCost(c = {}) {
         const d = document.createElement("div"); d.className = "en-item st-cost";
@@ -4190,8 +4230,8 @@ background:
       }
       function addCorp(c = {}) {
         const d = document.createElement("div"); d.className = "en-item st-corp";
-        const name = c.corp || "", ct = contacts[name] || {};
-        d.innerHTML = `<div class="ap-line"><input type="text" class="st-c-corp" placeholder="법인 (예: ET)" /><input type="text" class="st-c-count" inputmode="numeric" placeholder="인원" /><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>
+        const name = c.corp || "", dd = dirFind(name), ct = (dd && dd.code === name ? dd : null) || contacts[name] || {};
+        d.innerHTML = `<div class="ap-line"><input type="text" class="st-c-corp" list="stCorpList" placeholder="법인 (예: ET)" /><input type="text" class="st-c-count" inputmode="numeric" placeholder="인원" /><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>
           <div class="ap-line"><input type="text" class="st-c-mgr" placeholder="담당자 (예: 홍길동 선임)" /><input type="text" class="st-c-mail" placeholder="이메일" /></div>`;
         if (c.raw) d.dataset.raw = c.raw;
         q(d, ".st-c-corp").value = name; q(d, ".st-c-count").value = c.count ? String(c.count) : "";
@@ -4319,9 +4359,8 @@ background:
           const counts = new Map(); let off = 0;
           data.forEach((r) => { if (!ok(r)) { off++; return; } const raw = cleanCorp(val(r, ci)); counts.set(raw, (counts.get(raw) || 0) + 1); });
           if (!counts.size) throw new Error("수료자를 한 명도 찾지 못했어요. 엑셀의 수료 표시를 확인해 주세요.");
-          const list = [...counts].map(([raw, count]) => ({ raw, corp: alias[raw] || raw, count }));
-          const rank = (c) => { const i = CORP_ORDER.indexOf(c.corp.toUpperCase()); return i < 0 ? 99 : i; };
-          list.sort((a, b) => rank(a) - rank(b) || b.count - a.count);
+          const list = [...counts].map(([raw, count]) => ({ raw, corp: alias[raw] || dirFind(raw)?.code || raw, count }));
+          list.sort((a, b) => corpRank(a.corp) - corpRank(b.corp) || b.count - a.count);
           corpsEl.innerHTML = ""; list.forEach((c) => addCorp({ corp: c.corp, count: c.count, raw: c.raw }));
           const first = data[0] || [], gi = (n) => H.indexOf(n);
           if (gi("과목명") >= 0 && val(first, gi("과목명"))) sf.stTitle.value = val(first, gi("과목명"));
@@ -4346,7 +4385,10 @@ background:
           const corp = q(row, ".st-c-corp").value.trim();
           if (e.target.classList.contains("st-c-corp") && row.dataset.raw) { alias[row.dataset.raw] = corp; saveJ(ALIAS_KEY, alias); }
           if (corp && (e.target.classList.contains("st-c-mgr") || e.target.classList.contains("st-c-mail"))) {
-            contacts[corp] = { manager: q(row, ".st-c-mgr").value.trim(), email: q(row, ".st-c-mail").value.trim() }; saveJ(CONTACT_KEY, contacts);
+            const mgr = q(row, ".st-c-mgr").value.trim(), mail = q(row, ".st-c-mail").value.trim();
+            const dd = dir.find((d) => d.code === corp);
+            if (dd) { dd.manager = mgr; dd.email = mail; saveJ(DIR_KEY, dir); renderDir(); }   // 목록에 있는 법인이면 목록도 같이 수정
+            else { contacts[corp] = { manager: mgr, email: mail }; saveJ(CONTACT_KEY, contacts); }
           }
           if (e.target.classList.contains("st-c-corp") && contacts[corp] && !q(row, ".st-c-mgr").value && !q(row, ".st-c-mail").value) {
             q(row, ".st-c-mgr").value = contacts[corp].manager || ""; q(row, ".st-c-mail").value = contacts[corp].email || "";
@@ -4354,7 +4396,29 @@ background:
         }
         updateSettle();
       });
-      stForm.addEventListener("change", (e) => { if (e.target.type === "checkbox") updateSettle(); });
+      stForm.addEventListener("change", (e) => {
+        if (e.target.classList?.contains("st-c-corp")) {          // 법인명·약칭 입력 → 약칭으로 바꾸고 담당자 채우기
+          const row = e.target.closest(".st-corp"), dd = dirFind(e.target.value);
+          if (dd) {
+            e.target.value = dd.code; q(row, ".st-c-mgr").value = dd.manager; q(row, ".st-c-mail").value = dd.email;
+            if (row.dataset.raw) { alias[row.dataset.raw] = dd.code; saveJ(ALIAS_KEY, alias); }
+          }
+          updateSettle();
+        }
+        if (e.target.type === "checkbox") updateSettle();
+      });
+      $("stDirSave").onclick = () => {
+        const list = parseDir($("stDirText").value), bad = $("stDirText").value.split(/\n/).filter((l) => l.trim()).length - list.length;
+        dir = list; saveJ(DIR_KEY, dir); renderDir();
+        // 지금 표의 법인도 다시 매핑
+        corpsEl.querySelectorAll(".st-corp").forEach((row) => {
+          const dd = dirFind(row.dataset.raw || q(row, ".st-c-corp").value);
+          if (dd) { q(row, ".st-c-corp").value = dd.code; q(row, ".st-c-mgr").value = dd.manager; q(row, ".st-c-mail").value = dd.email; }
+        });
+        $("stDirStatus").textContent = `✓ ${list.length}개 법인 저장${bad > 0 ? ` · ⚠️ ${bad}줄은 약칭(영문 대문자)을 못 찾아 건너뜀` : ""}`;
+        updateSettle();
+      };
+      $("stDirCopy").onclick = () => copyTo(dirText(), null, $("stDirStatus"), "✓ 목록을 복사했어요. 팀원은 이 칸에 붙여넣고 저장하면 돼요");
       stForm.addEventListener("focusout", (e) => { if (e.target.classList?.contains("st-i-supply") && e.target.value.trim()) e.target.value = won(toNum(e.target.value)); });
       stForm.addEventListener("click", (e) => {
         const del = e.target.closest(".ap-del"), up = e.target.closest(".ap-up");
@@ -4517,9 +4581,9 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
           dateStart: "2026-09-15", timeStart: "09:00", timeEnd: "17:00", place: "과천 아이티센타워 3층 비전센터 C교육장" });
         setSettle({ title: "개발자를 위한 Claude Code 바이브코딩 검증 워크플로우 과정",
           items: [{ item: "강사료", supply: 3500000, note: "500,000/H" }, { item: "보조강사료", supply: 700000, note: "100,000/H" }],
-          corps: [{ corp: "ET", count: 9, manager: "", email: "" }, { corp: "GLO", count: 5, manager: "", email: "" }, { corp: "CLO", count: 5, manager: "", email: "" }, { corp: "CPF", count: 1, manager: "", email: "" }] });
+          corps: [{ corp: "ET", count: 9 }, { corp: "GLO", count: 5 }, { corp: "CLO", count: 5 }, { corp: "CPF", count: 1 }] });
         rsSchedDirty = rsSubjectDirty = false; updateSettle(); updateRs();
-        $("rsStatus").textContent = "✓ 예시를 불러왔어요. 담당자·이메일은 교육비 정산 탭에서 넣어주세요.";
+        $("rsStatus").textContent = dir.length ? "✓ 예시를 불러왔어요." : "✓ 예시를 불러왔어요. 담당자·이메일은 교육비 정산 탭의 🏢 법인 담당자 목록을 저장하면 채워져요.";
       };
       $("rsReset").onclick = () => {
         if (!confirm("결과 품의서 입력값을 지울까요? (교육비 정산 탭은 그대로)")) return;
@@ -4530,6 +4594,7 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
       $("rsCopySubject").onclick = () => copyTo(rf.rsSubject.value, null, $("rsCopyStatus"), "✓ 제목을 복사했어요");
 
       // ---- 시작
+      renderDir();
       setSettle(loadJ(ST_KEY, {}));
       const rsSaved = loadJ(RS_KEY, null);
       setRs(rsSaved || {});
