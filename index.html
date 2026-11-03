@@ -523,6 +523,8 @@
     .guide-list li b { display: inline-block; min-width: 128px; }
     .maintabs .maintab-help { margin: 0 0 0 auto; background: transparent; color: var(--muted); border: none; box-shadow: none; padding: 10px 14px; font-size: 13px; font-weight: 700; border-radius: 10px; }
     .maintabs .maintab-help:hover { color: var(--accent); background: var(--soft); filter: none; }
+    .xl-path { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
+    .xl-path b { color: var(--sub); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -860,7 +862,8 @@
         <div class="section-title">✉️ 입과 안내 HTML 만들기</div>
         <div class="hint" style="margin-bottom:6px;">입력하면 오른쪽 미리보기가 바로 바뀝니다. 입력값은 이 브라우저에 자동 저장돼요.</div>
         <div id="enDrop" class="pdf-dropzone" tabindex="0" role="button" aria-label="수강생 엑셀 업로드" style="margin-top:4px;">
-          📥 Cen-Class 수강생 엑셀(.xls)을 넣으면 과정 정보·받는 사람 메일주소가 자동으로 채워져요
+          📥 수강생 엑셀(.xls)을 클릭하거나 끌어다 놓으면 과정 정보·받는 사람 메일주소가 자동으로 채워져요
+          <span class="xl-path">📂 받는 곳: <b>CEN-Class</b> › <b>과목 개설</b> › <b>학습자</b> › <b>엑셀 다운로드</b></span>
           <input type="file" id="enFile" accept=".xls,.xlsx,.csv" style="display:none;" />
         </div>
         <div id="enFileStatus" class="hint"></div>
@@ -974,6 +977,7 @@
         </div>
         <div id="roDrop" class="pdf-dropzone" tabindex="0" role="button" aria-label="수강생 엑셀 업로드">
           📥 클릭하거나 수강생 엑셀 파일(.xls/.xlsx)을 여기로 끌어다 놓으세요
+          <span class="xl-path">📂 받는 곳: <b>CEN-Class</b> › <b>과목 개설</b> › <b>학습자</b> › <b>엑셀 다운로드</b></span>
           <input type="file" id="roFile" accept=".xls,.xlsx,.csv" style="display:none;" />
         </div>
         <div id="roFileStatus" class="hint"></div>
@@ -1093,7 +1097,7 @@
         <section class="guide-sec" data-g="enroll" hidden>
           <p class="modal-sub">수강생에게 보낼 <b>교육 참석 안내 메일</b>을 만드는 탭이에요. VisionCenter 안내 양식 그대로 나와요.</p>
           <ol class="guide-steps">
-            <li><b>수강생 엑셀 올리기 (추천)</b>Cen-Class에서 받은 수강생 엑셀을 올리면 과정명·차수·일자·시간과 <b>받는 사람 메일주소</b>가 자동으로 채워져요. 출석부 탭에서 이미 올렸다면 여기에도 자동으로 들어와요.</li>
+            <li><b>수강생 엑셀 올리기 (추천)</b><b>CEN-Class › 과목 개설 › 학습자 › 엑셀 다운로드</b>로 받은 엑셀을 올리면 과정명·차수·일자·시간과 <b>받는 사람 메일주소</b>가 자동으로 채워져요. 출석부 탭에서 이미 올렸다면 여기에도 자동으로 들어와요.</li>
             <li><b>과정 정보 확인</b>과정명, 차수, 교육 형태 배지, 일자·시간을 확인하고 장소를 고르세요(C·E·N교육장 또는 ✏️ 직접 입력). 교육시간 표기는 자동 계산돼요.</li>
             <li><b>사전 안내 사항 (선택)</b><b>＋ 항목 추가</b>나 예시 버튼으로 넣어요. <b>**굵게**</b>로 강조하고, 회색 박스는 <b># 소제목</b>·<b>- 항목</b> 형식으로 줄마다 적어요. 수강취소·주차 안내는 체크박스로 넣고 빼요.</li>
             <li><b>메일에 붙여넣기</b>오른쪽 위에서 <b>메일 제목 복사</b> → <b>받는 사람 복사</b>(이름&lt;이메일&gt;; 형식) 순서로 붙여넣고, 본문은 에디터의 HTML(소스) 모드면 <b>HTML 코드 복사</b>, 일반 편집 화면이면 <b>서식째 복사</b>를 쓰세요.</li>
@@ -1107,7 +1111,7 @@
         <section class="guide-sec" data-g="roster" hidden>
           <p class="modal-sub">Cen-Class 수강생 엑셀로 <b>출석부</b>와 <b>학습자 명단</b> Word 파일을 만드는 탭이에요.</p>
           <ol class="guide-steps">
-            <li><b>수강생 엑셀 올리기</b>Cen-Class에서 받은 엑셀(.xls)을 끌어다 놓아요. 입과 안내 탭에서 이미 올렸다면 자동으로 들어와 있어요.</li>
+            <li><b>수강생 엑셀 올리기</b><b>CEN-Class › 과목 개설 › 학습자 › 엑셀 다운로드</b>로 받은 엑셀(.xls)을 끌어다 놓아요. 입과 안내 탭에서 이미 올렸다면 자동으로 들어와 있어요.</li>
             <li><b>과정 정보 확인</b>과정명·차수·일자·총 교육시간은 엑셀에서 자동으로 채워져요(하루 7시간 기준, 주말 제외). 장소를 고르고, 서명 칸(일차 수)이 맞는지 확인하세요.</li>
             <li><b>명단 정리</b>체크를 해제하면 문서에서 빠져요. 수강취소 상태인 사람은 처음부터 해제돼 있어요. 엑셀에 없는 사람은 <b>＋ 직접 추가</b>로 넣어요.</li>
             <li><b>다운로드</b><b>⬇ 출석부</b>는 이름 가나다순(하루 교육은 이름·직급·서명, 2일 이상은 일차별 서명 칸), <b>⬇ 학습자 명단</b>은 부서 가나다순으로 Word 파일이 내려받아져요.</li>
