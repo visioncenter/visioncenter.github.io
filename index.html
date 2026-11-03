@@ -496,6 +496,15 @@
     .ap-chip button { border: none; background: none; color: var(--muted); cursor: pointer; padding: 0 4px; font-size: 13px; margin: 0; box-shadow: none; }
     .ap-chip button:hover { color: var(--text); transform: none; filter: none; background: none; }
 
+    #rsFormCard button.btn-sm, #rsPreviewCard button.btn-sm, #stFormCard button.btn-sm, #stPreviewCard button.btn-sm { margin-top: 0; }
+    #rsPreviewCard, #stPreviewCard { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+    @media (max-width: 760px) { #rsPreviewCard, #stPreviewCard { position: static; max-height: none; } }
+    .rs-info { margin-top: 8px; padding: 12px 14px; border-radius: 12px; background: var(--input-bg); border: 1px solid var(--line); font-size: 13px; line-height: 1.7; color: var(--sub); }
+    .rs-info b { color: var(--text); }
+    .rs-info .warn { color: #d9480f; }
+    .st-corp .ap-line input.st-c-count { flex: 0 0 64px; text-align: right; }
+    .st-cost .ap-line label { font-size: 12px; }
+
     /* --- 출석부·명단 --- */
     .ro-form input[type="date"], .ro-form input[type="time"] {
       width: 100%; padding: 11px 14px; font-size: 15px; font-family: inherit;
@@ -602,6 +611,8 @@
       <button type="button" class="maintab" data-panel="enroll">✉️ 입과 안내 HTML</button>
       <button type="button" class="maintab" data-panel="roster">📋 출석부·명단</button>
       <button type="button" class="maintab" data-panel="approval">📝 실시 품의서</button>
+      <button type="button" class="maintab" data-panel="result">📑 결과 품의서</button>
+      <button type="button" class="maintab" data-panel="settle">💰 교육비 정산</button>
       <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">📖 이 탭 사용법</button>
     </div>
 
@@ -1160,6 +1171,132 @@
       </div>
     </div><!-- /panel-approval -->
 
+    <div id="panel-result" class="tabpanel hidden">
+      <!-- 결과 품의서: 과정 개요 + 💰 교육비 정산 탭의 비용·법인 배분 → 그룹웨어 결과 보고 및 정산 품의 HTML -->
+      <div class="card no-print en-form" id="rsFormCard">
+        <div class="section-title">📑 교육 결과 보고 및 교육비 정산 품의</div>
+        <div class="hint" style="margin-bottom:6px;">과정 개요만 확인하면 돼요. <b>2. 총 비용 · 3. 비용 사용내역 · 4. 법인 별 비용배분</b>은 <b>💰 교육비 정산</b> 탭 값이 그대로 들어가요.</div>
+        <div class="minirow" style="gap:6px;">
+          <button type="button" class="btn-sm solid" id="rsFromAp">📝 실시 품의서에서 가져오기</button>
+          <button type="button" class="btn-sm" id="rsSample">예시 불러오기</button>
+          <button type="button" class="btn-sm" id="rsReset">↺ 입력 초기화</button>
+        </div>
+        <div id="rsStatus" class="hint"></div>
+
+        <div class="ap-sec">도입</div>
+        <div class="row">
+          <div style="flex:3;"><label class="field" for="rsTitle">과정명 (차수 제외)</label><input type="text" id="rsTitle" placeholder="비워두면 교육비 정산 탭의 과정명" /></div>
+          <div style="flex:1;"><label class="field" for="rsRound">차수 (선택)</label><input type="text" id="rsRound" placeholder="예: 2차수" /></div>
+        </div>
+        <label class="field" for="rsLead">도입 문장 앞부분</label>
+        <textarea id="rsLead" style="min-height:64px; font-size:14px;" placeholder="예: 백엔드·풀스택·DevOps 개발자 대상 AI 생성 코드의 검증 기준·절차 수립 및 적용 역량 강화를 위해 실시한"></textarea>
+        <div class="minirow" style="gap:6px; margin-top:6px;">
+          <button type="button" class="btn-sm" id="rsAiLead">✨ AI로 작성</button>
+          <span id="rsAiStatus" class="hint" style="margin:0;"></span>
+        </div>
+        <div class="hint">뒤에 <b>&lt;과정명&gt;에 대해 법인별 참가인원에 따라 비용을 정산코자 하오니 재가 바랍니다.</b>가 자동으로 붙어요.</div>
+
+        <div class="ap-sec">1. 과정 개요</div>
+        <div class="row">
+          <div><label class="field" for="rsDateStart">시작일</label><input type="date" id="rsDateStart" /></div>
+          <div><label class="field" for="rsDateEnd">종료일 (하루면 비워두기)</label><input type="date" id="rsDateEnd" /></div>
+        </div>
+        <div class="row">
+          <div><label class="field" for="rsTimeStart">시작 시간</label><input type="time" id="rsTimeStart" value="09:00" /></div>
+          <div><label class="field" for="rsTimeEnd">종료 시간</label><input type="time" id="rsTimeEnd" value="17:00" /></div>
+        </div>
+        <label class="field" for="rsSched">일시 표기</label>
+        <input type="text" id="rsSched" placeholder="날짜·시간으로 자동 작성돼요" />
+        <label class="field" for="rsPlaceSel">장소</label>
+        <select id="rsPlaceSel">
+          <option value="과천 아이티센타워 3층 비전센터 C교육장">과천 아이티센타워 3층 비전센터 C교육장</option>
+          <option value="과천 아이티센타워 3층 비전센터 E교육장">과천 아이티센타워 3층 비전센터 E교육장</option>
+          <option value="과천 아이티센타워 3층 비전센터 N교육장">과천 아이티센타워 3층 비전센터 N교육장</option>
+          <option value="__custom">✏️ 직접 입력</option>
+        </select>
+        <input type="text" id="rsPlace" placeholder="장소를 직접 입력하세요" style="display:none; margin-top:6px;" />
+
+        <div class="ap-sec">2~4. 비용·법인 배분</div>
+        <div id="rsCostInfo" class="rs-info"></div>
+        <div class="minirow" style="margin-top:8px;"><button type="button" class="btn-sm" id="rsGoSettle">💰 교육비 정산 탭에서 수정</button></div>
+        <label class="field" for="rsAllocNote">법인 별 비용배분 안내 문구</label>
+        <input type="text" id="rsAllocNote" />
+        <label class="field" for="rsAttach">별첨</label>
+        <input type="text" id="rsAttach" />
+      </div>
+
+      <div class="card no-print" id="rsPreviewCard">
+        <div class="section-title">👀 미리보기</div>
+        <label class="field" for="rsSubject" style="margin-top:0;">품의 제목</label>
+        <div class="en-copyrow">
+          <input type="text" id="rsSubject" />
+          <button type="button" class="btn-sm" id="rsCopySubject">복사</button>
+        </div>
+        <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:12px 0 10px;">
+          <button type="button" class="btn-sm solid" id="rsCopyCode">📋 HTML 코드 복사</button>
+          <button type="button" class="btn-sm" id="rsCopyRich">✨ 서식째 복사</button>
+          <span id="rsCopyStatus" class="hint" style="margin:0;"></span>
+        </div>
+        <iframe id="rsPreview" title="결과 품의서 미리보기" class="en-preview" style="background:#fff; min-height:640px;"></iframe>
+        <details style="margin-top:10px;">
+          <summary class="hint" style="cursor:pointer;">HTML 코드 보기</summary>
+          <textarea id="rsCode" readonly style="min-height:220px; font-family: Consolas, monospace; font-size:12px; margin-top:8px;"></textarea>
+        </details>
+      </div>
+    </div><!-- /panel-result -->
+
+    <div id="panel-settle" class="tabpanel hidden">
+      <!-- 교육비 정산: 비용 항목 + 수료자 엑셀(법인별 인원) → 법인별 배분표 (그룹공통 = 인원수 n분의 1) -->
+      <div class="card no-print en-form" id="stFormCard">
+        <div class="section-title">💰 교육비 정산</div>
+        <div class="hint" style="margin-bottom:6px;">비용 항목과 수료자 명단을 넣으면 법인별 공급가액·부가세·합계를 계산해요. 결과는 <b>📑 결과 품의서</b>에 자동으로 들어가요.</div>
+        <label class="field" for="stType">정산 유형</label>
+        <select id="stType">
+          <option value="common">그룹공통 — 법인별 수료 인원으로 n분의 1</option>
+          <option value="" disabled>그 밖의 유형 (준비 중)</option>
+        </select>
+        <div class="row">
+          <div style="flex:3;"><label class="field" for="stTitle">과정명</label><input type="text" id="stTitle" placeholder="수료자 엑셀을 넣으면 자동으로 채워져요" /></div>
+          <div style="flex:1;"><label class="field" for="stRound">차수</label><input type="text" id="stRound" placeholder="예: 1차수" /></div>
+        </div>
+
+        <div class="ap-sec">① 비용 항목 <span id="stCostSum" class="hint" style="font-weight:400; margin:0;"></span></div>
+        <div class="hint" style="margin-top:0;">실제 쓴 금액의 <b>공급가액</b>만 넣으면 돼요. 부가세는 공급가액×10%(원 미만 버림). <b>배분</b> 체크를 해제한 항목은 법인 배분에서 빠져요.</div>
+        <div id="stCosts"></div>
+        <div class="minirow" style="margin-top:8px; gap:6px;">
+          <button type="button" class="btn-sm" id="stAddCost">＋ 비용 추가</button>
+          <button type="button" class="btn-sm" id="stFromAp">📝 실시 품의서 교육비 가져오기</button>
+        </div>
+
+        <div class="ap-sec">② 법인별 수료 인원 <span id="stHeadSum" class="hint" style="font-weight:400; margin:0;"></span></div>
+        <div id="stDrop" class="pdf-dropzone" tabindex="0" role="button" aria-label="수료자 엑셀 업로드">
+          📥 수료자 엑셀(.xls/.xlsx)을 클릭하거나 끌어다 놓으면 법인별 인원이 채워져요
+          <span class="xl-path">'법인' 열로 세요. '수료' 열이 있으면 수료자만, 없으면 수강취소를 뺀 인원을 셉니다</span>
+          <input type="file" id="stFile" accept=".xls,.xlsx,.csv" style="display:none;" />
+        </div>
+        <div id="stFileStatus" class="hint"></div>
+        <div id="stCorps"></div>
+        <div class="minirow" style="margin-top:8px;"><button type="button" class="btn-sm" id="stAddCorp">＋ 법인 추가</button></div>
+        <div class="hint">담당자·이메일은 법인별로 이 브라우저에 기억해 둬서 다음 정산 때 자동으로 채워져요. 법인명을 고치면(예: 아이티센엔텍 → ET) 다음부터 그 이름으로 바꿔 넣어요.</div>
+      </div>
+
+      <div class="card no-print" id="stPreviewCard">
+        <div class="section-title">📊 법인별 배분 결과</div>
+        <div id="stSummary" class="rs-info"></div>
+        <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:12px 0 10px;">
+          <button type="button" class="btn-sm solid" id="stDownload">⬇ 엑셀 다운로드</button>
+          <button type="button" class="btn-sm" id="stCopyCode">📋 배분표 HTML 복사</button>
+          <button type="button" class="btn-sm" id="stGoResult">📑 결과 품의서 보기</button>
+          <span id="stCopyStatus" class="hint" style="margin:0;"></span>
+        </div>
+        <iframe id="stPreview" title="법인별 배분표 미리보기" class="en-preview" style="background:#fff; min-height:360px;"></iframe>
+        <details style="margin-top:10px;">
+          <summary class="hint" style="cursor:pointer;">HTML 코드 보기</summary>
+          <textarea id="stCode" readonly style="min-height:160px; font-family: Consolas, monospace; font-size:12px; margin-top:8px;"></textarea>
+        </details>
+      </div>
+    </div><!-- /panel-settle -->
+
     <!-- 첫 사용 가이드(처음 방문 시 자동 표시, '사용 가이드' 버튼으로 다시 열기) -->
     <div id="guideOverlay" class="modal-overlay no-print" style="display:none;">
       <div class="modal-card guide-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
@@ -1172,6 +1309,8 @@
           <button type="button" class="guide-tab" data-g="enroll">✉️ 입과 안내</button>
           <button type="button" class="guide-tab" data-g="roster">📋 출석부·명단</button>
           <button type="button" class="guide-tab" data-g="approval">📝 실시 품의서</button>
+          <button type="button" class="guide-tab" data-g="result">📑 결과 품의서</button>
+          <button type="button" class="guide-tab" data-g="settle">💰 교육비 정산</button>
         </div>
 
         <section class="guide-sec" data-g="start">
@@ -1182,10 +1321,12 @@
             <li><b>✉️ 입과 안내</b> 과정 정보를 넣으면 그룹웨어 메일에 붙여넣을 참석 안내 HTML과 메일 제목·받는 사람 목록을 만들어요.</li>
             <li><b>📋 출석부·명단</b> Cen-Class 수강생 엑셀로 출석부·학습자 명단 Word 파일을 만들어요.</li>
             <li><b>📝 실시 품의서</b> 커리큘럼·견적서 같은 자료를 넣으면 그룹웨어 교육 실시 품의서 HTML을 만들어요.</li>
+            <li><b>📑 결과 품의서</b> 교육 결과 보고 및 교육비 정산 품의서 HTML을 만들어요.</li>
+            <li><b>💰 교육비 정산</b> 수료자 엑셀로 법인별 교육비를 나누고 엑셀로 내려받아요.</li>
           </ul>
           <div class="guide-tip">
             🔒 API 키·입력값·조사 기록은 <b>이 브라우저에만</b> 저장되고 외부 서버로 전송되지 않아요. 수강생 명단도 브라우저 안에서만 처리돼요.<br />
-            🤖 AI는 교육 조사·강사 찾기·실시 품의서와 입과 안내의 안내문 작성에 써요. 출석부·명단은 AI 없이 바로 만들어져요.<br />
+            🤖 AI는 교육 조사·강사 찾기·실시 품의서, 입과 안내 안내문·결과 품의서 도입 문장 작성에 써요. 출석부·명단·교육비 정산은 AI 없이 계산돼요.<br />
             ⚙️ 오른쪽 위 <b>🔑 키 변경</b>으로 API 키를 바꾸고, <b>🌙</b> 버튼으로 다크모드를 켤 수 있어요.
           </div>
         </section>
@@ -1258,6 +1399,31 @@
           <div class="guide-tip">
             💡 처음엔 <b>예시 불러오기</b>로 완성된 모습을 확인해 보세요. 입력값은 자동 저장돼서 다음 차수엔 날짜·차수만 바꾸면 돼요. 사내강사 과정이면 '외부강사 정보'의 체크를 해제하세요.<br />
             ⚠️ AI가 금액·경력을 잘못 읽을 수 있어요. 상신 전에 견적서·프로필과 꼭 대조하세요.
+          </div>
+        </section>
+
+        <section class="guide-sec" data-g="result" hidden>
+          <p class="modal-sub">교육이 끝난 뒤 올리는 <b>교육 결과 보고 및 교육비 정산 품의서</b> 본문을 만드는 탭이에요.</p>
+          <ol class="guide-steps">
+            <li><b>과정 정보 가져오기</b><b>📝 실시 품의서에서 가져오기</b>를 누르면 과정명·일시·장소가 채워져요. 직접 넣어도 돼요.</li>
+            <li><b>도입 문장</b><b>✨ AI로 작성</b>을 누르면 "○○ 대상 ○○ 역량 강화를 위해 실시한" 구절을 써줘요. 뒤 문장은 자동으로 붙어요.</li>
+            <li><b>비용 확인</b>2. 총 비용 · 3. 비용 사용내역 · 4. 법인 별 비용배분은 <b>💰 교육비 정산</b> 탭 값이 그대로 들어가요. 고칠 땐 정산 탭에서 고치세요.</li>
+            <li><b>그룹웨어에 붙여넣기</b>품의 제목 복사 → 본문은 <b>HTML 코드 복사</b> 또는 <b>서식째 복사</b>.</li>
+          </ol>
+          <div class="guide-tip">💡 처음엔 <b>예시 불러오기</b>로 완성 모습을 확인해 보세요(정산 탭도 예시로 바뀌어요).</div>
+        </section>
+
+        <section class="guide-sec" data-g="settle" hidden>
+          <p class="modal-sub">교육 실비를 <b>법인별로 나누는</b> 탭이에요. 지금은 <b>그룹공통(수료 인원수로 n분의 1)</b>만 지원해요.</p>
+          <ol class="guide-steps">
+            <li><b>비용 항목</b>실제 쓴 금액의 <b>공급가액</b>을 넣어요. <b>📝 실시 품의서 교육비 가져오기</b>로 예비비를 뺀 항목을 불러올 수 있어요. 부가세는 공급가액×10%(원 미만 버림)로 자동 계산돼요.</li>
+            <li><b>수료자 엑셀 올리기</b>'법인' 열로 인원을 세요. '수료여부'처럼 수료 열이 있으면 수료자만, 없으면 수강취소를 뺀 인원을 세요. 인원은 직접 고치거나 ＋ 법인 추가로 넣어도 돼요.</li>
+            <li><b>담당자·이메일</b>법인별로 한 번 넣으면 기억해서 다음 정산 때 자동으로 채워져요. 엑셀의 법인명을 ET·GLO처럼 고치면 다음부터 그 이름으로 바꿔 넣어요.</li>
+            <li><b>결과 확인</b>법인 공급가액 = 배분 대상 공급가액 × 법인 인원 ÷ 전체 인원(원 미만 버림), 부가세는 법인별 공급가액×10% 버림. <b>⬇ 엑셀 다운로드</b>로 정산표를 받고, 결과 품의서에 자동 반영돼요.</li>
+          </ol>
+          <div class="guide-tip">
+            ⚠️ 인원수로 딱 나눠지지 않으면 끝수(몇 원)를 인원이 가장 많은 법인에 더하고 화면에 알려줘요. 법인별 부가세 버림 때문에 부가세 합계가 전체 금액의 10%와 몇 원 다를 수 있어요.<br />
+            🔒 명단·담당자 정보는 이 브라우저에만 저장돼요.
           </div>
         </section>
 
@@ -2522,7 +2688,7 @@ ${lines}
       localStorage.setItem("edu_theme", next); applyTheme(next);
     });
 
-    // --- 메인 탭(교육 조사 / 강사·강의 찾기 / 입과 안내 / 출석부·명단 / 실시 품의서) ---
+    // --- 메인 탭(교육 조사 / 강사·강의 찾기 / 입과 안내 / 출석부·명단 / 실시 품의서 / 결과 품의서 / 교육비 정산) ---
     document.querySelectorAll(".maintabs .maintab").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".maintabs .maintab").forEach((b) => b.classList.toggle("active", b === btn));
@@ -3983,6 +4149,392 @@ background:
         if (subjectDirty) f.apSubject.value = saved.subject || "";
       }
       update();
+    })();
+
+    // --- 교육비 정산(그룹공통 n분의 1) + 결과 품의서: 정산 탭이 비용·인원을 갖고, 결과 품의서가 그 값을 받아 씀 ---
+    (function setupSettleAndResult() {
+      const ST_KEY = "edu_settle_v1", RS_KEY = "edu_result_v1", CONTACT_KEY = "edu_corp_contacts_v1", ALIAS_KEY = "edu_corp_alias_v1";
+      const CORP_ORDER = ["ET", "GLO", "CLO", "COR", "CTS", "CPF", "PNS", "TKMS", "SON", "SIT", "KDA", "CRD"];
+      const WD = ["일", "월", "화", "수", "목", "금", "토"];
+      const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      const toNum = (v) => { const n = parseFloat(String(v ?? "").replace(/[^\d.\-]/g, "")); return isFinite(n) ? n : 0; };
+      const won = (n) => Math.round(n).toLocaleString("ko-KR");
+      const vatOf = (n) => Math.floor(n * 0.1);                       // 부가세: 원 미만 버림
+      const parseD = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+      const loadJ = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch (e) { return d; } };
+      const saveJ = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+      const q = (b, s) => b.querySelector(s);
+      const cleanCorp = (s) => String(s || "").replace(/\(주\)|㈜|주식회사/g, "").replace(/\s+/g, " ").trim();
+      const copyTo = async (text, html, flashEl, msg) => {
+        try {
+          if (html) await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([text], { type: "text/plain" }) })]);
+          else await navigator.clipboard.writeText(text);
+        } catch (e) { const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+        flashEl.textContent = msg; setTimeout(() => { flashEl.textContent = ""; }, 2500);
+      };
+      const goTab = (k) => document.querySelector(`.maintab[data-panel="${k}"]`).click();
+      const previewDoc = (html) => `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:18px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:#fff;color:#000}p{margin:0}td{vertical-align:middle}</style></head><body>${html}<script>const fit=()=>{document.body.style.zoom=Math.min(1,(document.documentElement.clientWidth-36)/672)};fit();addEventListener('resize',fit)<\/script></body></html>`;
+
+      // ================= 교육비 정산 =================
+      const sf = Object.fromEntries(["stType", "stTitle", "stRound"].map((k) => [k, $(k)]));
+      const costsEl = $("stCosts"), corpsEl = $("stCorps"), stFileStatusEl = $("stFileStatus");
+      let contacts = loadJ(CONTACT_KEY, {}), alias = loadJ(ALIAS_KEY, {});
+
+      function addCost(c = {}) {
+        const d = document.createElement("div"); d.className = "en-item st-cost";
+        d.innerHTML = `<div class="ap-line"><input type="text" class="st-i-item" placeholder="항목 (예: 강사료)" /><input type="text" class="st-i-supply" inputmode="numeric" placeholder="공급가액 (원)" style="flex:0 1 34%;" /><button type="button" class="btn-sm ap-up" title="위로">↑</button><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>
+          <div class="ap-line"><input type="text" class="st-i-note" placeholder="비고 (예: 500,000/H)" /><label><input type="checkbox" class="st-i-vat" /> 부가세</label><label><input type="checkbox" class="st-i-alloc" /> 배분</label></div>`;
+        q(d, ".st-i-item").value = c.item || ""; q(d, ".st-i-supply").value = c.supply ? won(toNum(c.supply)) : "";
+        q(d, ".st-i-note").value = c.note || ""; q(d, ".st-i-vat").checked = c.vat !== false; q(d, ".st-i-alloc").checked = c.alloc !== false;
+        costsEl.appendChild(d); return d;
+      }
+      function addCorp(c = {}) {
+        const d = document.createElement("div"); d.className = "en-item st-corp";
+        const name = c.corp || "", ct = contacts[name] || {};
+        d.innerHTML = `<div class="ap-line"><input type="text" class="st-c-corp" placeholder="법인 (예: ET)" /><input type="text" class="st-c-count" inputmode="numeric" placeholder="인원" /><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>
+          <div class="ap-line"><input type="text" class="st-c-mgr" placeholder="담당자 (예: 홍길동 선임)" /><input type="text" class="st-c-mail" placeholder="이메일" /></div>`;
+        if (c.raw) d.dataset.raw = c.raw;
+        q(d, ".st-c-corp").value = name; q(d, ".st-c-count").value = c.count ? String(c.count) : "";
+        q(d, ".st-c-mgr").value = c.manager ?? ct.manager ?? ""; q(d, ".st-c-mail").value = c.email ?? ct.email ?? "";
+        corpsEl.appendChild(d); return d;
+      }
+      function readSettle() {
+        const all = (el, s, fn) => [...el.querySelectorAll(s)].map(fn);
+        return {
+          type: sf.stType.value, title: sf.stTitle.value.trim(), round: sf.stRound.value.trim(),
+          items: all(costsEl, ".st-cost", (b) => ({ item: q(b, ".st-i-item").value.trim(), supply: toNum(q(b, ".st-i-supply").value), note: q(b, ".st-i-note").value.trim(), vat: q(b, ".st-i-vat").checked, alloc: q(b, ".st-i-alloc").checked })).filter((c) => c.item || c.supply),
+          corps: all(corpsEl, ".st-corp", (b) => ({ corp: q(b, ".st-c-corp").value.trim(), count: Math.max(0, Math.round(toNum(q(b, ".st-c-count").value))), manager: q(b, ".st-c-mgr").value.trim(), email: q(b, ".st-c-mail").value.trim(), raw: b.dataset.raw || "" })).filter((c) => c.corp || c.count),
+        };
+      }
+      function setSettle(s = {}) {
+        sf.stType.value = "common"; sf.stTitle.value = s.title || ""; sf.stRound.value = s.round || "";
+        costsEl.innerHTML = ""; (s.items || []).forEach(addCost); if (!costsEl.children.length) addCost({ item: "강사료" });
+        corpsEl.innerHTML = ""; (s.corps || []).forEach(addCorp);
+      }
+      // 인원수 비율로 나누고, 원 단위 끝수는 인원이 가장 많은 법인에 더함
+      function allocate(total, corps) {
+        const N = corps.reduce((a, c) => a + c.count, 0);
+        if (!N || !total) return { parts: corps.map(() => 0), rem: 0, remIdx: -1 };
+        const parts = corps.map((c) => Math.floor((total * c.count) / N));
+        const rem = total - parts.reduce((a, b) => a + b, 0);
+        let remIdx = -1;
+        if (rem) { remIdx = corps.reduce((best, c, i) => (c.count > corps[best].count ? i : best), 0); parts[remIdx] += rem; }
+        return { parts, rem, remIdx };
+      }
+      function computeSettle(s = readSettle()) {
+        const items = s.items.map((c) => { const vat = c.vat ? vatOf(c.supply) : 0; return { ...c, vatAmt: vat, total: c.supply + vat }; });
+        const tot = items.reduce((a, c) => ({ supply: a.supply + c.supply, vat: a.vat + c.vatAmt, total: a.total + c.total }), { supply: 0, vat: 0, total: 0 });
+        const alloc = items.filter((c) => c.alloc);
+        const corps = s.corps.filter((c) => c.count > 0);
+        const vatable = alloc.filter((c) => c.vat).reduce((a, c) => a + c.supply, 0), plain = alloc.filter((c) => !c.vat).reduce((a, c) => a + c.supply, 0);
+        const A = allocate(vatable, corps), B = allocate(plain, corps);
+        const rows = corps.map((c, i) => { const supply = A.parts[i] + B.parts[i], vat = vatOf(A.parts[i]); return { ...c, supply, vat, total: supply + vat }; });
+        const ctot = rows.reduce((a, r) => ({ count: a.count + r.count, supply: a.supply + r.supply, vat: a.vat + r.vat, total: a.total + r.total }), { count: 0, supply: 0, vat: 0, total: 0 });
+        const rem = A.rem + B.rem, remCorp = rem ? corps[A.remIdx >= 0 ? A.remIdx : B.remIdx]?.corp : "";
+        return { s, items, tot, alloc, allocNames: alloc.map((c) => c.item), rows, ctot, rem, remCorp, perHead: ctot.count ? (vatable + plain) / ctot.count : 0 };
+      }
+
+      // 법인 별 비용배분 표 (결과 품의서 양식과 같은 스타일)
+      const TDS = (w, bg, extra = "") => `padding: 0px; color: black; white-space: nowrap; border: 1px solid black; vertical-align: middle; height: 26px; width: ${w}px;${bg ? ` background: ${bg};` : ""}${extra}`;
+      const CP = (t, align = "center", bold = false) => `<p style="line-height: 100%; margin: 0px; text-align: ${align};"><span style="font-family: 'malgun gothic'; font-size: 9pt; color: rgb(0, 0, 0);${bold ? " font-weight: bold;" : ""}">${t}</span></p>`;
+      const TD = (w, inner, bg, attrs = "") => `<td${attrs} style="${TDS(w, bg)}">\n${inner}</td>`;
+      const TBL = (w, rows) => `<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: ${w}px; background-color: rgb(255, 255, 255); font-family: 'malgun gothic';">\n<tbody>\n${rows.map((r) => `<tr>\n${r.join("\n")}\n</tr>`).join("\n")}\n</tbody>\n</table>`;
+      const GRAY = "rgb(208, 208, 208)", LGRAY = "rgb(232, 232, 232)", YEL = "rgb(255, 255, 204)", CREAM = "rgb(255, 242, 204)";
+      function allocTableHtml(R) {
+        if (!R.rows.length) return "";
+        const rows = [["구분", 64], ["법인", 50], ["인원", 41], ["공급가액", 90], ["부가세", 86], ["합계", 90], ["담당자", 75], ["이메일", 162]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY));
+        const out = [rows];
+        const gubun = R.allocNames.length ? R.allocNames.map((n) => CP(esc(n))).join(`\n${CP("+")}\n`) : CP("교육비");
+        R.rows.forEach((r, i) => {
+          const tr = [];
+          if (i === 0) tr.push(TD(64, gubun, "", ` rowspan="${R.rows.length}"`));
+          tr.push(TD(50, CP(esc(r.corp))), TD(41, CP(String(r.count))), TD(90, CP(won(r.supply) + "&nbsp;", "right")), TD(86, CP(won(r.vat) + "&nbsp;", "right")), TD(90, CP(won(r.total) + "&nbsp;", "right")), TD(75, CP(esc(r.manager) || "<br />")), TD(162, CP(esc(r.email) || "<br />")));
+          out.push(tr);
+        });
+        out.push([TD(115, CP("합계", "center", true), LGRAY, ` colspan="2"`), TD(41, CP(String(R.ctot.count), "center", true), LGRAY), TD(90, CP(won(R.ctot.supply) + "&nbsp;", "right", true), YEL), TD(86, CP(won(R.ctot.vat) + "&nbsp;", "right", true), YEL), TD(90, CP(won(R.ctot.total) + "&nbsp;", "right", true), YEL), TD(75, CP("<br />"), LGRAY), TD(162, CP("<br />"), LGRAY)]);
+        return TBL(667, out);
+      }
+      function usageTableHtml(R) {
+        const out = [[["항목", 171], ["공급가액", 123], ["부가세", 123], ["합계", 123], ["비고", 123]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY))];
+        R.items.forEach((c) => out.push([TD(171, CP(esc(c.item))), TD(123, CP(won(c.supply))), TD(123, CP(c.vat ? won(c.vatAmt) : "-")), TD(123, CP(won(c.total))), TD(123, CP(esc(c.note) || "<br />"))]));
+        out.push([TD(171, CP("합계", "center", true), CREAM), TD(123, CP(won(R.tot.supply), "center", true), CREAM), TD(123, CP(won(R.tot.vat), "center", true), CREAM), TD(123, CP(won(R.tot.total), "center", true), CREAM), TD(123, CP("<br />"), CREAM)]);
+        return TBL(666, out);
+      }
+
+      // 엑셀(.xlsx) 만들기 — 숫자 셀은 천 단위 서식
+      function xlsxBlob(rows, sheet) {
+        const x = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const colName = (i) => { let s = ""; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+        const body = rows.map((r, ri) => `<row r="${ri + 1}">${r.cells.map((v, ci) => {
+          const ref = colName(ci) + (ri + 1), b = r.bold ? 1 : 0;
+          if (typeof v === "number") return `<c r="${ref}" s="${2 + b}"><v>${v}</v></c>`;
+          return v === "" || v == null ? "" : `<c r="${ref}" t="inlineStr" s="${b}"><is><t xml:space="preserve">${x(v)}</t></is></c>`;
+        }).join("")}</row>`).join("");
+        const cols = `<cols><col min="1" max="1" width="22" customWidth="1"/><col min="2" max="3" width="10" customWidth="1"/><col min="4" max="6" width="14" customWidth="1"/><col min="7" max="7" width="14" customWidth="1"/><col min="8" max="8" width="28" customWidth="1"/></cols>`;
+        const files = {
+          "[Content_Types].xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`,
+          "_rels/.rels": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+          "xl/workbook.xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${x(sheet)}" sheetId="1" r:id="rId1"/></sheets></workbook>`,
+          "xl/_rels/workbook.xml.rels": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+          "xl/styles.xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="10"/><name val="맑은 고딕"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" applyFont="1"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" applyNumberFormat="1"/><xf numFmtId="3" fontId="1" fillId="0" borderId="0" applyNumberFormat="1" applyFont="1"/></cellXfs></styleSheet>`,
+          "xl/worksheets/sheet1.xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${cols}<sheetData>${body}</sheetData></worksheet>`,
+        };
+        const te = new TextEncoder();
+        return new Blob([zipWrite(Object.entries(files).map(([name, s]) => ({ name, data: te.encode(s) })))], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      }
+
+      function updateSettle() {
+        const R = computeSettle();
+        $("stCostSum").textContent = R.tot.supply ? `— 총 ${won(R.tot.total)}원 (공급가액 ${won(R.tot.supply)} + 부가세 ${won(R.tot.vat)})` : "";
+        $("stHeadSum").textContent = R.ctot.count ? `— ${R.rows.length}개 법인 ${R.ctot.count}명` : "";
+        const sum = $("stSummary");
+        if (!R.alloc.length || !R.rows.length) sum.innerHTML = !R.alloc.length ? "배분할 비용 항목을 넣어주세요." : "법인별 수료 인원을 넣어주세요. (수료자 엑셀을 올리거나 ＋ 법인 추가)";
+        else {
+          sum.innerHTML = `배분 대상 <b>${esc(R.allocNames.join(" + "))}</b> · 공급가액 <b>${won(R.ctot.supply)}원</b> ÷ <b>${R.ctot.count}명</b> = 1인당 <b>${won(Math.floor(R.perHead))}원</b>${R.perHead % 1 ? " (원 미만 있음)" : ""}`
+            + (R.rem ? `<br /><span class="warn">⚠️ 인원수로 딱 나눠지지 않아 끝수 ${won(R.rem)}원을 인원이 가장 많은 ${esc(R.remCorp)}에 더했어요.</span>` : "")
+            + (R.ctot.vat !== vatOf(R.ctot.supply) ? `<br /><span class="warn">ℹ️ 부가세를 법인별로 버림 계산해서 합계가 전체 부가세(${won(vatOf(R.ctot.supply))})와 ${won(vatOf(R.ctot.supply) - R.ctot.vat)}원 달라요.</span>` : "")
+            + (R.ctot.supply !== R.tot.supply ? `<br />배분에서 뺀 항목: ${esc(R.items.filter((c) => !c.alloc).map((c) => c.item).join(", "))}` : "");
+        }
+        const html = allocTableHtml(R);
+        $("stCode").value = html;
+        $("stPreview").srcdoc = previewDoc(html || `<p style="color:#888;font-size:13px;">배분 결과가 여기에 표로 나와요.</p>`);
+        saveJ(ST_KEY, R.s);
+        document.dispatchEvent(new CustomEvent("settle-change"));
+      }
+
+      // 수료자 엑셀 → 법인별 인원
+      async function loadSettleFile(file) {
+        stFileStatusEl.textContent = "읽는 중…";
+        try {
+          const rows = (await readSheetFile(file)).filter((r) => r.some((v) => String(v).trim()));
+          const hi = rows.findIndex((r) => r.some((v) => /^법인/.test(String(v).trim())));
+          if (hi < 0) throw new Error("'법인' 열이 있는 머리글을 찾지 못했어요.");
+          const H = rows[hi].map((v) => String(v).trim());
+          const ci = H.findIndex((v) => /^법인/.test(v)), ni = H.findIndex((v) => v === "이름" || v === "성명");
+          const di = H.findIndex((v) => /수료|이수/.test(v) && !/수료증|일자|일시|번호|기준/.test(v)), si = H.indexOf("수강상태");
+          const val = (r, i) => (i >= 0 ? String(r[i] ?? "").trim() : "");
+          const data = rows.slice(hi + 1).filter((r) => val(r, ci) && (ni < 0 || val(r, ni)));
+          const ok = (r) => di >= 0 ? (/^(y|yes|o|○|●|v|✓|수료|이수|완료|pass|true|1)/i.test(val(r, di)) && !/미|불|n/i.test(val(r, di).slice(0, 1)))
+            : si >= 0 ? !/취소|반려|거절|미수료|미이수/.test(val(r, si)) : true;
+          const counts = new Map(); let off = 0;
+          data.forEach((r) => { if (!ok(r)) { off++; return; } const raw = cleanCorp(val(r, ci)); counts.set(raw, (counts.get(raw) || 0) + 1); });
+          if (!counts.size) throw new Error("수료자를 한 명도 찾지 못했어요. 엑셀의 수료 표시를 확인해 주세요.");
+          const list = [...counts].map(([raw, count]) => ({ raw, corp: alias[raw] || raw, count }));
+          const rank = (c) => { const i = CORP_ORDER.indexOf(c.corp.toUpperCase()); return i < 0 ? 99 : i; };
+          list.sort((a, b) => rank(a) - rank(b) || b.count - a.count);
+          corpsEl.innerHTML = ""; list.forEach((c) => addCorp({ corp: c.corp, count: c.count, raw: c.raw }));
+          const first = data[0] || [], gi = (n) => H.indexOf(n);
+          if (gi("과목명") >= 0 && val(first, gi("과목명"))) sf.stTitle.value = val(first, gi("과목명"));
+          if (gi("기수 번호") >= 0 && val(first, gi("기수 번호"))) sf.stRound.value = `${parseInt(val(first, gi("기수 번호")), 10) || val(first, gi("기수 번호"))}차수`;
+          const how = di >= 0 ? `'${H[di]}' 열 기준 수료자` : si >= 0 ? "수강취소 제외" : "전체";
+          stFileStatusEl.textContent = `✓ ${file.name} — ${how} ${data.length - off}명${off ? ` (제외 ${off}명)` : ""}, ${list.length}개 법인`;
+          updateSettle();
+        } catch (e) { stFileStatusEl.textContent = "⚠️ " + (e.message || e); }
+      }
+      const stDrop = $("stDrop"), stFile = $("stFile");
+      stDrop.addEventListener("click", () => stFile.click());
+      stDrop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stFile.click(); } });
+      stFile.addEventListener("change", () => { if (stFile.files[0]) loadSettleFile(stFile.files[0]); stFile.value = ""; });
+      ["dragenter", "dragover"].forEach((ev) => stDrop.addEventListener(ev, (e) => { e.preventDefault(); stDrop.classList.add("dragover"); }));
+      ["dragleave", "dragend"].forEach((ev) => stDrop.addEventListener(ev, (e) => { e.preventDefault(); stDrop.classList.remove("dragover"); }));
+      stDrop.addEventListener("drop", (e) => { e.preventDefault(); stDrop.classList.remove("dragover"); if (e.dataTransfer?.files?.[0]) loadSettleFile(e.dataTransfer.files[0]); });
+
+      const stForm = $("stFormCard");
+      stForm.addEventListener("input", (e) => {
+        const row = e.target.closest(".st-corp");
+        if (row) {
+          const corp = q(row, ".st-c-corp").value.trim();
+          if (e.target.classList.contains("st-c-corp") && row.dataset.raw) { alias[row.dataset.raw] = corp; saveJ(ALIAS_KEY, alias); }
+          if (corp && (e.target.classList.contains("st-c-mgr") || e.target.classList.contains("st-c-mail"))) {
+            contacts[corp] = { manager: q(row, ".st-c-mgr").value.trim(), email: q(row, ".st-c-mail").value.trim() }; saveJ(CONTACT_KEY, contacts);
+          }
+          if (e.target.classList.contains("st-c-corp") && contacts[corp] && !q(row, ".st-c-mgr").value && !q(row, ".st-c-mail").value) {
+            q(row, ".st-c-mgr").value = contacts[corp].manager || ""; q(row, ".st-c-mail").value = contacts[corp].email || "";
+          }
+        }
+        updateSettle();
+      });
+      stForm.addEventListener("change", (e) => { if (e.target.type === "checkbox") updateSettle(); });
+      stForm.addEventListener("focusout", (e) => { if (e.target.classList?.contains("st-i-supply") && e.target.value.trim()) e.target.value = won(toNum(e.target.value)); });
+      stForm.addEventListener("click", (e) => {
+        const del = e.target.closest(".ap-del"), up = e.target.closest(".ap-up");
+        if (del) { del.closest(".en-item").remove(); updateSettle(); }
+        if (up) { const it = up.closest(".en-item"); if (it.previousElementSibling) it.parentNode.insertBefore(it, it.previousElementSibling); updateSettle(); }
+      });
+      $("stAddCost").onclick = () => { q(addCost(), ".st-i-item").focus(); };
+      $("stAddCorp").onclick = () => { q(addCorp(), ".st-c-corp").focus(); };
+      $("stFromAp").onclick = () => {
+        const ap = loadJ("edu_approval_v1", null);
+        const costs = (ap?.costs || []).filter((c) => c.category !== "예비비" && (c.item || c.supply));
+        if (!costs.length) { stFileStatusEl.textContent = "⚠️ 실시 품의서 탭에 교육비(예비비 제외)가 없어요."; return; }
+        if (readSettle().items.some((c) => c.supply) && !confirm("지금 비용 항목을 실시 품의서 교육비로 바꿀까요?")) return;
+        costsEl.innerHTML = ""; costs.forEach((c) => addCost({ item: c.item, supply: c.supply, note: c.note, vat: c.vat, alloc: true }));
+        if (!sf.stTitle.value.trim()) sf.stTitle.value = ap.title || "";
+        if (!sf.stRound.value.trim()) sf.stRound.value = ap.round || "";
+        stFileStatusEl.textContent = "✓ 실시 품의서 교육비를 가져왔어요(예비비 제외). 실제 쓴 금액으로 고쳐주세요.";
+        updateSettle();
+      };
+      $("stGoResult").onclick = () => goTab("result");
+      $("stCopyCode").onclick = () => { const h = $("stCode").value; if (h) copyTo(h, null, $("stCopyStatus"), "✓ 배분표 HTML을 복사했어요"); };
+      $("stDownload").onclick = () => {
+        const R = computeSettle();
+        if (!R.rows.length) { $("stCopyStatus").textContent = "배분 결과가 없어요."; return; }
+        const title = R.s.title || "교육";
+        const rows = [
+          { cells: [`${title}${R.s.round ? ` (${R.s.round})` : ""} 교육비 정산 — 그룹공통(인원수 배분)`], bold: true }, { cells: [] },
+          { cells: ["항목", "", "", "공급가액", "부가세", "합계", "비고"], bold: true },
+          ...R.items.map((c) => ({ cells: [c.item + (c.alloc ? "" : " (배분 제외)"), "", "", c.supply, c.vat ? c.vatAmt : 0, c.total, c.note] })),
+          { cells: ["합계", "", "", R.tot.supply, R.tot.vat, R.tot.total], bold: true }, { cells: [] },
+          { cells: ["구분", "법인", "인원", "공급가액", "부가세", "합계", "담당자", "이메일"], bold: true },
+          ...R.rows.map((r, i) => ({ cells: [i === 0 ? R.allocNames.join(" + ") : "", r.corp, r.count, r.supply, r.vat, r.total, r.manager, r.email] })),
+          { cells: ["합계", "", R.ctot.count, R.ctot.supply, R.ctot.vat, R.ctot.total], bold: true },
+        ];
+        const fname = `${title}${R.s.round ? "_" + R.s.round : ""}_교육비정산.xlsx`.replace(/[\\/:*?"<>|]/g, "_");
+        const a = document.createElement("a"); a.href = URL.createObjectURL(xlsxBlob(rows, "법인별 배분")); a.download = fname;
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        $("stCopyStatus").textContent = `✓ ${fname}`;
+      };
+
+      // ================= 결과 품의서 =================
+      const rf = Object.fromEntries(["rsTitle", "rsRound", "rsLead", "rsDateStart", "rsDateEnd", "rsTimeStart", "rsTimeEnd", "rsSched", "rsPlace", "rsAllocNote", "rsAttach", "rsSubject"].map((k) => [k, $(k)]));
+      const RS_DEF = { allocNote: "과정 운영비용(공급가액 기준)을 각 법인 별 교육참가 인원에 따라 배분하여 세금계산서 처리 예정", attach: "교육실시품의서 1부(관련문서), 교육결과보고서 1부" };
+      let rsSchedDirty = false, rsSubjectDirty = false;
+
+      function rsSchedText() {
+        const s = parseD(rf.rsDateStart.value); let e = parseD(rf.rsDateEnd.value);
+        if (!s) return "";
+        if (e && e <= s) e = null;
+        const d = (x, y) => `${y ? x.getFullYear() + ". " : ""}${x.getMonth() + 1}. ${x.getDate()} (${WD[x.getDay()]})`;
+        let days = 1;
+        if (e) { days = 0; for (const t = new Date(s); t <= e; t.setDate(t.getDate() + 1)) if (t.getDay() % 6) days++; days = Math.max(1, days); }
+        const ts = rf.rsTimeStart.value, te = rf.rsTimeEnd.value; let time = "", per = 0;
+        if (ts && te) { const [a, b] = ts.split(":").map(Number), [c, dd] = te.split(":").map(Number); const diff = (c * 60 + dd - a * 60 - b) / 60; if (diff > 0) { per = diff >= 6 ? diff - 1 : diff; time = ` ${ts} ~ ${te}`; } }
+        const h = Math.round(days * per * 10) / 10;
+        return `${d(s, true)}${e ? " ~ " + d(e, e.getFullYear() !== s.getFullYear()) : ""}${time}${per ? ` (${days}일 ${h}H)` : ` (${days}일)`}`;
+      }
+      const readRs = () => ({
+        title: rf.rsTitle.value.trim(), round: rf.rsRound.value.trim(), lead: rf.rsLead.value.trim(),
+        dateStart: rf.rsDateStart.value, dateEnd: rf.rsDateEnd.value, timeStart: rf.rsTimeStart.value, timeEnd: rf.rsTimeEnd.value,
+        sched: rf.rsSched.value.trim(), place: rf.rsPlace.value.trim(), allocNote: rf.rsAllocNote.value.trim(), attach: rf.rsAttach.value.trim(),
+      });
+      function setRs(s = {}) {
+        rf.rsTitle.value = s.title || ""; rf.rsRound.value = s.round || ""; rf.rsLead.value = s.lead || "";
+        rf.rsDateStart.value = s.dateStart || ""; rf.rsDateEnd.value = s.dateEnd || ""; rf.rsTimeStart.value = s.timeStart || "09:00"; rf.rsTimeEnd.value = s.timeEnd || "17:00";
+        rf.rsSched.value = s.sched || ""; rf.rsPlace.value = s.place || "";
+        rf.rsAllocNote.value = s.allocNote ?? RS_DEF.allocNote; rf.rsAttach.value = s.attach ?? RS_DEF.attach;
+        syncRsPlace();
+      }
+
+      const BP = "line-height: 150%; margin: 0px; font-family: 'malgun gothic'; text-align: left;";
+      const P = (t, o = {}) => `<p style="${BP}${o.center ? " text-align: center;" : ""}"><span style="font-size: 9pt; color: rgb(0, 0, 0); font-family: 'malgun gothic';${o.bold ? " font-weight: bold;" : ""}">${t}</span></p>`;
+      const BR = P("<br />");
+      function buildRsHtml(r, R) {
+        const title = r.title || R.s.title || "과정명";
+        const out = [];
+        if (r.lead) out.push(P(esc(r.lead)));
+        out.push(P(`&lt;${esc(title)}&gt;에 대해&nbsp;법인별 참가인원에 따라 비용을 정산코자 하오니 재가 바랍니다.`), BR, P("-&nbsp; 아&nbsp; 래&nbsp; -", { center: true }), BR);
+        out.push(P("&nbsp;1. 과정 개요", { bold: true }), P(`&nbsp; &nbsp;① 과정명 : ${esc(title)}${r.round ? ` (${esc(r.round)})` : ""}`));
+        if (r.sched) out.push(P(`&nbsp; &nbsp;② 일 시 : ${esc(r.sched)}`));
+        if (r.place) out.push(P(`&nbsp; &nbsp;${r.sched ? "③" : "②"} 장 소 : ${esc(r.place)}`));
+        out.push(BR, P("2. 총 비용", { bold: true }), P(`&nbsp; &nbsp;- 총 사용금액 : ${won(R.tot.total)}원 (부가세 포함)`), BR);
+        out.push(P("3. 비용 사용내역", { bold: true }), usageTableHtml(R), BR);
+        if (R.rows.length) {
+          out.push(P("4. 법인 별 비용배분", { bold: true }));
+          if (r.allocNote) out.push(P(`&nbsp; &nbsp;- ${esc(r.allocNote)}`));
+          out.push(allocTableHtml(R), BR);
+        }
+        out.push(P(`${r.attach ? `별첨. ${esc(r.attach)}&nbsp;` : ""}끝.`));
+        return out.join("\n");
+      }
+      function updateRs() {
+        if (!rsSchedDirty) rf.rsSched.value = rsSchedText();
+        const r = readRs(), R = computeSettle();
+        const title = r.title || R.s.title;
+        if (!rsSubjectDirty) rf.rsSubject.value = title ? `[교육] ${title} 교육 결과 보고 및 교육비 정산 품의${r.round ? ` (${r.round})` : ""}` : "";
+        const info = $("rsCostInfo");
+        info.innerHTML = !R.items.length ? `<span class="warn">💰 교육비 정산 탭에 비용 항목이 없어요.</span>`
+          : `총 사용금액 <b>${won(R.tot.total)}원</b> (공급가액 ${won(R.tot.supply)} + 부가세 ${won(R.tot.vat)}) · 항목 ${R.items.length}개<br />`
+            + (R.rows.length ? `법인 배분: ${R.rows.map((x) => `${esc(x.corp)} ${x.count}명 ${won(x.total)}원`).join(" · ")}` : `<span class="warn">법인별 인원이 없어서 4. 법인 별 비용배분은 빠져요.</span>`)
+            + (r.title && R.s.title && r.title !== R.s.title ? `<br /><span class="warn">ℹ️ 정산 탭 과정명(${esc(R.s.title)})과 달라요.</span>` : "");
+        const html = buildRsHtml(r, R);
+        $("rsCode").value = html;
+        $("rsPreview").srcdoc = previewDoc(html);
+        saveJ(RS_KEY, { ...r, subject: rf.rsSubject.value, schedDirty: rsSchedDirty, subjectDirty: rsSubjectDirty });
+      }
+      document.addEventListener("settle-change", updateRs);
+      const rsForm = $("rsFormCard");
+      rsForm.addEventListener("input", (e) => {
+        if (e.target === rf.rsSched) rsSchedDirty = !!rf.rsSched.value.trim();
+        if ([rf.rsDateStart, rf.rsDateEnd, rf.rsTimeStart, rf.rsTimeEnd].includes(e.target) && !rf.rsSched.value.trim()) rsSchedDirty = false;
+        updateRs();
+      });
+      rf.rsSubject.addEventListener("input", () => { rsSubjectDirty = !!rf.rsSubject.value.trim(); updateRs(); });
+      const syncRsPlace = bindPlaceSelect($("rsPlaceSel"), rf.rsPlace);
+      $("rsGoSettle").onclick = () => goTab("settle");
+
+      $("rsFromAp").onclick = () => {
+        const ap = loadJ("edu_approval_v1", null);
+        if (!ap || !ap.title) { $("rsStatus").textContent = "⚠️ 실시 품의서 탭에 저장된 내용이 없어요."; return; }
+        const m = /([CEN])교육장/.exec(ap.place || "");
+        const place = m && /과천/.test(ap.place) ? `과천 아이티센타워 3층 비전센터 ${m[1]}교육장` : ap.place || "";
+        setRs({ ...readRs(), title: ap.title, round: ap.round || "", dateStart: ap.dateStart, dateEnd: ap.dateEnd, timeStart: ap.timeStart, timeEnd: ap.timeEnd, sched: "", place });
+        rsSchedDirty = false; rsSubjectDirty = false;
+        if (!sf.stTitle.value.trim()) { sf.stTitle.value = ap.title; sf.stRound.value = sf.stRound.value || ap.round || ""; updateSettle(); }
+        $("rsStatus").textContent = "✓ 과정명·일시·장소를 가져왔어요." + (rf.rsLead.value.trim() ? "" : " 도입 문장은 ✨ AI로 작성을 눌러주세요.");
+        updateRs();
+      };
+      $("rsAiLead").onclick = async () => {
+        const st = $("rsAiStatus"), btn = $("rsAiLead");
+        const apiKey = apiKeyEl.value.trim();
+        if (!apiKey) { st.textContent = "Gemini API 키가 필요해요."; return; }
+        const ap = loadJ("edu_approval_v1", {}) || {};
+        const title = rf.rsTitle.value.trim() || sf.stTitle.value.trim();
+        if (!title) { st.textContent = "과정명을 먼저 넣어주세요."; return; }
+        const same = ap.title && ap.title === title;
+        const prompt = `사내 '교육 결과 보고 및 교육비 정산 품의서'의 첫 문장 앞부분을 써줘.
+뒤에는 "<${title}>에 대해 법인별 참가인원에 따라 비용을 정산코자 하오니 재가 바랍니다."가 이어지니, 너는 그 앞에 올 구절만 쓴다.
+
+[과정명] ${title}
+${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? `[실시 품의서 도입 문장] ${ap.intro}\n` : ""}${same && ap.modules?.length ? `[모듈] ${ap.modules.map((m) => m.topic).join(", ")}\n` : ""}
+[규칙]
+- 형식: "{대상} 대상 {교육 목적·핵심 역량} 강화를 위해 실시한" — 반드시 "실시한"으로 끝낸다.
+- 60~90자, 한 줄. 대상에서 인원수(최대 20명 등)는 뺀다. 과정명은 넣지 않는다. 자료에 없는 내용은 지어내지 않는다.
+- 예: 백엔드·풀스택·DevOps 개발자 대상 AI 생성 코드의 검증 기준·절차 수립 및 적용 역량 강화를 위해 실시한
+
+[출력] 그 구절 한 줄만. 따옴표·설명 없이.`;
+        btn.disabled = true; st.textContent = "작성 중… ⏳";
+        try {
+          const { text } = await runGemini(apiKey, [userTurn(prompt)], null, false, st);
+          const line = text.split(/\n/).map((l) => l.replace(/^["'“”\s-]+|["'“”\s]+$/g, "")).find(Boolean) || "";
+          if (!line) throw new Error("AI 응답이 비어 있어요.");
+          rf.rsLead.value = line; st.textContent = "✓ 작성했어요. 확인하고 필요하면 고쳐주세요."; updateRs();
+        } catch (e) { st.textContent = "오류가 났어요: " + (e.message || e); }
+        btn.disabled = false;
+      };
+      $("rsSample").onclick = () => {
+        if ((readRs().title || readSettle().items.some((c) => c.supply)) && !confirm("결과 품의서와 교육비 정산 탭 내용을 예시로 바꿀까요?")) return;
+        setRs({ title: "개발자를 위한 Claude Code 바이브코딩 검증 워크플로우 과정", round: "", lead: "백엔드·풀스택·DevOps 개발자 대상 AI 생성 코드의 검증 기준·절차 수립 및 적용 역량 강화를 위해 실시한",
+          dateStart: "2026-09-15", timeStart: "09:00", timeEnd: "17:00", place: "과천 아이티센타워 3층 비전센터 C교육장" });
+        setSettle({ title: "개발자를 위한 Claude Code 바이브코딩 검증 워크플로우 과정",
+          items: [{ item: "강사료", supply: 3500000, note: "500,000/H" }, { item: "보조강사료", supply: 700000, note: "100,000/H" }],
+          corps: [{ corp: "ET", count: 9, manager: "", email: "" }, { corp: "GLO", count: 5, manager: "", email: "" }, { corp: "CLO", count: 5, manager: "", email: "" }, { corp: "CPF", count: 1, manager: "", email: "" }] });
+        rsSchedDirty = rsSubjectDirty = false; updateSettle(); updateRs();
+        $("rsStatus").textContent = "✓ 예시를 불러왔어요. 담당자·이메일은 교육비 정산 탭에서 넣어주세요.";
+      };
+      $("rsReset").onclick = () => {
+        if (!confirm("결과 품의서 입력값을 지울까요? (교육비 정산 탭은 그대로)")) return;
+        setRs({}); rsSchedDirty = rsSubjectDirty = false; $("rsStatus").textContent = ""; updateRs();
+      };
+      $("rsCopyCode").onclick = () => copyTo($("rsCode").value, null, $("rsCopyStatus"), "✓ HTML 코드를 복사했어요");
+      $("rsCopyRich").onclick = () => copyTo($("rsCode").value, $("rsCode").value, $("rsCopyStatus"), "✓ 서식째 복사했어요. 품의서 본문에 붙여넣으세요");
+      $("rsCopySubject").onclick = () => copyTo(rf.rsSubject.value, null, $("rsCopyStatus"), "✓ 제목을 복사했어요");
+
+      // ---- 시작
+      setSettle(loadJ(ST_KEY, {}));
+      const rsSaved = loadJ(RS_KEY, null);
+      setRs(rsSaved || {});
+      if (rsSaved) { rsSchedDirty = !!rsSaved.schedDirty; rsSubjectDirty = !!rsSaved.subjectDirty; if (rsSubjectDirty) rf.rsSubject.value = rsSaved.subject || ""; }
+      updateSettle();
     })();
   </script>
 </body>
