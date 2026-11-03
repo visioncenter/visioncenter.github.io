@@ -16,8 +16,8 @@
 - 형태: HTML 파일 1개 (서버·빌드·설치 없음)
 - AI: Google Gemini API (무료 등급, 웹 검색 그라운딩 사용)
 - 배포: GitHub Pages (정적 호스팅)
-- 공개 URL: <https://kbj7171-source.github.io/edu-research-tool/>
-- 저장소: <https://github.com/kbj7171-source/edu-research-tool>
+- 공개 URL: <https://visioncenter.github.io/>
+- 저장소: <https://github.com/visioncenter/visioncenter.github.io>
 
 ---
 
