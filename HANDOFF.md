@@ -107,7 +107,7 @@
 
 | 위치 | 역할 |
 |------|------|
-| `const MODELS = [...]` | 쓸 Gemini 모델 목록(혼잡 시 순서대로 전환). **모델명 바뀌면 여기만 수정** |
+| `const MODELS = [...]` | 쓸 Gemini 모델 목록(혼잡 시 순서대로 전환, 현재 3.8 → 3.7 → 3.5 Flash-Lite). **모델명 바뀌면 여기만 수정** |
 | `callGeminiStream(...)` | 실제 스트리밍 API 호출(SSE 파싱). `useSearch=false`면 검색 끔(키워드 추천용) |
 | `runGemini(apiKey, contents, onText, useSearch)` | 재시도+보조모델 전환 래퍼. 모든 호출이 여기 통함 |
 | `chunkText/chunkCites` | 스트리밍 조각에서 본문/출처 추출 |
