@@ -478,6 +478,24 @@
     .en-copyrow input, .en-copyrow textarea { flex: 1; }
     .en-copyrow .btn-sm { white-space: nowrap; margin-top: 4px !important; }
 
+    /* --- 실시 품의서 --- */
+    #apFormCard button.btn-sm, #apPreviewCard button.btn-sm { margin-top: 0; }
+    .ap-sec { margin: 22px 0 2px; padding-top: 14px; border-top: 1px solid var(--soft-line); font-weight: 800; font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ap-line { display: flex; gap: 6px; align-items: center; }
+    .ap-line input[type="text"] { flex: 1; min-width: 0; }
+    .ap-line .btn-sm { flex: none; }
+    .ap-line label { font-size: 13px; color: var(--sub); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+    #apPreviewCard { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+    @media (max-width: 760px) { #apPreviewCard { position: static; max-height: none; } }
+    .en-item textarea.ap-m-items { min-height: 86px; }
+    .en-item textarea.ap-i-career { min-height: 140px; }
+    .ap-files { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .ap-files:empty { display: none; }
+    .ap-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 6px 5px 10px; border-radius: 999px; background: var(--soft); color: var(--sub); font-size: 12px; max-width: 100%; }
+    .ap-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+    .ap-chip button { border: none; background: none; color: var(--muted); cursor: pointer; padding: 0 4px; font-size: 13px; margin: 0; box-shadow: none; }
+    .ap-chip button:hover { color: var(--text); transform: none; filter: none; background: none; }
+
     /* --- 출석부·명단 --- */
     .ro-form input[type="date"], .ro-form input[type="time"] {
       width: 100%; padding: 11px 14px; font-size: 15px; font-family: inherit;
@@ -583,6 +601,7 @@
       <button type="button" class="maintab" data-panel="instructor">🎤 강사·강의 찾기</button>
       <button type="button" class="maintab" data-panel="enroll">✉️ 입과 안내 HTML</button>
       <button type="button" class="maintab" data-panel="roster">📋 출석부·명단</button>
+      <button type="button" class="maintab" data-panel="approval">📝 실시 품의서</button>
       <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">📖 이 탭 사용법</button>
     </div>
 
@@ -1040,6 +1059,107 @@
       </div>
     </div><!-- /panel-roster -->
 
+    <div id="panel-approval" class="tabpanel hidden">
+      <!-- 실시 품의서: 자료(PDF·이미지·문서)+메모 → AI가 항목 채우기 → 편집 → 그룹웨어 품의서 HTML -->
+      <div class="card no-print en-form" id="apFormCard">
+        <div class="section-title">📝 교육 실시 품의서 만들기</div>
+        <div class="hint" style="margin-bottom:6px;">커리큘럼·견적서·강사 프로필 같은 자료와 교육 내용을 넣고 <b>✨ AI로 채우기</b>를 누르면 품의서 항목이 채워져요. 채워진 내용은 아래에서 바로 고칠 수 있어요.</div>
+        <div id="apDrop" class="pdf-dropzone" tabindex="0" role="button" aria-label="품의 자료 업로드">
+          📎 PDF·이미지·Word·엑셀·텍스트 파일을 클릭하거나 끌어다 놓으세요 (여러 개 가능)
+          <span class="xl-path">🖼 캡처한 이미지는 이 탭에서 <b>Ctrl+V</b>로 붙여넣어도 돼요</span>
+          <input type="file" id="apFile" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.docx,.xlsx,.xls,.txt,.md,.csv,.html,.htm" style="display:none;" />
+        </div>
+        <div id="apFiles" class="ap-files"></div>
+        <label class="field" for="apMemo">교육 내용 메모 (선택)</label>
+        <textarea id="apMemo" style="min-height:90px; font-size:14px;" placeholder="예: 2차수, 11/26(목) 9~17시, 백엔드·풀스택 개발자 최대 20명, C교육장, 강사료 시간당 50만원 + 보조강사 10만원/H, Claude Pro 1개월 지원&#10;이전 차수 품의서를 그대로 붙여넣어도 돼요"></textarea>
+        <div class="minirow" style="gap:6px;">
+          <button type="button" class="btn-sm solid" id="apAiBtn">✨ AI로 품의서 채우기</button>
+          <button type="button" class="btn-sm" id="apSample">예시 불러오기</button>
+          <button type="button" class="btn-sm" id="apReset">↺ 입력 초기화</button>
+        </div>
+        <div id="apAiStatus" class="hint"></div>
+
+        <div class="ap-sec">제목·도입</div>
+        <div class="row">
+          <div style="flex:3;">
+            <label class="field" for="apTitle">과정명 (차수 제외)</label>
+            <input type="text" id="apTitle" placeholder="예: 개발자를 위한 Claude Code 바이브코딩 검증 워크플로우 과정" />
+          </div>
+          <div style="flex:1;">
+            <label class="field" for="apRound">차수 (선택)</label>
+            <input type="text" id="apRound" placeholder="예: 2차수" />
+          </div>
+        </div>
+        <label class="field" for="apIntro">도입 문장</label>
+        <textarea id="apIntro" style="min-height:70px; font-size:14px;" placeholder="비워두면 '<과정명>을 아래와 같이 실시하고자 품의를 상신합니다.'로 들어가요"></textarea>
+
+        <div class="ap-sec">1. 개설배경</div>
+        <textarea id="apBg" style="min-height:100px; font-size:14px;" placeholder="한 줄에 하나씩 (앞에 '-'는 자동으로 붙어요)"></textarea>
+
+        <div class="ap-sec">2. 과정개요</div>
+        <div class="row">
+          <div><label class="field" for="apDateStart">시작일</label><input type="date" id="apDateStart" /></div>
+          <div><label class="field" for="apDateEnd">종료일 (하루면 비워두기)</label><input type="date" id="apDateEnd" /></div>
+        </div>
+        <div class="row">
+          <div><label class="field" for="apTimeStart">시작 시간</label><input type="time" id="apTimeStart" value="09:00" /></div>
+          <div><label class="field" for="apTimeEnd">종료 시간</label><input type="time" id="apTimeEnd" value="17:00" /></div>
+        </div>
+        <label class="field" for="apSched">교육일정 표기</label>
+        <input type="text" id="apSched" placeholder="날짜·시간으로 자동 작성돼요" />
+        <div class="hint">자동 작성돼요(주말 제외, 6시간 이상이면 점심 1시간 제외). 직접 고치면 그 값을 씁니다.</div>
+        <label class="field" for="apTarget">교육대상</label>
+        <input type="text" id="apTarget" placeholder="예: 백엔드·풀스택·DevOps 개발자 (최대 20명)" />
+        <label class="field" for="apPlaceSel">교육장소</label>
+        <select id="apPlaceSel">
+          <option value="과천아이티센타워 3층 C교육장">과천아이티센타워 3층 C교육장</option>
+          <option value="과천아이티센타워 3층 E교육장">과천아이티센타워 3층 E교육장</option>
+          <option value="과천아이티센타워 3층 N교육장">과천아이티센타워 3층 N교육장</option>
+          <option value="__custom">✏️ 직접 입력</option>
+        </select>
+        <input type="text" id="apPlace" placeholder="장소를 직접 입력하세요" style="display:none; margin-top:6px;" />
+        <label class="field">모듈구성 <span id="apModSum" class="hint" style="font-weight:400;"></span></label>
+        <div id="apModules"></div>
+        <div class="minirow" style="margin-top:8px;"><button type="button" class="btn-sm" id="apAddMod">＋ 모듈 추가</button></div>
+
+        <div class="ap-sec">외부강사 정보</div>
+        <div class="checks" style="margin-top:0;"><label><input type="checkbox" id="apInstrOn" checked /> 품의서에 넣기 (사내강사면 해제)</label></div>
+        <div id="apInstrs"></div>
+        <div class="minirow" style="margin-top:8px;"><button type="button" class="btn-sm" id="apAddInstr">＋ 강사 추가</button></div>
+
+        <div class="ap-sec">예상 교육비 <span id="apCostSum" class="hint" style="font-weight:400; margin:0;"></span></div>
+        <div class="hint" style="margin-top:0;">공급가액(VAT 제외)만 넣으면 VAT 10%·합계·계는 자동 계산돼요. 같은 비용구분이 이어지면 칸이 합쳐지고, 비고 칸에서 <b>//</b>로 줄을 나눌 수 있어요.</div>
+        <div id="apCosts"></div>
+        <datalist id="apCatList"><option value="외부특강"></option><option value="예비비"></option><option value="교재비"></option><option value="장소대관"></option><option value="식대"></option></datalist>
+        <div class="minirow" style="margin-top:8px;"><button type="button" class="btn-sm" id="apAddCost">＋ 비용 추가</button></div>
+        <label class="field" for="apCostNotes">교육비 아래 참고 문구</label>
+        <textarea id="apCostNotes" style="min-height:60px; font-size:14px;" placeholder="한 줄에 하나씩 (앞에 ※ 자동). 예: 교육 후 실비 참가자 조직으로 분할 청구 예정"></textarea>
+
+        <div class="ap-sec">비고</div>
+        <textarea id="apRemarks" style="min-height:50px; font-size:14px;" placeholder="한 줄에 하나씩. 예: 강의 커리큘럼 및 견적서 PDF 첨부"></textarea>
+      </div>
+
+      <div class="card no-print" id="apPreviewCard">
+        <div class="section-title">👀 미리보기</div>
+        <label class="field" for="apSubject" style="margin-top:0;">품의 제목</label>
+        <div class="en-copyrow">
+          <input type="text" id="apSubject" />
+          <button type="button" class="btn-sm" id="apCopySubject">복사</button>
+        </div>
+        <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:12px 0 10px;">
+          <button type="button" class="btn-sm solid" id="apCopyCode">📋 HTML 코드 복사</button>
+          <button type="button" class="btn-sm" id="apCopyRich">✨ 서식째 복사</button>
+          <span id="apCopyStatus" class="hint" style="margin:0;"></span>
+        </div>
+        <div class="hint" style="margin-top:0;">그룹웨어 품의서 본문의 HTML(소스) 모드에 붙일 땐 <b>코드 복사</b>, 일반 편집 화면에 바로 붙일 땐 <b>서식째 복사</b>.</div>
+        <iframe id="apPreview" title="품의서 미리보기" class="en-preview" style="background:#fff; min-height:640px;"></iframe>
+        <details style="margin-top:10px;">
+          <summary class="hint" style="cursor:pointer;">HTML 코드 보기</summary>
+          <textarea id="apCode" readonly style="min-height:220px; font-family: Consolas, monospace; font-size:12px; margin-top:8px;"></textarea>
+        </details>
+      </div>
+    </div><!-- /panel-approval -->
+
     <!-- 첫 사용 가이드(처음 방문 시 자동 표시, '사용 가이드' 버튼으로 다시 열기) -->
     <div id="guideOverlay" class="modal-overlay no-print" style="display:none;">
       <div class="modal-card guide-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
@@ -1051,6 +1171,7 @@
           <button type="button" class="guide-tab" data-g="instructor">🎤 강사·강의 찾기</button>
           <button type="button" class="guide-tab" data-g="enroll">✉️ 입과 안내</button>
           <button type="button" class="guide-tab" data-g="roster">📋 출석부·명단</button>
+          <button type="button" class="guide-tab" data-g="approval">📝 실시 품의서</button>
         </div>
 
         <section class="guide-sec" data-g="start">
@@ -1060,10 +1181,11 @@
             <li><b>🎤 강사·강의 찾기</b> 주제에 맞는 강사·강의 후보를 찾아 시간·단가·커리큘럼을 비교해요.</li>
             <li><b>✉️ 입과 안내</b> 과정 정보를 넣으면 그룹웨어 메일에 붙여넣을 참석 안내 HTML과 메일 제목·받는 사람 목록을 만들어요.</li>
             <li><b>📋 출석부·명단</b> Cen-Class 수강생 엑셀로 출석부·학습자 명단 Word 파일을 만들어요.</li>
+            <li><b>📝 실시 품의서</b> 커리큘럼·견적서 같은 자료를 넣으면 그룹웨어 교육 실시 품의서 HTML을 만들어요.</li>
           </ul>
           <div class="guide-tip">
             🔒 API 키·입력값·조사 기록은 <b>이 브라우저에만</b> 저장되고 외부 서버로 전송되지 않아요. 수강생 명단도 브라우저 안에서만 처리돼요.<br />
-            🤖 AI가 필요한 건 교육 조사·강사 찾기 두 탭뿐이에요. 입과 안내·출석부는 AI 없이 바로 만들어져요.<br />
+            🤖 AI는 교육 조사·강사 찾기·실시 품의서와 입과 안내의 안내문 작성에 써요. 출석부·명단은 AI 없이 바로 만들어져요.<br />
             ⚙️ 오른쪽 위 <b>🔑 키 변경</b>으로 API 키를 바꾸고, <b>🌙</b> 버튼으로 다크모드를 켤 수 있어요.
           </div>
         </section>
@@ -1122,6 +1244,20 @@
           <div class="guide-tip">
             🔒 명단 파일은 브라우저 안에서만 처리되고 어디에도 전송되지 않아요.<br />
             💡 Word 생성은 최신 Chrome·Edge에서 동작해요. 인쇄 전에 Word에서 한 번 열어 확인하세요.
+          </div>
+        </section>
+
+        <section class="guide-sec" data-g="approval" hidden>
+          <p class="modal-sub">그룹웨어에 올릴 <b>교육 실시 품의서</b> 본문을 만드는 탭이에요. VisionCenter 품의서 양식(개설배경·과정개요·외부강사·예상 교육비·비고) 그대로 나와요.</p>
+          <ol class="guide-steps">
+            <li><b>자료 넣기</b>강의 커리큘럼·견적서·강사 프로필(PDF·이미지·Word·엑셀)을 끌어다 놓아요. 캡처한 이미지는 이 탭에서 <b>Ctrl+V</b>로 붙여넣으면 돼요. 일정·대상·금액처럼 자료에 없는 건 <b>메모</b>에 대충 적어요. 이전 차수 품의서를 메모에 붙여넣어도 돼요.</li>
+            <li><b>✨ AI로 품의서 채우기</b>20~60초 뒤 도입 문장·개설배경·모듈구성·강사 경력·교육비가 채워져요. 자료에 없는 숫자는 비워둬요.</li>
+            <li><b>확인·수정</b>교육일정 표기와 품의 제목은 자동으로 만들어져요. 교육비는 <b>공급가액</b>만 넣으면 VAT 10%·합계·계가 자동 계산되고, 같은 비용구분이 이어지면 칸이 합쳐져요. 모듈 시간 합계가 교육시간과 다르면 ⚠️로 알려줘요.</li>
+            <li><b>그룹웨어에 붙여넣기</b>품의 제목을 <b>복사</b>하고, 본문은 HTML(소스) 모드면 <b>HTML 코드 복사</b>, 일반 편집 화면이면 <b>서식째 복사</b>를 쓰세요.</li>
+          </ol>
+          <div class="guide-tip">
+            💡 처음엔 <b>예시 불러오기</b>로 완성된 모습을 확인해 보세요. 입력값은 자동 저장돼서 다음 차수엔 날짜·차수만 바꾸면 돼요. 사내강사 과정이면 '외부강사 정보'의 체크를 해제하세요.<br />
+            ⚠️ AI가 금액·경력을 잘못 읽을 수 있어요. 상신 전에 견적서·프로필과 꼭 대조하세요.
           </div>
         </section>
 
@@ -2386,7 +2522,7 @@ ${lines}
       localStorage.setItem("edu_theme", next); applyTheme(next);
     });
 
-    // --- 메인 탭(교육 조사 / 강사·강의 찾기 / 입과 안내 / 출석부·명단) ---
+    // --- 메인 탭(교육 조사 / 강사·강의 찾기 / 입과 안내 / 출석부·명단 / 실시 품의서) ---
     document.querySelectorAll(".maintabs .maintab").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".maintabs .maintab").forEach((b) => b.classList.toggle("active", b === btn));
@@ -3415,6 +3551,438 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       }
       dlAttendBtn.addEventListener("click", () => download("attend", dlAttendBtn));
       dlListBtn.addEventListener("click", () => download("list", dlListBtn));
+    })();
+
+    // --- 실시 품의서 (자료·메모 → AI로 항목 채우기 → 편집 → 그룹웨어 품의서 HTML) ---
+    (function setupApproval() {
+      const AP_KEY = "edu_approval_v1";
+      const ids = ["apTitle", "apRound", "apIntro", "apBg", "apDateStart", "apDateEnd", "apTimeStart", "apTimeEnd", "apSched", "apTarget", "apPlace", "apCostNotes", "apRemarks", "apMemo", "apSubject"];
+      const f = Object.fromEntries(ids.map((k) => [k, $(k)]));
+      const modsEl = $("apModules"), instrsEl = $("apInstrs"), costsEl = $("apCosts"), instrOnEl = $("apInstrOn");
+      const previewEl = $("apPreview"), codeEl = $("apCode"), copyStatusEl = $("apCopyStatus"), aiStEl = $("apAiStatus");
+      const filesEl = $("apFiles"), fileEl = $("apFile"), dropEl = $("apDrop"), aiBtn = $("apAiBtn");
+      const WD = ["일", "월", "화", "수", "목", "금", "토"];
+      let schedDirty = false, subjectDirty = false, files = [];
+
+      const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      const lines = (s) => String(s || "").split(/\r?\n/).map((l) => l.replace(/^\s*(?:[-•·*※]|\d+[.)])\s*/, "").trim()).filter(Boolean);
+      const parseD = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+      const toNum = (v) => { const n = parseFloat(String(v ?? "").replace(/[^\d.\-]/g, "")); return isFinite(n) ? n : 0; };
+      const won = (n) => Math.round(n).toLocaleString("ko-KR");
+      const fmtH = (h) => String(Math.round(h * 10) / 10);
+      // 받침 있으면 '을', 없으면 '를' (한글이 아니면 '을')
+      const eulReul = (w) => { const c = String(w).trim().slice(-1).charCodeAt(0); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 === 0 ? "를" : "을"; };
+      const htmlToText = (t) => {
+        const s = String(t).replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|tr|li|h\d)>/gi, "\n").replace(/<\/t[dh]>/gi, "\t");
+        return (new DOMParser().parseFromString(s, "text/html").body.textContent || "").replace(/ /g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+      };
+
+      // ---- 교육일정 자동 표기: 2026년 11월 26일(목) 09:00 ~ 17:00 (1일, 7시간)
+      function schedInfo() {
+        const s = parseD(f.apDateStart.value); let e = parseD(f.apDateEnd.value);
+        if (!s) return { text: "", hours: 0 };
+        if (e && e <= s) e = null;
+        const md = (d, y, m) => `${y ? d.getFullYear() + "년 " : ""}${m ? d.getMonth() + 1 + "월 " : ""}${d.getDate()}일(${WD[d.getDay()]})`;
+        let when = md(s, true, true);
+        if (e) when += " ~ " + md(e, e.getFullYear() !== s.getFullYear(), e.getFullYear() !== s.getFullYear() || e.getMonth() !== s.getMonth());
+        let days = 1;
+        if (e) { days = 0; for (const d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) if (d.getDay() % 6) days++; days = Math.max(days, 1); }
+        const ts = f.apTimeStart.value, te = f.apTimeEnd.value; let time = "", per = 0;
+        if (ts && te) {
+          const [a, b] = ts.split(":").map(Number), [c, d] = te.split(":").map(Number);
+          const diff = (c * 60 + d - a * 60 - b) / 60;
+          if (diff > 0) { per = diff >= 6 ? diff - 1 : diff; time = ` ${ts} ~ ${te}`; }
+        }
+        return { text: when + time + (per ? ` (${days}일, ${fmtH(days * per)}시간)` : ` (${days}일)`), hours: days * per };
+      }
+
+      // ---- 반복 행(모듈·강사·비용)
+      const q = (b, s) => b.querySelector(s);
+      function addMod(m = {}) {
+        const d = document.createElement("div"); d.className = "en-item ap-mod";
+        d.innerHTML = `<div class="ap-line"><input type="text" class="ap-m-topic" placeholder="주제 (예: 오프닝)" /><input type="text" class="ap-m-hours" placeholder="1H" style="flex:0 0 74px;" /><button type="button" class="btn-sm ap-up" title="위로">↑</button><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>
+          <textarea class="ap-m-items" placeholder="내용 — 한 줄에 하나씩"></textarea>`;
+        q(d, ".ap-m-topic").value = m.topic || ""; q(d, ".ap-m-hours").value = m.hours || "";
+        q(d, ".ap-m-items").value = (m.items || []).join("\n");
+        modsEl.appendChild(d); return d;
+      }
+      function addInstr(p = {}) {
+        const d = document.createElement("div"); d.className = "en-item ap-instr";
+        d.innerHTML = `<div class="ap-line"><input type="text" class="ap-i-name" placeholder="이름" /><input type="text" class="ap-i-role" placeholder="직함 (예: AI Native Developer)" /><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>
+          <div class="ap-line"><input type="text" class="ap-i-company" placeholder="교육업체 (예: 한빛앤)" /></div>
+          <textarea class="ap-i-career" placeholder="경력 — 한 줄에 하나씩 (예: 現 AI 개발팀 에이전트 엔지니어)"></textarea>`;
+        q(d, ".ap-i-name").value = p.name || ""; q(d, ".ap-i-role").value = p.role || ""; q(d, ".ap-i-company").value = p.company || "";
+        q(d, ".ap-i-career").value = (p.career || []).join("\n");
+        instrsEl.appendChild(d); return d;
+      }
+      function addCost(c = {}) {
+        const d = document.createElement("div"); d.className = "en-item ap-cost";
+        d.innerHTML = `<div class="ap-line"><input type="text" class="ap-c-cat" list="apCatList" placeholder="비용구분 (예: 외부특강)" style="flex:0 1 38%;" /><input type="text" class="ap-c-item" placeholder="내용 (예: 강사료)" /><button type="button" class="btn-sm ap-up" title="위로">↑</button><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>
+          <div class="ap-line"><input type="text" class="ap-c-supply" inputmode="numeric" placeholder="공급가액 (원)" style="flex:0 1 38%;" /><label><input type="checkbox" class="ap-c-vat" /> VAT</label><input type="text" class="ap-c-note" placeholder="비고 (예: 500,000/H)" /></div>`;
+        q(d, ".ap-c-cat").value = c.category || ""; q(d, ".ap-c-item").value = c.item || "";
+        q(d, ".ap-c-supply").value = c.supply ? won(toNum(c.supply)) : "";
+        q(d, ".ap-c-vat").checked = c.vat !== false; q(d, ".ap-c-note").value = c.note || "";
+        costsEl.appendChild(d); return d;
+      }
+
+      function readState() {
+        const all = (el, s, fn) => [...el.querySelectorAll(s)].map(fn);
+        return {
+          title: f.apTitle.value.trim(), round: f.apRound.value.trim(), intro: f.apIntro.value.trim(), background: lines(f.apBg.value),
+          dateStart: f.apDateStart.value, dateEnd: f.apDateEnd.value, timeStart: f.apTimeStart.value, timeEnd: f.apTimeEnd.value,
+          sched: f.apSched.value.trim(), target: f.apTarget.value.trim(), place: f.apPlace.value.trim(),
+          modules: all(modsEl, ".ap-mod", (b) => ({ topic: q(b, ".ap-m-topic").value.trim(), hours: q(b, ".ap-m-hours").value.trim(), items: lines(q(b, ".ap-m-items").value) }))
+            .filter((m) => m.topic || m.items.length),
+          instrOn: instrOnEl.checked,
+          instructors: all(instrsEl, ".ap-instr", (b) => ({ name: q(b, ".ap-i-name").value.trim(), role: q(b, ".ap-i-role").value.trim(), company: q(b, ".ap-i-company").value.trim(), career: lines(q(b, ".ap-i-career").value) }))
+            .filter((p) => p.name || p.career.length),
+          costs: all(costsEl, ".ap-cost", (b) => ({ category: q(b, ".ap-c-cat").value.trim(), item: q(b, ".ap-c-item").value.trim(), supply: toNum(q(b, ".ap-c-supply").value), vat: q(b, ".ap-c-vat").checked, note: q(b, ".ap-c-note").value.trim() }))
+            .filter((c) => c.item || c.supply),
+          costNotes: lines(f.apCostNotes.value), remarks: lines(f.apRemarks.value),
+        };
+      }
+      function setState(s = {}) {
+        f.apTitle.value = s.title || ""; f.apRound.value = s.round || ""; f.apIntro.value = s.intro || "";
+        f.apBg.value = (s.background || []).join("\n");
+        f.apDateStart.value = s.dateStart || ""; f.apDateEnd.value = s.dateEnd || "";
+        f.apTimeStart.value = s.timeStart || "09:00"; f.apTimeEnd.value = s.timeEnd || "17:00";
+        f.apSched.value = s.sched || ""; f.apTarget.value = s.target || ""; f.apPlace.value = s.place || "";
+        modsEl.innerHTML = ""; (s.modules || []).forEach(addMod); if (!modsEl.children.length) addMod();
+        instrOnEl.checked = s.instrOn !== false;
+        instrsEl.innerHTML = ""; (s.instructors || []).forEach(addInstr); if (!instrsEl.children.length) addInstr();
+        costsEl.innerHTML = ""; (s.costs || []).forEach(addCost); if (!costsEl.children.length) addCost({ category: "외부특강", item: "강사료" });
+        f.apCostNotes.value = (s.costNotes || []).join("\n"); f.apRemarks.value = (s.remarks || []).join("\n");
+        syncPlace();
+      }
+
+      // ---- 품의서 HTML (그룹웨어 기본 양식 스타일 그대로)
+      const PS = "line-height: 20px; margin-top: 0pt; margin-bottom: 0pt; margin-left: 0in; direction: ltr; unicode-bidi: embed; word-break: keep-all;";
+      const SP = (t, b) => `<span style="font-size: 10pt;${b ? " font-weight: bold;" : ""} color: rgb(0, 0, 0);">${t}</span>`;
+      const P = (inner, extra = "") => `<p style="${PS}${extra}">${inner}</p>`;
+      const BR = P(SP("<br />"));
+      const HANG = " padding-left: 1.1em; text-indent: -1.1em;";
+      const BUL = (t, extra = "") => P(SP("&nbsp;- " + esc(t)), HANG + extra);
+      const CENTER = " text-align: center;", RIGHT = " text-align: right;";
+      const TABLE = (w, rows) => `<table cellspacing="0" cellpadding="0" border="1" style="width: ${w}px; font-size: 10pt; border-width: 0px; border-color: rgb(0, 0, 0); border-collapse: collapse; border-style: solid; background-color: rgb(255, 255, 255);">\n<tbody>\n${rows.map((r) => `<tr>\n${r.join("\n")}\n</tr>`).join("\n")}\n</tbody>\n</table>`;
+      const TD = (w, inner, o = {}) => `<td${o.rs > 1 ? ` rowspan="${o.rs}"` : ""}${o.cs > 1 ? ` colspan="${o.cs}"` : ""} style="width: ${w}px; height: 26px; border-width: 1px; border-color: rgb(0, 0, 0); border-style: solid;${o.head ? " background-color: rgb(238, 238, 238);" : ""}">\n${inner}</td>`;
+      const HEAD = (w, t) => TD(w, P(SP(esc(t), true), CENTER), { head: true });
+      const numCell = (n, bold) => P(n === null ? SP("-&nbsp;") : bold ? `<span style="font-size: 10pt; font-weight: bold; color: rgb(0, 0, 0);">${won(n)}&nbsp;</span>` : SP(won(n) + "&nbsp;"), RIGHT);
+
+      function introText(s) {
+        if (s.intro) return s.intro;
+        return s.title ? `<${s.title}>${eulReul(s.title)} 아래와 같이 실시하고자 품의를 상신합니다.` : "";
+      }
+      function buildHtml(s) {
+        const out = []; let no = 0;
+        const H = (t) => P(SP(`${++no}. ${esc(t)}`, true));
+        out.push(P(SP(esc(introText(s)).replace(/\n/g, "<br />")), " text-align: left;"), BR, BR, P(SP("- 아&nbsp;&nbsp; 래 -", true), CENTER), BR);
+        if (s.background.length) out.push(H("개설배경"), ...s.background.map((t) => BUL(t)), BR);
+
+        out.push(H("과정개요")); let sub = 0;
+        const S = (label, val) => P(SP(`&nbsp;${++sub}) ${label}${val != null ? " : " + esc(val) : ""}`));
+        out.push(S("과정명", s.title + (s.round ? ` (${s.round})` : "")));
+        if (s.sched) out.push(S("교육일정"), TABLE(650, [[TD(163, P(SP(esc(s.title || "과정명")), CENTER), { head: true }), TD(484, P(SP("&nbsp;" + esc(s.sched))))]]));
+        if (s.target) out.push(S("교육대상", s.target));
+        if (s.place) out.push(S("교육장소", s.place));
+        if (s.modules.length) {
+          out.push(S("모듈구성"), TABLE(650, [
+            [HEAD(190, "주제"), HEAD(373, "내용"), HEAD(85, "시간")],
+            ...s.modules.map((m) => [TD(190, P(SP(esc(m.topic)), CENTER)), TD(373, m.items.map((t) => BUL(t)).join("\n") || BR), TD(85, P(SP(esc(m.hours)), CENTER))]),
+          ]));
+        }
+        out.push(BR);
+
+        if (s.instrOn && s.instructors.length) {
+          out.push(H("외부강사 정보"), TABLE(650, [
+            [HEAD(125, "강사"), HEAD(524, "경력")],
+            ...s.instructors.map((p) => [
+              TD(125, P([p.name, p.role, p.company ? `(교육업체: ${p.company})` : ""].filter(Boolean).map((t) => SP(esc(t))).join("<br />\n"), CENTER)),
+              TD(524, p.career.map((t) => BUL(t, " line-height: 150%;")).join("\n") || BR),
+            ]),
+          ]), BR);
+        }
+
+        if (s.costs.length) {
+          let tSup = 0, tVat = 0;
+          const rows = [[HEAD(74, "비용구분"), HEAD(157, "내용"), HEAD(96, "공급가액"), HEAD(96, "VAT"), HEAD(96, "합계"), HEAD(127, "비고")]];
+          s.costs.forEach((c, i) => {
+            const vat = c.vat ? Math.round(c.supply * 0.1) : 0; tSup += c.supply; tVat += vat;
+            const r = [];
+            if (i === 0 || !c.category || c.category !== s.costs[i - 1].category) {
+              let span = 1; while (c.category && s.costs[i + span] && s.costs[i + span].category === c.category) span++;
+              r.push(TD(74, P(SP(esc(c.category)), CENTER), { rs: span }));
+            }
+            r.push(TD(157, P(SP(esc(c.item)), CENTER)), TD(96, numCell(c.supply)), TD(96, numCell(c.vat ? vat : null)), TD(96, numCell(c.supply + vat)),
+              TD(127, P(esc(c.note).split(/\s*\/\/\s*|\n/).map((t) => SP(t)).join("<br />\n"), CENTER)));
+            rows.push(r);
+          });
+          rows.push([TD(231, P(SP("계", true), CENTER), { cs: 2, head: true }), TD(96, numCell(tSup, true), { head: true }), TD(96, numCell(tVat, true), { head: true }), TD(96, numCell(tSup + tVat, true), { head: true }), TD(127, BR)]);
+          out.push(H("예상 교육비"), TABLE(650, rows));
+          s.costNotes.forEach((t) => out.push(P(SP("&nbsp;※ " + esc(t)), " line-height: 150%;")));
+          out.push(BR);
+        }
+
+        if (s.remarks.length) out.push(H("비고"), ...s.remarks.map((t) => BUL(t)), BR);
+        out.push(BR, P(SP("끝.")));
+        return out.join("\n");
+      }
+
+      function update() {
+        const info = schedInfo();
+        if (!schedDirty) f.apSched.value = info.text;
+        const s = readState();
+        if (!subjectDirty) f.apSubject.value = s.title ? `[교육] ${s.title} 실시 품의${s.round ? ` (${s.round})` : ""}` : "";
+        // 모듈 시간 합계 확인
+        const modH = s.modules.reduce((a, m) => a + toNum(m.hours), 0);
+        $("apModSum").textContent = modH ? `— 합계 ${fmtH(modH)}H${info.hours && Math.abs(modH - info.hours) > 0.01 ? ` ⚠️ 교육시간 ${fmtH(info.hours)}H와 달라요` : ""}` : "";
+        const sup = s.costs.reduce((a, c) => a + c.supply, 0), vat = s.costs.reduce((a, c) => a + (c.vat ? Math.round(c.supply * 0.1) : 0), 0);
+        $("apCostSum").textContent = sup ? `— 계 ${won(sup + vat)}원 (공급가액 ${won(sup)} + VAT ${won(vat)})` : "";
+        const html = buildHtml(s);
+        codeEl.value = html;
+        previewEl.srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:18px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:#fff;color:#000}p{margin:0}table{margin:4px 0}td{vertical-align:middle}</style></head><body>${html}<script>const fit=()=>{document.body.style.zoom=Math.min(1,(document.documentElement.clientWidth-36)/652)};fit();addEventListener('resize',fit)<\/script></body></html>`;
+        save(s);
+      }
+      function save(s = readState()) {
+        try { localStorage.setItem(AP_KEY, JSON.stringify({ ...s, memo: f.apMemo.value, subject: f.apSubject.value, schedDirty, subjectDirty })); } catch (e) {}
+      }
+
+      // ---- 자료 파일
+      const MAX_INLINE = 18 * 1024 * 1024, MAX_TEXT = 30000;
+      function renderFiles() {
+        filesEl.innerHTML = files.map((x, i) => `<span class="ap-chip" title="${esc(x.name)}">${x.kind === "inline" ? (x.mime.startsWith("image/") ? "🖼" : "📄") : "📝"} <span>${esc(x.name)}</span><button type="button" data-i="${i}" aria-label="빼기">✕</button></span>`).join("");
+      }
+      filesEl.addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (b) { files.splice(+b.dataset.i, 1); renderFiles(); } });
+      function docxText(buf) {
+        return zipRead(buf).then((z) => {
+          if (!z["word/document.xml"]) throw new Error("Word 내용을 찾지 못했어요.");
+          const doc = new DOMParser().parseFromString(new TextDecoder().decode(z["word/document.xml"]), "application/xml");
+          return [...doc.getElementsByTagName("w:p")].map((p) => [...p.getElementsByTagName("w:t")].map((t) => t.textContent).join("")).filter((l) => l.trim()).join("\n");
+        });
+      }
+      async function addFiles(list) {
+        const msgs = [];
+        for (const file of list) {
+          const name = file.name || "붙여넣은 이미지.png", ext = (name.split(".").pop() || "").toLowerCase(), type = file.type || "";
+          try {
+            if (type === "application/pdf" || ext === "pdf" || type.startsWith("image/")) {
+              const used = files.filter((x) => x.kind === "inline").reduce((a, x) => a + x.size, 0);
+              if (used + file.size > MAX_INLINE) { msgs.push(`${name}: 파일 용량 합계가 18MB를 넘어요`); continue; }
+              files.push({ name, kind: "inline", mime: type || (ext === "pdf" ? "application/pdf" : "image/png"), data: await fileToBase64(file), size: file.size });
+            } else {
+              let text = "";
+              if (ext === "docx") text = await docxText(await file.arrayBuffer());
+              else if (ext === "xlsx" || ext === "xls") text = (await readSheetFile(file)).map((r) => r.join("\t").trim()).filter(Boolean).join("\n");
+              else if (/^html?$/.test(ext)) text = htmlToText(await file.text());
+              else if (/^(txt|md|csv|tsv|json)$/.test(ext) || type.startsWith("text/")) text = await file.text();
+              else { msgs.push(`${name}: 지원하지 않는 형식이에요 (.hwp는 PDF로 저장해서 올려주세요)`); continue; }
+              if (!text.trim()) { msgs.push(`${name}: 읽을 내용이 없어요`); continue; }
+              files.push({ name, kind: "text", text: text.slice(0, MAX_TEXT), size: file.size });
+            }
+          } catch (e) { msgs.push(`${name}: ${e.message || e}`); }
+        }
+        renderFiles();
+        aiStEl.textContent = msgs.length ? "⚠️ " + msgs.join(" / ") : files.length ? `자료 ${files.length}개 준비됐어요. ✨ AI로 품의서 채우기를 눌러주세요.` : "";
+      }
+      fileEl.addEventListener("change", () => { addFiles([...fileEl.files]); fileEl.value = ""; });
+      dropEl.addEventListener("click", () => fileEl.click());
+      dropEl.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileEl.click(); } });
+      ["dragenter", "dragover"].forEach((evt) => dropEl.addEventListener(evt, (e) => { e.preventDefault(); dropEl.classList.add("dragover"); }));
+      ["dragleave", "dragend"].forEach((evt) => dropEl.addEventListener(evt, (e) => { e.preventDefault(); dropEl.classList.remove("dragover"); }));
+      dropEl.addEventListener("drop", (e) => { e.preventDefault(); dropEl.classList.remove("dragover"); if (e.dataTransfer?.files?.length) addFiles([...e.dataTransfer.files]); });
+      // 캡처 이미지 붙여넣기 (이 탭이 열려 있을 때만)
+      document.addEventListener("paste", (e) => {
+        if ($("panel-approval").classList.contains("hidden")) return;
+        const imgs = [...(e.clipboardData?.files || [])].filter((x) => x.type.startsWith("image/"));
+        if (!imgs.length) return;
+        e.preventDefault();
+        addFiles(imgs.map((x, i) => new File([x], `캡처 이미지 ${files.length + i + 1}.${(x.type.split("/")[1] || "png").replace("jpeg", "jpg")}`, { type: x.type })));
+      });
+
+      // ---- AI로 채우기
+      function buildApPrompt(memo) {
+        const now = new Date(), today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        const cur = readState();
+        const known = Object.fromEntries(Object.entries({ title: cur.title, round: cur.round, dateStart: cur.dateStart, dateEnd: cur.dateEnd, target: cur.target }).filter(([, v]) => v));
+        const texts = files.filter((x) => x.kind === "text").map((x) => `--- [파일: ${x.name}] ---\n${x.text}`).join("\n\n");
+        const inl = files.filter((x) => x.kind === "inline").map((x) => x.name);
+        return `너는 아이티센그룹 VisionCenter(그룹 HRD 교육센터)의 교육 담당자야.
+첨부 자료(커리큘럼·견적서·강사 프로필·이전 품의서 등)와 메모를 읽고, 그룹웨어 '교육 실시 품의서'에 들어갈 항목을 채워줘.
+
+[오늘] ${today} (연도가 없는 날짜는 오늘 이후 가장 가까운 날짜로)
+${Object.keys(known).length ? `[담당자가 이미 입력한 값 — 자료와 다르면 이 값을 우선] ${JSON.stringify(known)}\n` : ""}${inl.length ? `[첨부 파일] ${inl.join(", ")}\n` : ""}[메모]
+"""${/<\w+[^>]*>/.test(memo) ? htmlToText(memo) : memo || "(없음)"}"""
+${texts ? `\n[텍스트 자료]\n${texts}\n` : ""}
+[작성 규칙]
+- 자료·메모에 없는 숫자·날짜·시간·이름·금액·경력·장소는 절대 지어내지 말고 빈 값("" 또는 [])으로 둔다.
+- title: 과정명만(차수 빼고). round: "2차수" 형식, 없으면 "".
+- intro: 아래 예시처럼 한 문장. "{연도}년 {대상} {목적}를 위해, {과정 핵심을 한 구절로 설명하는} 과정 <과정명>을 아래와 같이 실시하고자 품의를 상신합니다." 과정명은 <>로 감싸고 차수는 뺀다.
+- background: 개설배경 2~3개. 각 1~2문장, 개조식으로 '~임/~함/~하고자 함'으로 끝낸다. 자료의 교육 목적·필요성을 근거로 쓴다(문장은 다듬어도 되지만 사실은 지어내지 않는다).
+- dateStart/dateEnd: YYYY-MM-DD (하루 교육이면 dateEnd ""). timeStart/timeEnd: HH:MM.
+- target: 예 "백엔드·풀스택·DevOps 개발자 (최대 20명)". place: 예 "과천아이티센타워 3층 C교육장".
+- modules: 커리큘럼의 모듈/세션 단위. topic은 짧은 명사구, items는 2~4개의 짧은 명사형 항목, hours는 "1H" "0.5H" "1.5H" 형식(모르면 "").
+- instructors: 외부 강사만. role은 직함 한 줄, company는 교육업체명, career는 경력 한 줄씩(現/前 표기 등 자료 그대로).
+- costs: 견적서·메모 기준. supply는 VAT 제외 공급가액 숫자(원 단위 정수). 견적 금액이 VAT 포함이면 1.1로 나눈 값. vat: 부가세 대상이면 true(운영 예비비처럼 부가세가 없으면 false).
+  category 예: 강사료·보조강사료 → "외부특강", 라이선스·운영 예비 → "예비비". note에는 단가 근거(예: "500,000/H", "33,000원/인 // 최대 20명" — 줄바꿈은 " // ").
+- costNotes: 교육비 아래 참고 문구(청구 방식, 라이선스 제공 등). '※'는 빼고 쓴다. 근거 없으면 [].
+- remarks: 비고(예: "강의 커리큘럼 및 견적서 PDF 첨부" — 첨부된 자료 종류 기준). 없으면 [].
+
+[문체 예시 — 이전 품의서 (문체만 참고, 내용 복사 금지)]
+intro: 2026년 개발자 대상 AI 활용 역량 강화를 위해, AI가 생성한 코드의 검증 기준과 절차를 직접 설계·적용하는 실습형 과정 <개발자를 위한 Claude Code 바이브코딩 검증 워크플로우 과정>을 아래와 같이 실시하고자 품의를 상신합니다.
+background:
+- 생성형 AI 코딩 도구 활용이 확산되며 코드 생성 속도는 향상되었으나, 생성 결과물의 신뢰성·정합성을 판단하는 기준이 개인별로 상이하여 품질 표준이 부재한 상황임
+- 도구 활용법 중심의 기존 교육에서 나아가, AI 생성 결과물에 대한 통과 기준(루브릭) 수립 및 AI 검토·자동화 테스트·사람 판단을 결합한 검증 워크플로우를 직접 설계·적용함으로써, 개발 조직의 AI 활용 품질 표준화 기반을 마련하고자 함
+
+[출력] 아래 JSON 하나만. 설명·코드블록 없이.
+{"title":"","round":"","intro":"","background":[""],"dateStart":"","dateEnd":"","timeStart":"","timeEnd":"","target":"","place":"",
+"modules":[{"topic":"","items":[""],"hours":""}],
+"instructors":[{"name":"","role":"","company":"","career":[""]}],
+"costs":[{"category":"","item":"","supply":0,"vat":true,"note":""}],
+"costNotes":[""],"remarks":[""]}`;
+      }
+      function parseJson(text) {
+        const a = text.indexOf("{"), b = text.lastIndexOf("}");
+        if (a < 0 || b <= a) throw new Error("AI 응답을 이해하지 못했어요. 다시 시도해 주세요.");
+        return JSON.parse(text.slice(a, b + 1));
+      }
+      function applyAi(j) {
+        const cur = readState(), arr = (v) => (Array.isArray(v) ? v : []);
+        const pick = (k) => (typeof j[k] === "string" && j[k].trim() ? j[k].trim() : cur[k]);
+        const strs = (v) => arr(v).map((x) => String(x || "").trim()).filter(Boolean);
+        const mods = arr(j.modules).map((m) => ({ topic: String(m.topic || "").trim(), hours: String(m.hours || "").trim(), items: strs(m.items) })).filter((m) => m.topic || m.items.length);
+        const ins = arr(j.instructors).map((p) => ({ name: String(p.name || "").trim(), role: String(p.role || "").trim(), company: String(p.company || "").trim(), career: strs(p.career) })).filter((p) => p.name || p.career.length);
+        const costs = arr(j.costs).map((c) => ({ category: String(c.category || "").trim(), item: String(c.item || "").trim(), supply: toNum(c.supply), vat: c.vat !== false, note: String(c.note || "").trim() })).filter((c) => c.item || c.supply);
+        const bg = strs(j.background), cn = strs(j.costNotes).map((t) => t.replace(/^※\s*/, "")), rm = strs(j.remarks);
+        setState({
+          title: pick("title"), round: pick("round"), intro: pick("intro"), background: bg.length ? bg : cur.background,
+          dateStart: pick("dateStart"), dateEnd: typeof j.dateStart === "string" && j.dateStart ? (j.dateEnd || "") : cur.dateEnd,
+          timeStart: pick("timeStart"), timeEnd: pick("timeEnd"), target: pick("target"), place: pick("place"),
+          modules: mods.length ? mods : cur.modules, instrOn: ins.length ? true : cur.instrOn,
+          instructors: ins.length ? ins : cur.instructors, costs: costs.length ? costs : cur.costs,
+          costNotes: cn.length ? cn : cur.costNotes, remarks: rm.length ? rm : cur.remarks,
+        });
+        schedDirty = false; subjectDirty = false;
+        update();
+      }
+      aiBtn.addEventListener("click", async () => {
+        const apiKey = apiKeyEl.value.trim();
+        if (!apiKey) { aiStEl.textContent = "Gemini API 키가 필요해요. 오른쪽 위 🔑 키 변경에서 넣어주세요."; return; }
+        const memo = f.apMemo.value.trim();
+        if (!memo && !files.length) { aiStEl.textContent = "자료를 올리거나 교육 내용 메모를 적어주세요."; return; }
+        const parts = [{ text: buildApPrompt(memo) }];
+        files.filter((x) => x.kind === "inline").forEach((x) => parts.push({ inlineData: { mimeType: x.mime, data: x.data } }));
+        aiBtn.disabled = true; aiStEl.textContent = "AI가 자료를 읽고 품의서를 채우는 중… (20~60초) ⏳";
+        try {
+          const { text } = await runGemini(apiKey, [{ role: "user", parts }], null, false, aiStEl);
+          applyAi(parseJson(text));
+          aiStEl.textContent = "✓ 채웠어요. 금액·날짜·강사 경력은 자료와 꼭 대조해 주세요.";
+        } catch (e) {
+          aiStEl.textContent = "오류가 났어요: " + (e.message || e);
+        }
+        aiBtn.disabled = false;
+      });
+
+      // ---- 입력 이벤트
+      const formCard = $("apFormCard");
+      formCard.addEventListener("input", (e) => {
+        if (e.target === f.apSched) schedDirty = !!f.apSched.value.trim();
+        if (e.target === f.apMemo) { save(); return; }
+        if ([f.apDateStart, f.apDateEnd, f.apTimeStart, f.apTimeEnd].includes(e.target) && !f.apSched.value.trim()) schedDirty = false;
+        update();
+      });
+      formCard.addEventListener("change", (e) => { if (e.target.type === "checkbox") update(); });
+      formCard.addEventListener("focusout", (e) => { // 공급가액 천 단위 콤마
+        if (e.target.classList?.contains("ap-c-supply") && e.target.value.trim()) e.target.value = won(toNum(e.target.value));
+      });
+      formCard.addEventListener("click", (e) => {
+        const del = e.target.closest(".ap-del"), up = e.target.closest(".ap-up");
+        if (del) { del.closest(".en-item").remove(); update(); }
+        if (up) { const it = up.closest(".en-item"); if (it.previousElementSibling) it.parentNode.insertBefore(it, it.previousElementSibling); update(); }
+      });
+      f.apSubject.addEventListener("input", () => { subjectDirty = !!f.apSubject.value.trim(); if (!subjectDirty) update(); else save(); });
+      $("apAddMod").onclick = () => { q(addMod(), ".ap-m-topic").focus(); };
+      $("apAddInstr").onclick = () => { q(addInstr(), ".ap-i-name").focus(); };
+      $("apAddCost").onclick = () => { q(addCost(), ".ap-c-cat").focus(); };
+      const syncPlace = bindPlaceSelect($("apPlaceSel"), f.apPlace);
+
+      const SAMPLE = {
+        title: "개발자를 위한 Claude Code 바이브코딩 검증 워크플로우 과정", round: "2차수",
+        intro: "2026년 개발자 대상 AI 활용 역량 강화를 위해, AI가 생성한 코드의 검증 기준과 절차를 직접 설계·적용하는 실습형 과정 <개발자를 위한 Claude Code 바이브코딩 검증 워크플로우 과정>을 아래와 같이 실시하고자 품의를 상신합니다.",
+        background: [
+          "생성형 AI 코딩 도구 활용이 확산되며 코드 생성 속도는 향상되었으나, 생성 결과물의 신뢰성·정합성을 판단하는 기준이 개인별로 상이하여 품질 표준이 부재한 상황임",
+          "도구 활용법 중심의 기존 교육에서 나아가, AI 생성 결과물에 대한 통과 기준(루브릭) 수립 및 AI 검토·자동화 테스트·사람 판단을 결합한 검증 워크플로우를 직접 설계·적용함으로써, 개발 조직의 AI 활용 품질 표준화 기반을 마련하고자 함",
+        ],
+        dateStart: "2026-11-26", dateEnd: "", timeStart: "09:00", timeEnd: "17:00",
+        target: "백엔드·풀스택·DevOps 개발자 (최대 20명)", place: "과천아이티센타워 3층 C교육장",
+        modules: [
+          { topic: "오프닝", items: ["도구 활용과 성과의 간극", "검증의 부재가 만드는 문제"], hours: "0.5H" },
+          { topic: "AI에게 시킬 일 정의하기", items: ["Claude Code 핵심 사용 패턴", "CLAUDE.md 프로젝트 규칙 설정", "작업 정의서 (목표, 제약, 완료 조건) 작성"], hours: "1H" },
+          { topic: "기준 없는 1차 구현 (v1)", items: ["작업 정의서 기반 초기 결과물 생성", "프롬프트, 작업 과정 기록", "결과물 문제점 직관적 점검"], hours: "1.5H" },
+          { topic: "통과기준 수립", items: ["요구사항 재점검 및 완료 조건 구체화", "검증 루브릭 작성", "AI 검토 프롬프트 설계"], hours: "1H" },
+          { topic: "검증 적용(v1→v2)", items: ["루브릭 기반 v1 평가", "AI 비평 + 사람 판단 결합 검토", "주요 문제 수정 및 개선 전후 비교"], hours: "1H" },
+          { topic: "품질게이트(v2→v3)", items: ["핵심 기능 테스트 1~2개 작성", "로컬 Git Hooks 적용", "CI/CD 확장 방법 이해"], hours: "1.5H" },
+          { topic: "랩업", items: ["v1→v2→v3 회고 및 워크플로우 정리", "사후 과제 제출, 피드백 안내"], hours: "0.5H" },
+        ],
+        instrOn: true,
+        instructors: [{ name: "송승현", role: "AI Native Developer", company: "한빛앤", career: [
+          "現 AI 개발팀 에이전트 엔지니어: 에이전트 플랫폼·코딩 에이전트 솔루션 개발",
+          "증권사 사내 생성형 AI 챗봇 워크플로우 편집 도구 개발",
+          "폐쇄망 환경 에이전트 빌딩 스튜디오 및 동적 응답 빌더 개발",
+          "통신사 AI Call Assistant 앱 리팩토링·런칭 (QA 48점 → 98점 개선)",
+          "Flutter Seoul Organizer/GDG DevFest, Google I/O Extended 등 기술발표 10회 이상",
+          "건국대학교 컴퓨터공학과 대학원 졸",
+        ] }],
+        costs: [
+          { category: "외부특강", item: "강사료", supply: 3500000, vat: true, note: "500,000/H" },
+          { category: "외부특강", item: "보조강사료", supply: 700000, vat: true, note: "100,000/H" },
+          { category: "예비비", item: "Claude Pro 라이선스", supply: 600000, vat: true, note: "33,000원/인 // 최대 20명" },
+          { category: "예비비", item: "운영 예비비", supply: 200000, vat: false, note: "실습·운영 예비" },
+        ],
+        costNotes: ["교육 후 실비 참가자 조직으로 분할 청구 예정", "원활한 실습 진행을 위한 Claude Pro 라이센스(1개월) 제공"],
+        remarks: ["강의 커리큘럼 및 견적서 PDF 첨부"],
+      };
+      $("apSample").onclick = () => {
+        if (readState().title && !confirm("지금 입력한 내용을 예시로 바꿀까요?")) return;
+        setState(SAMPLE); schedDirty = subjectDirty = false; update();
+      };
+      $("apReset").onclick = () => {
+        if (!confirm("입력한 내용과 올린 자료를 모두 지울까요?")) return;
+        setState({}); f.apMemo.value = ""; files = []; renderFiles(); aiStEl.textContent = "";
+        schedDirty = subjectDirty = false; update();
+      };
+
+      // ---- 복사
+      const flash = (msg) => { copyStatusEl.textContent = msg; setTimeout(() => { copyStatusEl.textContent = ""; }, 2500); };
+      $("apCopyCode").onclick = async () => {
+        try { await navigator.clipboard.writeText(codeEl.value); }
+        catch (e) { codeEl.closest("details").open = true; codeEl.select(); document.execCommand("copy"); }
+        flash("✓ HTML 코드를 복사했어요");
+      };
+      $("apCopyRich").onclick = async () => {
+        const html = codeEl.value;
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([html], { type: "text/plain" }) })]);
+        } catch (e) {
+          const d = previewEl.contentDocument, r = d.createRange();
+          r.selectNodeContents(d.body); const sel = d.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+          d.execCommand("copy"); sel.removeAllRanges();
+        }
+        flash("✓ 서식째 복사했어요. 품의서 본문에 붙여넣으세요");
+      };
+      $("apCopySubject").onclick = async () => {
+        try { await navigator.clipboard.writeText(f.apSubject.value); } catch (e) { f.apSubject.select(); document.execCommand("copy"); }
+        flash("✓ 제목을 복사했어요");
+      };
+
+      // ---- 시작: 저장된 입력값 복원
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem(AP_KEY) || "null"); } catch (e) {}
+      setState(saved || {});
+      if (saved) {
+        f.apMemo.value = saved.memo || "";
+        schedDirty = !!saved.schedDirty; subjectDirty = !!saved.subjectDirty;
+        if (subjectDirty) f.apSubject.value = saved.subject || "";
+      }
+      update();
     })();
   </script>
 </body>
