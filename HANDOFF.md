@@ -2,60 +2,85 @@
 
 > 다른 사람이 이 프로젝트를 이어서 작업할 수 있도록 정리한 문서입니다.
 > 비개발자도 따라올 수 있게 "무엇을 / 왜 / 어디를 고치면 되는지" 중심으로 적었습니다.
-> 최종 갱신: 2026-06-17
+> 최종 갱신: 2026-11-03
 
 ---
 
 ## 1. 한 줄 요약
 
-**교육 주제 키워드를 입력하면, Gemini가 웹 검색으로 트렌드·타사 사례·커리큘럼 등을 조사해
-보고서로 정리하고, 그 결과로 품의서·계획서·설문·발표자료까지 만들어 주는 웹 도구**입니다.
-파일 하나(`index.html`)로 동작합니다.
+**교육 기획(조사·강사 찾기)부터 운영 서류(입과 안내 메일·출석부·학습자 명단)까지
+한곳에서 처리하는 VisionCenter 업무용 웹 도구**입니다. 파일 하나(`index.html`)로 동작합니다.
 
-- 목적: 교육 기획 담당자가 "근거 있게" 기획하고 결재까지 빠르게 (배경은 `PRD_교육기획근거도우미.md`)
+- 목적: 교육 담당자가 "근거 있게" 기획하고, 반복되는 운영 서류 작업을 빠르게 끝내기 (배경은 `PRD_교육기획근거도우미.md`)
 - 형태: HTML 파일 1개 (서버·빌드·설치 없음)
 - AI: Google Gemini API (무료 등급, 웹 검색 그라운딩 사용)
-- 배포: GitHub Pages (정적 호스팅)
+- 배포: GitHub Pages (정적 호스팅, `visioncenter` GitHub 조직)
 - 공개 URL: <https://visioncenter.github.io/>
 - 저장소: <https://github.com/visioncenter/visioncenter.github.io>
+- 예전 주소(`edu-research-tool`)는 폐기됨 — 공유할 땐 위 주소만 사용
 
 ---
 
 ## 2. 지금 상태
 
 - ✅ GitHub Pages 배포 중 (위 공개 URL)
-- ✅ 누구나 링크 접속 후 **본인 Gemini 무료 키**를 넣고 사용(키·결과는 그 사람 브라우저에만 저장)
-- ⚠️ **실제 키로 한 브라우저 end-to-end 테스트는 아직 미완** — API 호출 기능(조사/키워드/문서생성)은
-  코드 검증(문법·요소 존재)만 마친 상태. 실제 키로 한 번 돌려보는 것을 권장.
+- ✅ 접속하면 먼저 **Gemini API 키 입력 화면**이 뜨고, 키를 넣어야 본 화면으로 들어감
+  (키·결과·입력값은 그 사람 브라우저에만 저장)
+- ✅ 탭 4개: 📊 교육 조사 / 🎤 강사·강의 찾기 / ✉️ 입과 안내 HTML / 📋 출석부·명단
+- ✅ 탭마다 `📖 이 탭 사용법` 버튼 + 사용 설명서 모달(시작하기·탭별 설명)
+- ⚠️ **실제 키로 처음부터 끝까지 돌려본 테스트는 아직 안 함** — AI 호출 기능(조사/강사 찾기/
+  문서 생성/안내문 AI 작성)과 2026-11-03 고친 오류 처리는 가짜 응답으로만 확인한 상태.
+  실제 키로 한 번 돌려보는 것을 권장.
+- ℹ️ 출석부·명단 탭과 입과 안내의 엑셀 읽기는 AI를 쓰지 않음(브라우저 안에서만 처리, 전송 없음)
 
 ---
 
-## 3. 주요 기능 (현재)
+## 3. 주요 기능 (탭별)
 
-**조사**
-- 교육 주제 + 옵션(조사 항목 체크 13종, 출력타입/범위/분량 + 기간/규모/직급/규모 드롭다운, 자유 입력)
-- **실시간 스트리밍 출력**(글이 흐르듯), 혼잡 시 자동 재시도 + 보조 모델 전환
+### 📊 교육 조사
+- 교육 주제 + 옵션(조사 항목 체크 13종, 출력타입/범위/분량 + 기간/규모/직급 드롭다운, 자유 입력)
+- **실시간 스트리밍 출력**, 혼잡·한도 시 자동 재시도 + 보조 모델 전환
 - **연관 키워드 추천**(주제 입력 후 버튼 → 칩 클릭으로 주제 교체)
+- 보고서 카드 + 검색 출처 + 시간배분 막대그래프 + 커리큘럼 표
+- **복사 / Markdown(.md) / Word(.doc) / 인쇄·PDF**, **결과 공유 링크**(URL 해시 `#r=`)
+- **이어서 질문하기**(멀티턴)
+- **AI 추가 문서**(토글 버튼): 📊 발표 슬라이드 개요 / 📋 교육 품의서 / 🗂 교육 운영 계획서 /
+  📝 설문(사전·사후) / 🎤 임원 예상질문 & 방어 답변 / 🥊 레드팀 허점 검토
+- 💰 예산 계산기(AI 단가 추정) / 📈 ROI·기대효과 산출(예산 연동)
+- 🕘 이전 조사 기록(최근 20건, JSON 내보내기/가져오기), 조건 프리셋, 📄 보고서 표지 설정
 
-**결과 활용**
-- 보고서 카드 + 검색 출처(번호·사이트 표시) + 시간배분 막대그래프 + 커리큘럼 표(세부 학습내용/목표)
-- **복사 / Markdown(.md) / Word(.doc) / 인쇄·PDF**
-- **결과 공유 링크**(보고서를 URL 해시 `#r=`에 담아 백엔드 없이 공유)
-- **이어서 질문하기**(멀티턴, 맥락 유지)
+### 🎤 강사·강의 찾기
+- 강의 주제 키워드 → 멀티캠퍼스·인프런 같은 강사 매칭 플랫폼·교육업체 위주로 후보 검색·비교표
+- 결과는 AI가 판단한 신뢰도 순 정렬, 링크는 검색 출처 기반(최종 확인은 직접)
+- **시간당 단가 범위 필터**(만원 단위, 선택)
+- **기존 교재 PDF 업로드**(클릭/드래그, 15MB 이하) → 교재 내용을 분석해 맞는 강사·강의 검색
+- ⭐ **저장함**: 마음에 드는 후보를 담아두기/삭제
 
-**AI 추가 문서 생성 (버튼 = 토글: 누르면 생성, 다시 누르면 닫힘/다시 열림)**
-- 📊 발표 슬라이드 개요 / 📋 교육 품의서 / 🗂 교육 운영 계획서 / 📝 설문(사전·사후)
-- 🎤 임원 예상질문 & 방어 답변 / 🥊 레드팀 허점 검토
-- 닫은 문서는 인쇄·다운로드·공유에서 제외됨
+### ✉️ 입과 안내 HTML
+- 과정명·차수·교육형태 배지·날짜·시간·장소·사전 안내를 입력하면 오른쪽에 **미리보기가 바로 바뀜**
+- **수강생 엑셀(.xls) 넣으면** 과정 정보 + **받는 사람 메일주소 목록** 자동 채움
+  (수강취소 상태는 제외, 메일주소는 저장 안 함)
+  - 엑셀 받는 곳: CEN-Class › 과목 개설 › 학습자 › 엑셀 다운로드
+- **메일 제목 자동 생성**(과정명·차수·날짜 기반) + 복사
+- 교육시간 자동 계산(6시간 이상이면 점심 1시간 제외, 직접 고치면 그 값 사용)
+- 장소: 과천 아이티센타워 3층 C·E·N교육장 선택 또는 ✏️ 직접 입력
+- **사전 안내 항목**: 항목 추가 → ✨ 칸에 대충 적고 "AI로 작성"(Ctrl+Enter) → 안내문으로 다듬음,
+  URL은 링크로 자동 연결. 예시 버튼(Claude Pro 계정, 노트북 지참)
+- 하단 공통 안내(수강취소·주차) 켜고 끄기
+- 출력: **📋 HTML 코드 복사**(에디터 HTML 소스 모드용) / **✨ 서식째 복사**(일반 편집 화면용)
+- 입력값은 브라우저에 자동 저장, ↺ 입력 초기화
 
-**부가**
-- 💰 예산 계산기(직접 입력 + "AI로 단가 추정해 채우기", 숫자 바꾸면 합계 자동 재계산)
-- 📈 ROI·기대효과 산출(예산=투자 대비 기대 성과, "AI로 향상률 추정" + 직접 수정, ROI·순효과·회수기간 자동 계산, 예산 계산기 값 연동)
-- 🕘 이전 조사 기록(자동 저장 최근 20건, JSON 내보내기/가져오기)
-- 조건 프리셋 저장/불러오기
-- 📄 보고서 표지 설정(회사·부서명/작성자/로고 → 인쇄·PDF·Word 표지에 표시)
-- 🌙 다크모드(토스 스타일 테마: 라이트=흰 배경+블루, 다크=블랙+블루)
-- ❓ 첫 사용 가이드(첫 방문 자동 표시 + 버튼)
+### 📋 출석부·명단
+- CEN-Class 수강생 엑셀(.xls/.xlsx) → 과정 정보 자동 채움 → **Word(.docx) 2종 생성**
+  - **출석부**: 이름 가나다순. 하루 교육이면 이름·직급·서명 열, 여러 날이면 일차별 서명 칸(1~5일)
+  - **학습자 명단**: 부서 가나다순(같은 부서는 이름순)
+- 날짜·일차는 엑셀의 학습시작일·총시수로 계산(하루 7시간 기준, 주말 건너뜀) — 다르면 수정
+- 학습자 체크 해제 시 문서에서 제외(수강취소는 처음부터 해제), 명단에 없는 사람 직접 추가
+- Word 양식은 `index.html` 안에 base64로 내장(`ROSTER_DOCX_TPL`) → 별도 파일 없음
+
+### 공통
+- **수강생 엑셀은 탭 간 공유**: 입과 안내나 출석부 탭 중 한 곳에 넣으면 다른 탭에도 반영
+- 🔑 키 변경(오른쪽 위), 🌙 다크모드(토스 스타일 테마), 📖 사용 설명서
 
 ---
 
@@ -65,17 +90,29 @@
 |------|------|----------------|
 | 파일 | `index.html` 하나 (+ 로고 png) | 비개발자가 환경설정 없이 바로 쓰고 배포 |
 | 의존성 | 없음 (외부 라이브러리 X) | 깨질 부분 최소화 |
+| 엑셀 읽기 | `.xls`(구형 바이너리)·`.xlsx`를 직접 파싱(`readXls`/`readXlsx`) | 라이브러리 없이 처리 |
+| Word 생성 | 내장 .docx 양식을 풀어서(`zipRead`) 표를 채우고 다시 묶음(`zipWrite`) | 라이브러리 없이 처리. 최신 Chrome/Edge 필요(`DecompressionStream`) |
 | AI 호출 | 브라우저에서 Gemini API 직접 fetch (스트리밍) | 서버 없이 동작 |
 | 웹 검색 | Gemini `google_search` 그라운딩 | 최신 정보 + 출처 확보(환각 줄이기) |
-| API 키 | 코드에 안 박음 → 사용자가 입력 → `localStorage` | 키 유출 방지. 공개 배포해도 안전 |
-| 저장 | 전부 `localStorage`(브라우저 안) | 서버·DB 없음. PC 옮길 땐 기록 JSON 내보내기/가져오기 |
+| API 키 | 코드에 안 박음 → 시작 화면에서 사용자가 입력 → `localStorage` | 키 유출 방지. 공개 배포해도 안전 |
+| 저장 | 전부 `localStorage`(브라우저 안) | 서버·DB 없음 |
 
 > **보안 원칙**: API 키 등 비밀값은 절대 코드/저장소에 넣지 않습니다. 키는 사용자 브라우저
-> `localStorage`(`gemini_api_key`)에만 저장되고 외부로 전송되지 않습니다.
+> `localStorage`(`gemini_api_key`)에만 저장되고 Gemini API 호출 외에는 외부로 전송되지 않습니다.
+> 수강생 명단(이름·부서·메일)도 브라우저 안에서만 처리하고 저장·전송하지 않습니다.
 
 ### 사용하는 localStorage 키
-`gemini_api_key`, `edu_theme`, `edu_company`, `edu_author`, `edu_logo`,
-`edu_history_v1`(기록), `edu_presets_v1`(프리셋), `edu_seen_guide`(가이드 본 적 있음)
+| 키 | 내용 |
+|----|------|
+| `gemini_api_key` | Gemini API 키 |
+| `edu_theme` | 라이트/다크 |
+| `edu_company`, `edu_author`, `edu_logo` | 보고서 표지 설정 |
+| `edu_history_v1` | 조사 기록 |
+| `edu_presets_v1` | 조사 조건 프리셋 |
+| `edu_seen_guide` | 사용 설명서 본 적 있음 |
+| `edu_instr_saved_v1` | 강사·강의 저장함 |
+| `edu_enroll_v1` | 입과 안내 입력값 |
+| `edu_roster_v1` | 출석부·명단 입력값(과정 정보) |
 
 ---
 
@@ -88,16 +125,18 @@
 - `.gitignore` — 추적 대상 화이트리스트
 
 **로컬에만 있고 저장소엔 안 올라감(내부 자료)**
-- `PRD_교육기획근거도우미.md`, `00_용어설명.md`~`09_E_CI.md`, `hanbit-prd-interview.skill` 등
+- `PRD_교육기획근거도우미.md`, `00_용어설명.md`~`09_E_CI.md`, `hanbit-prd-interview.skill`, `DESIGN.md` 등
 
-> `프로젝트폴더`가 곧 이 GitHub 저장소의 로컬 작업본입니다. 강의자료·PRD는 `.gitignore`로
-> 가려져 GitHub에 공개되지 않습니다.
+> 로컬 작업본: 바탕화면 `프로젝트폴더` = 이 GitHub 저장소의 로컬 복사본.
+> 강의자료·PRD는 `.gitignore`로 가려져 GitHub에 공개되지 않습니다.
 
 ---
 
 ## 6. 코드 구조 (`index.html` 내부)
 
 `<style>`(디자인·테마) + `<body>`(화면) + `<script>`(동작) 세 부분.
+화면은 `<div id="panel-research|instructor|enroll|roster" class="tabpanel">` 4개로 나뉘고,
+상단 `.maintab` 버튼의 `data-panel` 값으로 전환됩니다.
 
 ### 6-1. 디자인/테마
 - 색은 전부 **CSS 변수**(`:root` 라이트, `:root[data-theme="dark"]` 다크). 색을 바꾸려면 이 두 블록만 수정.
@@ -105,52 +144,101 @@
 
 ### 6-2. 자바스크립트 핵심 (여기를 고치면 동작이 바뀜)
 
+**공통 / AI 호출**
 | 위치 | 역할 |
 |------|------|
+| `passGate/showGate/enterGate` | 시작 화면(API 키 입력) ↔ 본 화면 전환 |
 | `const MODELS = [...]` | 쓸 Gemini 모델 목록(혼잡 시 순서대로 전환, 현재 3.8 → 3.7 → 3.5 Flash-Lite). **모델명 바뀌면 여기만 수정** |
-| `callGeminiStream(...)` | 실제 스트리밍 API 호출(SSE 파싱). `useSearch=false`면 검색 끔(키워드 추천용) |
-| `runGemini(apiKey, contents, onText, useSearch)` | 재시도+보조모델 전환 래퍼. 모든 호출이 여기 통함 |
-| `chunkText/chunkCites` | 스트리밍 조각에서 본문/출처 추출 |
-| `const ITEMS = [...]` | **조사 항목 목록**(체크박스 자동 생성) |
-| `buildPrompt(...)` | 선택값을 모아 조사 프롬프트 조립 (각 `~Rule`로 표/그래프/번호목록 지시) |
-| `renderMarkdown(md)` | 마크다운 → 보고서 HTML(카드·표·불릿). 표 셀의 `<br>`만 줄바꿈 허용 |
-| `renderChart/renderSources/buildCoverHtml` | 막대그래프 / 출처목록 / 인쇄 표지 |
-| `finalizeReport(text,cites,topic,industry,save)` | 보고서 렌더+표지+출처+도구노출+기록저장 (조사/기록불러오기/공유 공통) |
-| `research()` | 조사하기 클릭 전체 흐름(스트리밍 렌더 → finalize) |
-| `askFollowup(q, label, opts)` | 멀티턴 질문/문서 생성. `opts.key` 있으면 토글 가능 문서 |
-| `toggleDoc(key, btn, prompt, label)` | 추가 문서 버튼 열고/닫기. `docBlocks` 맵으로 추적 |
-| `exportMarkdown/exportDoc/downloadFile` | .md / .doc 내보내기 (닫힌 문서 제외) |
-| 기록: `loadHistory/saveHistoryRecord/renderHistory/loadHistoryItem` + export/import | localStorage 기록 |
-| 프리셋: `snapshotOptions/applyOptions/renderPresetOptions` | 옵션 조합 저장 |
-| 예산: `computeBudget/estimateBudget/budgetSummaryText` | 계산 + AI 단가 추정 |
-| 공유: `b64encode/b64decode/loadSharedReport` + shareBtn | URL 해시 공유 |
-| 표지: `buildCoverHtml` + 로고/회사/작성자 저장 | 인쇄 표지 |
-| 가이드: `openGuide/closeGuide` | 온보딩 모달 |
+| `callGeminiStream(...)` | 실제 스트리밍 API 호출(SSE 파싱). `useSearch=false`면 검색 끔 |
+| `runGemini(apiKey, contents, onText, useSearch)` | 재시도+보조모델 전환 래퍼. 못 쓰는 모델은 건너뜀. 모든 AI 호출이 여기 통함 |
+| `friendlyError(e)` | API 오류를 한국어 안내로 변환(한도·키 오류·혼잡·네트워크 차단) |
+| `chunkText/chunkCites/chunkSupports` | 스트리밍 조각에서 본문/출처 추출 |
+| `showGuideSection` | 사용 설명서 모달 탭 전환 |
 
-### 6-3. 조사 흐름
+**📊 교육 조사**
+| 위치 | 역할 |
+|------|------|
+| `const ITEMS = [...]` | **조사 항목 목록**(체크박스 자동 생성) |
+| `buildPrompt(...)` | 선택값을 모아 조사 프롬프트 조립 |
+| `renderMarkdown(md)` | 마크다운 → 보고서 HTML. 표 셀의 `<br>`만 줄바꿈 허용 |
+| `renderChart/renderSources/buildCoverHtml/buildReportNav` | 막대그래프 / 출처 / 인쇄 표지 / 보고서 목차 |
+| `finalizeReport(...)` | 보고서 렌더+표지+출처+기록저장 (조사/기록/공유 공통) |
+| `research()` | 조사하기 전체 흐름 |
+| `askFollowup` / `toggleDoc` | 멀티턴 질문 / 추가 문서 버튼 열고 닫기 |
+| `exportMarkdown/exportDoc/downloadFile` | .md / .doc 내보내기 |
+| `loadHistory/saveHistoryRecord/renderHistory/loadHistoryItem` | 조사 기록 |
+| `snapshotOptions/applyOptions/renderPresetOptions` | 프리셋 |
+| `computeBudget/estimateBudget` · `computeRoi/estimateRoi/syncRoiFromBudget` | 예산 · ROI |
+| `loadSharedReport` | 공유 링크 열기 |
+| `recommendKeywords` | 연관 키워드 추천 |
+
+**🎤 강사·강의 찾기**
+| 위치 | 역할 |
+|------|------|
+| `buildInstructorPrompt` | 강사 검색 프롬프트 |
+| `searchInstructors` | 검색 전체 흐름 |
+| `parseFirstTable/resolveRowLink/parseHourlyRate` | 결과 표 파싱, 행별 출처 링크 연결, 시간당 단가 추출(필터용) |
+| `renderInstructorResults/renderInstrSources` | 결과 카드·출처 표시 |
+| `analyzeInstrPdf/buildPdfAnalysisPrompt/parsePdfAnalysis` | 교재 PDF 분석 |
+| `loadInstrSaved/saveInstrCandidate/deleteInstrCandidate/renderInstrSaved` | ⭐ 저장함 |
+
+**✉️ 입과 안내** (`setupEnroll()` 안에 모여 있음)
+| 위치 | 역할 |
+|------|------|
+| `buildHtml` | 메일 본문 HTML 조립(**VisionCenter 참석 안내 양식은 여기**) — `boxHtml/infoRow/footerBox` 조각 |
+| `subjectText` | 메일 제목 자동 생성 |
+| `autoHours/dateText` | 교육시간 자동 계산 / 날짜 표기 |
+| `addNotice/noticeRow/aiWriteNotice` | 사전 안내 항목 추가 / AI로 안내문 다듬기 |
+| `loadEnrollFile` | 수강생 엑셀 → 과정 정보·받는 사람 목록 |
+| `save/update` | 입력값 저장 / 미리보기 갱신 |
+
+**📋 출석부·명단** (`setupRoster()` 안에 모여 있음)
+| 위치 | 역할 |
+|------|------|
+| `loadFile/renderTable` | 엑셀 읽어 학습자 목록 표시 |
+| `addBizDays/dateLine` | 주말 건너뛴 일차 계산 / 날짜 줄 |
+| `ROSTER_DOCX_TPL` + `loadTemplate` | 내장 Word 양식(base64) 불러오기 |
+| `buildDocx(kind)` | `attend`(출석부) / 명단 Word 생성 — 열 구성·정렬은 여기 |
+| `cell/table/download` | Word 표 XML 조립 / 파일 저장 |
+
+**엑셀·압축 공통 유틸**
+| 위치 | 역할 |
+|------|------|
+| `readXls/readXlsx/readSheetFile` | .xls/.xlsx 읽기 |
+| `zipRead/zipWrite/inflateRaw/crc32` | .docx/.xlsx(zip) 풀기·묶기 |
+| `shareRosterRows` + `roster-file` 이벤트 | 수강생 엑셀을 입과 안내 ↔ 출석부 탭에 공유 |
+| `bindPlaceSelect` | 교육장 선택(C·E·N/직접 입력) 공통 처리 |
+
+### 6-3. 흐름
 ```
-[조사하기] → buildPrompt() → runGemini(스트리밍, onText로 실시간 렌더)
-          → finalizeReport(): 표/그래프/출처/표지 정식 렌더 + 기록 저장
-[추가 문서 버튼] → toggleDoc() → (없으면) askFollowup(): 보고서 맥락 + 지시 프롬프트로 생성
+[조사하기] → buildPrompt() → runGemini(스트리밍) → finalizeReport()
+[추가 문서 버튼] → toggleDoc() → askFollowup()
+[강사·강의 찾기] → (PDF 있으면 analyzeInstrPdf) → searchInstructors() → runGemini() → renderInstructorResults()
+[수강생 엑셀 투입] → readSheetFile() → shareRosterRows() → 입과 안내·출석부 탭 둘 다 채움
+[입과 안내 입력] → update() → buildHtml()/subjectText() → 미리보기·복사
+[출석부/명단 다운로드] → buildDocx() → loadTemplate() → zipWrite() → .docx 저장
 ```
 
 ---
 
 ## 7. 자주 하는 수정 (레시피)
 
-- **조사 항목 추가/삭제**: `ITEMS` 배열에 `{ id, label, text, def }` 한 줄. 특수 형식은 `buildPrompt`의 `~Rule` 참고.
-- **Gemini 모델 변경**: `const MODELS = [...]` 모델명 교체.
-- **프롬프트 말투/형식**: `buildPrompt`의 return 템플릿(`[출력 형식]`/`[정확성 규칙]`) 수정.
-- **추가 문서 버튼 추가**: 버튼 HTML + 요소 ref + `genButtons()` 목록에 추가 + `toggleDoc("새키", 버튼, "프롬프트", "라벨")` 배선.
+- **조사 항목 추가/삭제**: `ITEMS` 배열에 `{ id, label, text, def }` 한 줄.
+- **Gemini 모델 변경**: `const MODELS = [...]` 모델명 교체. (예: 2026-11 Google이 신규 키에 `gemini-2.5-flash`를 막아서 교체함)
+- **프롬프트 말투/형식**: `buildPrompt`(조사) / `buildInstructorPrompt`(강사) 템플릿 수정.
+- **추가 문서 버튼 추가**: 버튼 HTML + 요소 ref + `genButtons()` 목록 + `toggleDoc("새키", 버튼, "프롬프트", "라벨")`.
+- **입과 안내 메일 양식 변경**: `setupEnroll()` 안의 `buildHtml`·`footerBox` 수정. 공통 안내 문구도 여기.
+- **교육장 추가**: 입과 안내·출석부 탭의 장소 `<select>` 두 곳에 `<option>` 추가.
+- **출석부·명단 열 구성/정렬 변경**: `setupRoster()` 안의 `buildDocx` 수정.
+- **새 탭 추가**: `.maintab` 버튼(`data-panel="이름"`) + `<div id="panel-이름" class="tabpanel hidden">` +
+  사용 설명서 `guide-tab`(`data-g="이름"`)과 설명 섹션.
 - **테마 색 변경**: `:root` / `:root[data-theme="dark"]` 변수값만 수정.
-- **표 셀 줄바꿈**: 프롬프트에서 셀 안에 `<br>` 쓰게 지시 → `inline()`이 `<br>`만 살려줌(다른 태그는 escape).
 
 ---
 
-## 8. 배포 / 업데이트 방법 (중요 — 어제와 달라짐)
+## 8. 배포 / 업데이트 방법
 
-**이제 `프로젝트폴더`가 GitHub 저장소에 직접 연결돼 있습니다.** 웹에서 업로드할 필요 없이
-이 폴더에서 바로 푸시하면 됩니다.
+**`프로젝트폴더`가 GitHub 저장소에 직접 연결돼 있습니다.** 이 폴더에서 바로 푸시하면 됩니다.
 
 1. `프로젝트폴더`의 `index.html`(또는 로고 등) 수정
 2. 터미널(Git Bash/PowerShell)에서:
@@ -159,11 +247,11 @@
    git commit -m "수정 내용 설명"
    git push
    ```
-   (Claude Code에게 "수정하고 배포해줘"라고 해도 됨)
-3. 1~2분 뒤 공개 URL을 **Ctrl+F5**(강력 새로고침)로 확인
+   (Claude에게 "수정하고 배포해줘"라고 해도 됨)
+3. 1~2분 뒤 공개 URL을 **Ctrl+F5**(강력 새로고침)로 확인 — 팀원에게도 Ctrl+F5 안내
 
 - 새 파일을 웹사이트에 포함시키려면 `.gitignore`의 화이트리스트(`!/파일명`)에 추가해야 함.
-- 배포 후 반영 확인: 공개 URL을 새로고침했을 때 변경이 보이면 완료.
+- 다른 곳(Claude 클라우드 등)에서 푸시했다면 로컬에서 `git pull` 먼저.
 
 ---
 
@@ -172,61 +260,44 @@
 | 항목 | 내용 |
 |------|------|
 | **API 키 각자 발급** | Gemini 무료. 키는 `AIza`로 시작(OpenAI `sk-...`와 혼동 주의). 발급: <https://aistudio.google.com/app/apikey> |
-| **무료 한도/혼잡** | 분당 요청수 제한/일시 혼잡 있음 → 자동 재시도·보조모델 전환으로 완화. 계속 막히면 잠시 후 재시도 |
-| **환각** | AI가 사실을 지어낼 수 있음. 본문 모델 링크는 클릭 비활성화, **실제 링크는 "검색 출처"에서만**. 회사 사례·수치는 재확인 권장 |
-| **공유 링크 길이** | 아주 긴 보고서는 링크화 불가(안내 뜸) → Word/PDF/.md로 공유 |
-| **기록은 브라우저별** | 기기·브라우저마다 따로. 옮길 땐 기록 **JSON 내보내기 → 가져오기** |
-| **로고 다크모드** | 로고 글자가 검정이라 다크모드에선 흰 박스를 깔아 보이게 처리함 |
-| **모델명 변동** | 바뀌면 `MODELS` 수정. 오류 메시지는 화면에 그대로 노출됨 |
+| **무료 한도/혼잡** | 분당 요청수 제한/일시 혼잡 → 자동 재시도·보조모델 전환. 원인은 한국어로 안내됨 |
+| **신규 키 모델 제한** | Google이 신규 가입자에게 일부 구형 모델을 막을 수 있음 → `MODELS` 교체 |
+| **회사 네트워크** | 사내망에서 Gemini API가 막히면 호출 실패(안내 문구 표시) |
+| **환각** | AI가 사실을 지어낼 수 있음. **실제 링크는 "검색 출처"에서만**. 강사 단가·경력, 회사 사례·수치는 재확인 |
+| **Word 생성 브라우저** | 최신 Chrome/Edge 필요(`DecompressionStream`) |
+| **공유 링크 길이** | 아주 긴 보고서는 링크화 불가 → Word/PDF/.md로 공유 |
+| **기록은 브라우저별** | 기기·브라우저마다 따로. 옮길 땐 기록 JSON 내보내기 → 가져오기 |
+| **로고 다크모드** | 로고 글자가 검정이라 다크모드에선 흰 박스를 깔아 처리 |
 
 ---
 
 ## 10. 작업 이력 (요약)
 
-**어제까지(v1)**: PRD → MVP → "키워드로 조사" 방향 전환 → Gemini 직접 연결(무료+웹검색) →
-조사 항목/필터/드롭다운 → 보고서 카드 레이아웃·인쇄 → 커리큘럼표/시간그래프/뉴스링크 →
-혼잡 재시도·보조모델 → 링크 환각 차단 → **GitHub Pages 배포**.
-(중간에 OpenAI로 잠깐 바꿨다가 무료 문제로 Gemini 복귀 — 현재 코드에 OpenAI 흔적 없음)
+**v1 (2026-06)**: PRD → MVP → "키워드로 조사" 방향 전환 → Gemini 직접 연결(무료+웹검색) →
+조사 항목/필터 → 보고서 카드·인쇄 → 커리큘럼표/시간그래프 → 혼잡 재시도·보조모델 →
+링크 환각 차단 → GitHub Pages 배포.
 
-**오늘(v2) 추가**:
-1. 자유 입력(추가 요청사항) 칸
-2. `프로젝트폴더`를 저장소에 직접 연결(배포 방식이 web 업로드 → git push 로 변경)
-3. 실시간 스트리밍 출력 + 호출 구조 리팩터(`callGeminiStream/runGemini`)
-4. 결과 저장/이전 기록(+JSON 내보내기/가져오기), .md/.doc 다운로드
-5. 조건 프리셋
-6. 후속 질문(멀티턴), 발표 슬라이드 개요
-7. 예산 계산기(AI 단가 추정 + 직접 수정)
-8. 모바일 레이아웃, 출처 표시 개선
-9. 다크모드 + 보고서 표지(회사/로고/작성자) + 연관 키워드 추천
-10. 토스 스타일 테마, ITCEN 로고/제목(VisionCenter 교육기획 AI Agent) 브랜딩
-11. 품의서·교육 계획서·설문(사전/사후) 생성, 결과 공유 링크
-12. 커리큘럼 세부 학습내용/목표 구체화(셀 줄바꿈), 표 글씨 축소
-13. 첫 사용 가이드(온보딩)
-14. 임원 예상질문&방어, 레드팀 허점 검토
-15. 추가 문서 버튼 **열고닫기(토글)** + 닫힌 문서 내보내기 제외
-16. 예산 입력칸 토스식 금액 박스로 재디자인(`.bfield`: 라벨+큰 숫자+단위)
-17. 📈 ROI·기대효과 산출 카드 추가(예산 계산기 값 연동, AI 향상률 추정, ROI/순효과/회수기간 자동 계산, 생성 문서 '기대효과'에 반영)
+**v2 (2026-06)**: 자유 입력, 폴더-저장소 직접 연결(git push 배포), 스트리밍 출력, 기록·프리셋,
+멀티턴·추가 문서, 예산 계산기·ROI, 모바일, 다크모드·표지·연관 키워드.
+
+**v3 (2026-09)**: 🎤 강사·강의 찾기 탭(교재 PDF 업로드·드래그앤드롭, 저장함), 카드 제목 깨짐 수정.
+
+**v4 (2026-11-03)** — "기획 도구"에서 "기획·운영 도구"로 확장:
+1. 강사 찾기 시간당 단가 필터
+2. ✉️ 입과 안내 HTML 탭(메일 제목 자동, 엑셀로 받는 사람 목록, 사전 안내 AI 작성 + 링크 자동 연결)
+3. 📋 출석부·학습자 명단 Word 생성 탭(하루 교육은 이름·직급·서명 열)
+4. 수강생 엑셀 탭 간 공유, 교육장 선택(C·E·N/직접 입력)
+5. 배포 주소 변경 → `visioncenter.github.io`
+6. 도구 이름 변경 → ITCEN VisionCenter 교육 기획·운영 AI Agent
+7. API 키 시작 화면 + 키 발급 안내, 탭별 사용 설명서, CEN-Class 엑셀 받는 경로 안내
+8. Gemini 보조 모델 교체(2.5-flash → 3.7 / 3.5 Flash-Lite) + 오류 원인 한국어 안내
 
 ---
 
-## 11. 향후 개선 아이디어 (선택)
+## 11. 다음 할 일 (후보)
 
-- **실제 키로 end-to-end 테스트**(가장 우선) — 스트리밍/문서생성/예산 AI추정/공유링크 열기 확인
-- 안내·섭외 메일 초안, PWA 설치, 비용 구성 그래프, 비교 모드, 영문 보고서, 가상 수강생 페르소나, ROI 시뮬레이터
-- 공용 키 + 작은 백엔드(키 1개 운영, 단 비용 집중)
-- 다른 AI 제공자 지원(호출 함수 분리)
-
----
-
-## 12. 막혔을 때 디버깅
-
-- 결과 칸의 **"오류가 났어요: ..."** 문구로 원인 파악
-  - `API key not valid` / `API_KEY_INVALID` → 키 문제(AIza 키 맞는지)
-  - `quota` / `rate limit` → 무료 한도/혼잡 → 잠시 후 재시도
-  - `model ... not found` → 모델명 변경 → `MODELS` 수정
-  - 스트리밍 중단/네트워크 오류 → 다시 조사
-- 브라우저 **F12 → Console / Network** 탭에서 상세 확인
-- 코드 수정 후 배포 전, JS 문법 빠르게 점검:
-  ```bash
-  node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');new Function(h.match(/<script>([\s\S]*?)<\/script>/)[1]);console.log('OK');"
-  ```
+- [ ] 실제 Gemini 키로 4개 탭을 처음부터 끝까지 테스트
+- [ ] 📈 만족도 조사 결과 정리 탭(설문 XLS → 익명화 엑셀 + 강사 메일 요약)
+- [ ] 🎓 수료증 자동 생성(수강생 엑셀 재사용)
+- [ ] 💰 교육비 정산(계열사별 인원 비율 배분)
+- [ ] 📋 품의서 단독 생성(조사 없이 과정 정보만으로)
