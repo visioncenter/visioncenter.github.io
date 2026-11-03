@@ -1296,6 +1296,7 @@
         <div id="stSummary" class="rs-info"></div>
         <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:12px 0 10px;">
           <button type="button" class="btn-sm solid" id="stDownload">⬇ 엑셀 다운로드</button>
+          <button type="button" class="btn-sm" id="stCopyRich">✨ 표 서식째 복사</button>
           <button type="button" class="btn-sm" id="stCopyCode">📋 배분표 HTML 복사</button>
           <button type="button" class="btn-sm" id="stGoResult">📑 결과 품의서 보기</button>
           <span id="stCopyStatus" class="hint" style="margin:0;"></span>
@@ -4448,6 +4449,15 @@ background:
       };
       $("stGoResult").onclick = () => goTab("result");
       $("stCopyCode").onclick = () => { const h = $("stCode").value; if (h) copyTo(h, null, $("stCopyStatus"), "✓ 배분표 HTML을 복사했어요"); };
+      // Outlook·그룹웨어 메일 본문에 표 그대로 붙여넣기 (일반 텍스트로 붙는 곳엔 탭 구분 → 엑셀에도 붙음)
+      $("stCopyRich").onclick = () => {
+        const R = computeSettle(), h = allocTableHtml(R);
+        if (!h) { $("stCopyStatus").textContent = "배분 결과가 없어요."; return; }
+        const tsv = [["구분", "법인", "인원", "공급가액", "부가세", "합계", "담당자", "이메일"],
+          ...R.rows.map((r, i) => [i ? "" : R.allocNames.join(" + "), r.corp, r.count, won(r.supply), won(r.vat), won(r.total), r.manager, r.email]),
+          ["합계", "", R.ctot.count, won(R.ctot.supply), won(R.ctot.vat), won(R.ctot.total), "", ""]].map((r) => r.join("\t")).join("\n");
+        copyTo(tsv, `<div style="font-family: 'malgun gothic';">${h}</div>`, $("stCopyStatus"), "✓ 표를 복사했어요. 메일 본문에 Ctrl+V 하세요");
+      };
       $("stDownload").onclick = () => {
         const R = computeSettle();
         if (!R.rows.length) { $("stCopyStatus").textContent = "배분 결과가 없어요."; return; }
