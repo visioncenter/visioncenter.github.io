@@ -864,12 +864,13 @@
         <div class="hint">날짜·시간으로 자동 계산돼요(6시간 이상이면 점심 1시간 제외). 직접 고치면 그 값을 씁니다.</div>
 
         <label class="field" for="enPlace">장소</label>
-        <input type="text" id="enPlace" list="enPlaceList" placeholder="예: 과천 아이티센타워 3층 E교육장" />
-        <datalist id="enPlaceList">
-          <option value="과천 아이티센타워 3층 A교육장"></option><option value="과천 아이티센타워 3층 B교육장"></option>
-          <option value="과천 아이티센타워 3층 C교육장"></option><option value="과천 아이티센타워 3층 D교육장"></option>
-          <option value="과천 아이티센타워 3층 E교육장"></option>
-        </datalist>
+        <select id="enPlaceSel">
+          <option value="과천 아이티센타워 3층 C교육장">과천 아이티센타워 3층 C교육장</option>
+          <option value="과천 아이티센타워 3층 E교육장">과천 아이티센타워 3층 E교육장</option>
+          <option value="과천 아이티센타워 3층 N교육장">과천 아이티센타워 3층 N교육장</option>
+          <option value="__custom">✏️ 직접 입력</option>
+        </select>
+        <input type="text" id="enPlace" placeholder="장소를 직접 입력하세요" style="display:none; margin-top:6px;" />
 
         <label class="field">사전 안내 사항 (선택)</label>
         <div class="hint" style="margin-top:0;">
@@ -953,12 +954,13 @@
         <label class="field" for="roHours">총 교육시간</label>
         <input type="text" id="roHours" placeholder="예: 14H" />
         <label class="field" for="roPlace">장소</label>
-        <input type="text" id="roPlace" list="roPlaceList" placeholder="예: 과천 아이티센타워 3층, E교육장" />
-        <datalist id="roPlaceList">
-          <option value="과천 아이티센타워 3층, A교육장"></option><option value="과천 아이티센타워 3층, B교육장"></option>
-          <option value="과천 아이티센타워 3층, C교육장"></option><option value="과천 아이티센타워 3층, D교육장"></option>
-          <option value="과천 아이티센타워 3층, E교육장"></option>
-        </datalist>
+        <select id="roPlaceSel">
+          <option value="과천 아이티센타워 3층, C교육장">과천 아이티센타워 3층, C교육장</option>
+          <option value="과천 아이티센타워 3층, E교육장">과천 아이티센타워 3층, E교육장</option>
+          <option value="과천 아이티센타워 3층, N교육장">과천 아이티센타워 3층, N교육장</option>
+          <option value="__custom">✏️ 직접 입력</option>
+        </select>
+        <input type="text" id="roPlace" placeholder="장소를 직접 입력하세요" style="display:none; margin-top:6px;" />
         <div class="hint">미리 채워진 날짜·일차는 엑셀의 학습시작일·총시수로 계산한 값이에요(하루 7시간 기준, 주말 건너뜀). 다르면 고쳐주세요.</div>
       </div>
 
@@ -2676,7 +2678,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       $("enReset").onclick = () => {
         if (!confirm("입력한 내용을 모두 지울까요?")) return;
         ids.forEach((k) => { el[k].value = ""; });
-        el.enType.value = "집합교육"; el.enTimeStart.value = "09:00"; el.enTimeEnd.value = "17:00";
+        el.enType.value = "집합교육"; el.enTimeStart.value = "09:00"; el.enTimeEnd.value = "17:00"; syncEnPlace();
         hoursDirty = false; noticesEl.innerHTML = ""; cancelEl.checked = parkingEl.checked = true; subjectDirty = false; rcptEl.value = ""; rcptCountEl.textContent = ""; enFileStatusEl.textContent = "";
         update();
       };
@@ -2715,13 +2717,16 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       };
 
       // 수강생 엑셀 → 과정 정보 + 받는 사람
+      const syncEnPlace = bindPlaceSelect($("enPlaceSel"), el.enPlace);
       const enFileEl = $("enFile"), enDropEl = $("enDrop"), enFileStatusEl = $("enFileStatus");
       const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      async function loadEnrollFile(file) {
-        if (!file) return;
+      async function loadEnrollFile(file, shared) {
+        if (!file && !shared) return;
         enFileStatusEl.textContent = "읽는 중…";
         try {
-          const rows = (await readSheetFile(file)).filter((r) => r.some((v) => String(v).trim()));
+          const fname = shared ? shared.name : file.name;
+          const rows = shared ? shared.rows : (await readSheetFile(file)).filter((r) => r.some((v) => String(v).trim()));
+          if (!shared) shareRosterRows(rows, fname, "enroll");
           const hi = rows.findIndex((r) => r.includes("이름") && r.includes("이메일"));
           if (hi < 0) throw new Error("'이름'·'이메일' 열을 찾지 못했어요. Cen-Class 수강생 엑셀이 맞는지 확인해 주세요.");
           const H = rows[hi], get = (r, n) => (H.indexOf(n) >= 0 ? String(r[H.indexOf(n)] ?? "").trim() : "");
@@ -2756,7 +2761,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
           }
           hoursDirty = false; subjectDirty = false;
           update();
-          enFileStatusEl.textContent = `✓ ${file.name} — 받는 사람 ${list.length}명${skipped ? ` · 수강취소 ${skipped}명 제외` : ""}${noMail ? ` · 메일주소 없음 ${noMail}명` : ""}`;
+          enFileStatusEl.textContent = `✓ ${fname}${shared ? " (출석부·명단 탭에서 올린 파일)" : ""} — 받는 사람 ${list.length}명${skipped ? ` · 수강취소 ${skipped}명 제외` : ""}${noMail ? ` · 메일주소 없음 ${noMail}명` : ""}`;
         } catch (e) { enFileStatusEl.textContent = "⚠️ " + (e.message || e); }
       }
       enDropEl.addEventListener("click", () => enFileEl.click());
@@ -2765,6 +2770,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       ["dragenter", "dragover"].forEach((ev) => enDropEl.addEventListener(ev, (e) => { e.preventDefault(); enDropEl.classList.add("dragover"); }));
       ["dragleave", "drop"].forEach((ev) => enDropEl.addEventListener(ev, (e) => { e.preventDefault(); enDropEl.classList.remove("dragover"); }));
       enDropEl.addEventListener("drop", (e) => loadEnrollFile(e.dataTransfer.files[0]));
+      document.addEventListener("roster-file", (e) => { if (e.detail.from !== "enroll") loadEnrollFile(null, e.detail); });
 
       // 저장된 입력 복원
       let saved = null;
@@ -2775,6 +2781,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         cancelEl.checked = saved.cancel !== false; parkingEl.checked = saved.parking !== false;
         (saved.notices || []).forEach((n) => addNotice(n));
       }
+      syncEnPlace();
       update();
     })();
 
@@ -2961,6 +2968,31 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       }
       return grid.map((row) => Array.from(row || [], (v) => v == null ? "" : String(v)));
     }
+    // 장소 선택 상자 + '직접 입력' 칸 연결. 실제 값은 input에 들어있음
+    function bindPlaceSelect(sel, input) {
+      const presets = [...sel.options].map((o) => o.value).filter((v) => v !== "__custom");
+      const show = (custom) => { input.style.display = custom ? "" : "none"; };
+      sel.addEventListener("change", () => {
+        if (sel.value === "__custom") { if (presets.includes(input.value.trim())) input.value = ""; show(true); input.focus(); }
+        else { input.value = sel.value; show(false); }
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      // input 값에 맞춰 선택 상자 상태 맞추기 (비어 있으면 첫 번째 교육장)
+      return function syncFromInput() {
+        const v = input.value.trim();
+        if (!v) { sel.value = presets[0]; input.value = presets[0]; show(false); }
+        else if (presets.includes(v)) { sel.value = v; show(false); }
+        else { sel.value = "__custom"; show(true); }
+      };
+    }
+
+    // 수강생 엑셀 공유: 한 탭에서 올리면 다른 탭도 같은 데이터를 씀
+    let sharedRoster = null; // { rows, name, from }
+    function shareRosterRows(rows, name, from) {
+      sharedRoster = { rows, name, from };
+      document.dispatchEvent(new CustomEvent("roster-file", { detail: sharedRoster }));
+    }
+
     async function readSheetFile(file) {
       const buf = await file.arrayBuffer(), head = new Uint8Array(buf.slice(0, 8));
       if (head[0] === 0xD0 && head[1] === 0xCF) return readXls(buf);
@@ -2994,6 +3026,9 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         const enroll = JSON.parse(localStorage.getItem("edu_enroll_v1") || "null");
         f.roPlace.value = saved?.place || (enroll?.enPlace ? enroll.enPlace.replace(/(\d+층)\s+/, "$1, ") : "");
       } catch (e) {}
+      const syncRoPlace = bindPlaceSelect($("roPlaceSel"), f.roPlace);
+      syncRoPlace();
+      try { localStorage.setItem(ROSTER_KEY, JSON.stringify({ place: f.roPlace.value })); } catch (e) {}
       f.roPlace.addEventListener("input", () => { try { localStorage.setItem(ROSTER_KEY, JSON.stringify({ place: f.roPlace.value })); } catch (e) {} });
 
       // --- 날짜 유틸 ---
@@ -3021,11 +3056,13 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       }
 
       // --- 엑셀 → 학습자 ---
-      async function loadFile(file) {
-        if (!file) return;
+      async function loadFile(file, shared) {
+        if (!file && !shared) return;
         fileStatusEl.textContent = "읽는 중…";
         try {
-          const rows = (await readSheetFile(file)).filter((r) => r.some((v) => String(v).trim()));
+          const fname = shared ? shared.name : file.name;
+          const rows = shared ? shared.rows : (await readSheetFile(file)).filter((r) => r.some((v) => String(v).trim()));
+          if (!shared) shareRosterRows(rows, fname, "roster");
           const hi = rows.findIndex((r) => r.includes("이름") && r.includes("부서"));
           if (hi < 0) throw new Error("'이름'·'부서' 열이 있는 머리글을 찾지 못했어요. Cen-Class 수강생 엑셀이 맞는지 확인해 주세요.");
           const H = rows[hi], col = (n) => H.indexOf(n), get = (r, n) => (col(n) >= 0 ? String(r[col(n)] ?? "").trim() : "");
@@ -3053,7 +3090,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
           }
           if (hours > 0) f.roHours.value = `${hours}H`;
           const off = learners.filter((l) => !l.include).length;
-          fileStatusEl.textContent = `✓ ${file.name} — ${learners.length}명 불러옴${off ? ` (수강취소 등 ${off}명 제외)` : ""}`;
+          fileStatusEl.textContent = `✓ ${fname}${shared ? " (입과 안내 탭에서 올린 파일)" : ""} — ${learners.length}명 불러옴${off ? ` (수강취소 등 ${off}명 제외)` : ""}`;
           renderTable();
         } catch (e) {
           fileStatusEl.textContent = "⚠️ " + (e.message || e);
@@ -3065,6 +3102,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       ["dragenter", "dragover"].forEach((ev) => dropEl.addEventListener(ev, (e) => { e.preventDefault(); dropEl.classList.add("dragover"); }));
       ["dragleave", "drop"].forEach((ev) => dropEl.addEventListener(ev, (e) => { e.preventDefault(); dropEl.classList.remove("dragover"); }));
       dropEl.addEventListener("drop", (e) => loadFile(e.dataTransfer.files[0]));
+      document.addEventListener("roster-file", (e) => { if (e.detail.from !== "roster") loadFile(null, e.detail); });
 
       function renderTable() {
         const on = learners.filter((l) => l.include).length;
