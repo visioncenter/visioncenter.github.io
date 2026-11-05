@@ -54,6 +54,7 @@
       padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer;
       box-shadow: none; transition: background .12s, color .12s, box-shadow .12s;
     }
+    .maintabs .maintab-group { display: none; }
     .maintabs .maintab:hover { color: var(--accent); background: var(--soft); filter: none; }
     .maintabs .maintab:active { transform: none; }
     .maintabs .maintab.active { background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm), 0 1px 4px rgba(0,0,0,.06); }
@@ -559,6 +560,10 @@
         flex-direction: column; gap: 3px; margin: 4px 0 0; padding: 8px;
       }
       .maintabs .maintab { width: 100%; text-align: left; padding: 11px 14px; white-space: nowrap; }
+      .maintabs .maintab-group { display: block; padding: 12px 14px 4px; font-size: 11.5px; font-weight: 800; letter-spacing: .3px; color: var(--muted); }
+      .maintabs .maintab-group:first-child { padding-top: 4px; }
+      .maintabs .maintab-group.sep { padding: 0; margin: 8px 6px; height: 1px; background: var(--soft-line); }
+      .maintabs .maintab { padding-left: 18px; }
       .maintabs .maintab-help { margin: 6px 0 0; padding: 10px 14px; text-align: left; border-top: 1px solid var(--soft-line); border-radius: 0 0 10px 10px; }
     }
     @media print { .wrap { display: block !important; } }
@@ -624,13 +629,16 @@
     </div>
 
     <div class="maintabs no-print">
+      <span class="maintab-group">교육 기획</span>
       <button type="button" class="maintab active" data-panel="research">📊 교육 조사</button>
       <button type="button" class="maintab" data-panel="instructor">🎤 강사·강의 찾기</button>
-      <button type="button" class="maintab" data-panel="enroll">✉️ 입과 안내 HTML</button>
+      <span class="maintab-group">교육 운영</span>
+      <button type="button" class="maintab" data-panel="enroll">✉️ 입과 안내문</button>
       <button type="button" class="maintab" data-panel="roster">📋 출석부·명단</button>
       <button type="button" class="maintab" data-panel="approval">📝 실시 품의서</button>
       <button type="button" class="maintab" data-panel="result">📑 결과 품의서</button>
       <button type="button" class="maintab" data-panel="settle">💰 교육비 정산</button>
+      <span class="maintab-group sep"></span>
       <button type="button" class="maintab" data-panel="notice">🖼️ 공지문 메이커</button>
       <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">📖 이 탭 사용법</button>
     </div>
