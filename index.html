@@ -549,6 +549,11 @@
     .guide-list li { font-size: 14px; padding: 8px 0; border-bottom: 1px solid var(--soft-line); }
     .guide-list li b { display: inline-block; min-width: 128px; }
     .maintabs .maintab-help { margin: 0 0 0 auto; background: transparent; color: var(--muted); border: none; box-shadow: none; padding: 10px 14px; font-size: 13px; font-weight: 700; border-radius: 10px; }
+    #panel-notice { grid-template-columns: 1fr; }
+    .notice-frame-wrap { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: var(--shadow-sm); }
+    .notice-frame-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; font-size: 13px; color: var(--sub); border-bottom: 1px solid var(--line); }
+    .notice-frame-bar a { color: var(--accent); font-weight: 700; text-decoration: none; white-space: nowrap; }
+    #noticeFrame { display: block; width: 100%; height: calc(100vh - 180px); min-height: 760px; border: 0; background: #F4F5F8; }
     .maintabs .maintab-help:hover { color: var(--accent); background: var(--soft); filter: none; }
     .xl-path { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
     .xl-path b { color: var(--sub); font-weight: 700; }
@@ -613,6 +618,7 @@
       <button type="button" class="maintab" data-panel="approval">📝 실시 품의서</button>
       <button type="button" class="maintab" data-panel="result">📑 결과 품의서</button>
       <button type="button" class="maintab" data-panel="settle">💰 교육비 정산</button>
+      <button type="button" class="maintab" data-panel="notice">🖼️ 공지문 메이커</button>
       <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">📖 이 탭 사용법</button>
     </div>
 
@@ -1318,6 +1324,17 @@
       </div>
     </div><!-- /panel-settle -->
 
+    <div id="panel-notice" class="tabpanel hidden">
+      <!-- 공지문 메이커: 별도 페이지(notice-maker.html)를 그대로 불러옴. 처음 탭을 열 때만 로드 -->
+      <div class="notice-frame-wrap">
+        <div class="notice-frame-bar no-print">
+          <span>과정 신청·비용 정산·일정 변경·설문 안내를 ITCEN 공지 디자인 HTML로 만들어요.</span>
+          <a href="notice-maker.html" target="_blank" rel="noopener">↗ 새 창으로 열기</a>
+        </div>
+        <iframe id="noticeFrame" data-src="notice-maker.html" title="공지문 메이커"></iframe>
+      </div>
+    </div><!-- /panel-notice -->
+
     <!-- 첫 사용 가이드(처음 방문 시 자동 표시, '사용 가이드' 버튼으로 다시 열기) -->
     <div id="guideOverlay" class="modal-overlay no-print" style="display:none;">
       <div class="modal-card guide-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
@@ -1332,6 +1349,7 @@
           <button type="button" class="guide-tab" data-g="approval">📝 실시 품의서</button>
           <button type="button" class="guide-tab" data-g="result">📑 결과 품의서</button>
           <button type="button" class="guide-tab" data-g="settle">💰 교육비 정산</button>
+          <button type="button" class="guide-tab" data-g="notice">🖼️ 공지문 메이커</button>
         </div>
 
         <section class="guide-sec" data-g="start">
@@ -1344,6 +1362,7 @@
             <li><b>📝 실시 품의서</b> 커리큘럼·견적서 같은 자료를 넣으면 그룹웨어 교육 실시 품의서 HTML을 만들어요.</li>
             <li><b>📑 결과 품의서</b> 교육 결과 보고 및 교육비 정산 품의서 HTML을 만들어요.</li>
             <li><b>💰 교육비 정산</b> 수료자 엑셀로 법인별 교육비를 나누고 엑셀로 내려받아요.</li>
+            <li><b>🖼️ 공지문 메이커</b> 과정 신청·비용 정산·일정 변경·설문 안내 공지를 ITCEN 디자인 HTML로 만들어요.</li>
           </ul>
           <div class="guide-tip">
             🔒 API 키·입력값·조사 기록은 <b>이 브라우저에만</b> 저장되고 외부 서버로 전송되지 않아요. 수강생 명단도 브라우저 안에서만 처리돼요.<br />
@@ -1445,6 +1464,20 @@
           <div class="guide-tip">
             ⚠️ 인원수로 딱 나눠지지 않으면 끝수(몇 원)를 인원이 가장 많은 법인에 더하고 화면에 알려줘요. 법인별 부가세 버림 때문에 부가세 합계가 전체 금액의 10%와 몇 원 다를 수 있어요.<br />
             🔒 명단·담당자 정보는 이 브라우저에만 저장돼요.
+          </div>
+        </section>
+
+        <section class="guide-sec" data-g="notice" hidden>
+          <p class="modal-sub">텍스트로만 보내던 공지를 <b>ITCEN 공지 디자인</b>으로 바꿔 주는 탭이에요. AI를 쓰지 않고 브라우저 안에서만 동작해요.</p>
+          <ol class="guide-steps">
+            <li><b>템플릿 고르기</b>왼쪽에서 과정 신청 안내 / 비용 정산 안내 / 일정 변경 안내 / 설문 안내 중 하나를 불러와요.</li>
+            <li><b>미리보기에서 바로 고치기</b>글자를 클릭해 고치고, 블록을 클릭하면 뜨는 툴바로 이동·복제·삭제·옵션을 바꿔요. 블록 위아래 <b>+</b>로 문단·번호 카드·정보 박스·단계 가이드·안내 문구·강사 소개·이미지·버튼을 추가해요.</li>
+            <li><b>서식</b>드래그 후 툴바의 강조·형광·하늘·크기·굵기를 쓰거나, 입력칸에 <code>**굵게**</code> <code>[[파란 강조]]</code> <code>==노랑 형광==</code> <code>{{하늘 형광}}</code>로 써요.</li>
+            <li><b>복사</b><b>HTML 복사</b>(코드) 또는 <b>서식째 복사</b>(그룹웨어 편집기에 바로 붙여넣기).</li>
+          </ol>
+          <div class="guide-tip">
+            🖼️ 로고·단계 가이드 이미지는 HTML 안에 들어 있어요(base64). 아웃룩 데스크톱 앱에선 이미지가 안 보일 수 있으니 그룹웨어에서 한 번 확인하세요.<br />
+            💾 작성 중인 내용은 이 브라우저에 자동 저장돼요. <b>↗ 새 창으로 열기</b>로 넓게 쓸 수도 있어요.
           </div>
         </section>
 
@@ -2714,6 +2747,7 @@ ${lines}
       btn.addEventListener("click", () => {
         document.querySelectorAll(".maintabs .maintab").forEach((b) => b.classList.toggle("active", b === btn));
         document.querySelectorAll(".tabpanel").forEach((p) => p.classList.toggle("hidden", p.id !== `panel-${btn.dataset.panel}`));
+        if (btn.dataset.panel === "notice") { const f = $("noticeFrame"); if (f && !f.src) f.src = f.dataset.src; }
       });
     });
 
