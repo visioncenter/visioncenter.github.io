@@ -28,7 +28,7 @@
   (키·결과·입력값은 그 사람 브라우저에만 저장)
 - ✅ 탭 8개(왼쪽 메뉴 그룹): **교육 기획** 📊 교육 조사 / 🎤 강사·강의 찾기 · **교육 운영** ✉️ 입과 안내문 / 📋 출석부·명단 / 📝 실시 품의서 / 📑 결과 품의서 / 💰 교육비 정산 · (구분선) 🖼️ 공지문 메이커
   - 그룹 제목은 `.maintab-group` span(가로 탭 모드에선 숨김). 새 탭은 해당 그룹 아래에 버튼 추가
-- ✅ 🖼️ 공지문 메이커 탭은 별도 파일 `notice-maker.html`을 iframe으로 불러옴(탭을 처음 열 때 로드). 공지문 메이커 수정은 그 파일만 고치면 됨. 저장 키 `vc-notice-maker-v2`. 파일 저장(PNG/JPG/PDF/PPTX)은 html2canvas·jsPDF·PptxGenJS를 CDN에서 누를 때만 불러옴(PPTX는 이미지 1장 슬라이드)
+- ✅ 🖼️ 공지문 메이커 탭은 별도 파일 `notice-maker.html`을 iframe으로 불러옴(탭을 처음 열 때 로드). 공지문 메이커 수정은 그 파일만 고치면 됨. 저장 키 `vc-notice-maker-v2`. 파일 저장(PNG/JPG/PDF/PPTX)은 html2canvas·jsPDF·PptxGenJS를 CDN에서 누를 때만 불러옴. PPTX는 화면 HTML을 위치 그대로 텍스트 상자·도형·이미지로 옮겨 편집 가능(`buildEditablePptx`, 1px=1/96in), 예전 방식(그림 1장)은 "PPTX (이미지)"
 - ✅ **📂 HTML 불러오기 / 💾 HTML 파일 저장**(입과 안내문·실시 품의서·결과 품의서·교육비 정산·공지문 메이커): 내보내는 HTML(코드 복사·파일 저장, 공지문은 HTML 복사·코드 보기·저장 ▸ HTML) 끝에 `<!--vc-state:탭:base64(JSON)-->` 주석으로 입력값을 붙여두고, 불러오면 그대로 복원. 다른 탭 HTML을 넣으면 그 탭으로 자동 이동. 주석 없는 HTML은 Gemini가 읽어 칸을 채움(실시 품의서는 기존 'AI로 채우기' 흐름 재사용, 공지문 메이커는 주석 있는 것만). 공통 코드: `VC_IMPORT`·`vcDoImport`·`vcStamp`, 모달 `#hiOverlay`. 공지문 이미지는 상태에서 `@@vcimg:n@@`(본문 n번째 이미지)로 바꿔 용량 절약
 - ✅ 넓은 화면(900px 이상)에선 메인 탭이 왼쪽 세로 메뉴(sticky), 좁은 화면에선 기존 가로 탭 — CSS `@media (min-width: 900px)` 블록
 - ✅ 탭마다 `📖 이 탭 사용법` 버튼 + 사용 설명서 모달(시작하기·탭별 설명)
