@@ -1015,6 +1015,8 @@
         <div class="minirow" style="gap:6px; flex-wrap:wrap; margin-bottom:10px;">
           <button type="button" class="btn-sm solid" id="enCopyCode">📋 HTML 코드 복사</button>
           <button type="button" class="btn-sm" id="enCopyRich">✨ 서식째 복사</button>
+          <button type="button" class="btn-sm" id="enImport" title="저장해 둔 HTML을 불러와 다시 편집">📂 HTML 불러오기</button>
+          <button type="button" class="btn-sm" id="enSaveHtml" title="다시 불러올 수 있는 HTML 파일로 저장">💾 HTML 파일 저장</button>
           <span id="enCopyStatus" class="hint" style="margin:0;"></span>
         </div>
         <div class="hint" style="margin-top:0;">에디터의 HTML(소스) 모드에 붙일 땐 <b>코드 복사</b>, 일반 편집 화면에 바로 붙일 땐 <b>서식째 복사</b>.</div>
@@ -1186,6 +1188,8 @@
         <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:12px 0 10px;">
           <button type="button" class="btn-sm solid" id="apCopyCode">📋 HTML 코드 복사</button>
           <button type="button" class="btn-sm" id="apCopyRich">✨ 서식째 복사</button>
+          <button type="button" class="btn-sm" id="apImport" title="저장해 둔 HTML을 불러와 다시 편집">📂 HTML 불러오기</button>
+          <button type="button" class="btn-sm" id="apSaveHtml" title="다시 불러올 수 있는 HTML 파일로 저장">💾 HTML 파일 저장</button>
           <span id="apCopyStatus" class="hint" style="margin:0;"></span>
         </div>
         <div class="hint" style="margin-top:0;">그룹웨어 품의서 본문의 HTML(소스) 모드에 붙일 땐 <b>코드 복사</b>, 일반 편집 화면에 바로 붙일 땐 <b>서식째 복사</b>.</div>
@@ -1261,6 +1265,8 @@
         <div class="minirow" style="gap:6px; flex-wrap:wrap; margin:12px 0 10px;">
           <button type="button" class="btn-sm solid" id="rsCopyCode">📋 HTML 코드 복사</button>
           <button type="button" class="btn-sm" id="rsCopyRich">✨ 서식째 복사</button>
+          <button type="button" class="btn-sm" id="rsImport" title="저장해 둔 HTML을 불러와 다시 편집">📂 HTML 불러오기</button>
+          <button type="button" class="btn-sm" id="rsSaveHtml" title="다시 불러올 수 있는 HTML 파일로 저장">💾 HTML 파일 저장</button>
           <span id="rsCopyStatus" class="hint" style="margin:0;"></span>
         </div>
         <iframe id="rsPreview" title="결과 품의서 미리보기" class="en-preview" style="background:#fff; min-height:640px;"></iframe>
@@ -1334,6 +1340,8 @@
           <button type="button" class="btn-sm" id="stCopyRich">✨ 표 서식째 복사</button>
           <button type="button" class="btn-sm" id="stCopyCode">📋 배분표 HTML 복사</button>
           <button type="button" class="btn-sm" id="stGoResult">📑 결과 품의서 보기</button>
+          <button type="button" class="btn-sm" id="stImport" title="저장해 둔 HTML을 불러와 다시 편집">📂 HTML 불러오기</button>
+          <button type="button" class="btn-sm" id="stSaveHtml" title="다시 불러올 수 있는 HTML 파일로 저장">💾 HTML 파일 저장</button>
           <span id="stCopyStatus" class="hint" style="margin:0;"></span>
         </div>
         <iframe id="stPreview" title="법인별 배분표 미리보기" class="en-preview" style="background:#fff; min-height:360px;"></iframe>
@@ -1354,6 +1362,26 @@
         <iframe id="noticeFrame" data-src="notice-maker.html" title="공지문 메이커"></iframe>
       </div>
     </div><!-- /panel-notice -->
+
+    <!-- HTML 불러오기(입과 안내문·실시/결과 품의서·교육비 정산 공용) -->
+    <div id="hiOverlay" class="modal-overlay no-print" style="display:none;">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="hiTitle" style="max-width:600px;">
+        <button type="button" id="hiClose" class="modal-close" aria-label="닫기">✕</button>
+        <h2 id="hiTitle">📂 HTML 불러오기</h2>
+        <p class="modal-sub" id="hiSub"></p>
+        <div id="hiDrop" class="pdf-dropzone" tabindex="0" role="button" aria-label="HTML 파일 업로드" style="margin-top:0;">
+          📄 .html 파일을 클릭하거나 끌어다 놓으세요
+          <input type="file" id="hiFile" accept=".html,.htm,text/html" style="display:none;" />
+        </div>
+        <label class="field" for="hiCode">또는 HTML 코드 붙여넣기 <span class="hint" style="font-weight:400;">(그룹웨어 HTML(소스) 모드에서 복사한 코드도 돼요)</span></label>
+        <textarea id="hiCode" style="min-height:120px; font-family: Consolas, monospace; font-size:12px;"></textarea>
+        <div class="minirow" style="gap:6px; margin-top:10px;">
+          <button type="button" class="btn-sm solid" id="hiGo">불러오기</button>
+          <button type="button" class="btn-sm" id="hiCancel">닫기</button>
+        </div>
+        <div id="hiStatus" class="hint" style="margin-top:8px;"></div>
+      </div>
+    </div>
 
     <!-- 첫 사용 가이드(처음 방문 시 자동 표시, '사용 가이드' 버튼으로 다시 열기) -->
     <div id="guideOverlay" class="modal-overlay no-print" style="display:none;">
@@ -1726,6 +1754,100 @@
     }
     // 멀티턴 대화용 contents 누적 (후속 질문에서 맥락 유지)
     const userTurn = (text) => ({ role: "user", parts: [{ text }] });
+
+    // ===== HTML 불러오기 공통 =====
+    // 이 도구가 내보내는 HTML(코드 복사·파일 저장) 끝에 <!--vc-state:탭:base64(JSON)--> 주석으로 입력값을 붙여둠.
+    // 다시 불러오면 그 값으로 칸을 그대로 복원하고, 주석이 없는 HTML은 각 탭의 AI 읽기(fallback)로 채움.
+    const vcB64enc = (t) => { const u = new TextEncoder().encode(t); let b = ""; for (let i = 0; i < u.length; i += 0x8000) b += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(b); };
+    const vcB64dec = (b) => new TextDecoder().decode(Uint8Array.from(atob(b), (c) => c.charCodeAt(0)));
+    const vcStamp = (tab, state, html) => `${html}\n<!--vc-state:${tab}:${vcB64enc(JSON.stringify({ v: 1, s: state }))}-->`;
+    function vcReadStamp(h) {
+      h = String(h || "");
+      // 일부 에디터는 주석을 URL 인코딩해서 보관함(<!--{cke_protected}%3C!%2D%2D...) → 풀어서 다시 찾기
+      if (!/vc-state:[a-z]+:/.test(h) && /vc-state/.test(h)) { try { h = decodeURIComponent(h.replace(/%(?![0-9A-Fa-f]{2})/g, "%25")); } catch (e) {} }
+      const m = /vc-state:([a-z]+):([A-Za-z0-9+/=]+)/.exec(h);
+      if (!m) return null;
+      try { return { tab: m[1], state: JSON.parse(vcB64dec(m[2])).s, html: h }; } catch (e) { return null; }
+    }
+    function vcDownloadHtml(name, title, body) {
+      const doc = `<!DOCTYPE html>\n<html lang="ko">\n<head>\n<meta charset="UTF-8">\n<title>${String(title || "").replace(/[<>&]/g, "")}</title>\n</head>\n<body style="margin:0; padding:16px; background:#fff;">\n${body}\n</body>\n</html>`;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([doc], { type: "text/html;charset=utf-8" }));
+      a.download = (String(name || "문서").replace(/[\\/:*?"<>|]/g, "_").trim() || "문서") + ".html";
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+    const vcHtmlText = (t) => {
+      const s = String(t).replace(/<!--[\s\S]*?-->/g, "").replace(/<(style|script)[\s\S]*?<\/\1>/gi, "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|tr|li|h\d|table)>/gi, "\n").replace(/<\/t[dh]>/gi, "\t");
+      return (new DOMParser().parseFromString(s, "text/html").body.textContent || "").replace(/\u00a0/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+    };
+    const vcParseJson = (text) => {
+      const a = text.indexOf("{"), b = text.lastIndexOf("}");
+      if (a < 0 || b <= a) throw new Error("AI 응답을 이해하지 못했어요. 다시 시도해 주세요.");
+      return JSON.parse(text.slice(a, b + 1));
+    };
+    // 탭별 등록: VC_IMPORT[탭] = { label, restore(state) → 메시지, fallback(html, statusEl) → Promise<메시지> }
+    const VC_IMPORT = {};
+    const VC_TAB_LABEL = { enroll: "✉️ 입과 안내문", approval: "📝 실시 품의서", result: "📑 결과 품의서", settle: "💰 교육비 정산", notice: "🖼️ 공지문 메이커" };
+    const vcGoTab = (k) => document.querySelector(`.maintab[data-panel="${k}"]`)?.click();
+    let vcImportTab = null;
+    function vcOpenImport(tab) {
+      vcImportTab = tab;
+      $("hiTitle").textContent = `📂 HTML 불러오기 — ${VC_TAB_LABEL[tab] || ""}`;
+      $("hiSub").innerHTML = "이 도구에서 <b>코드 복사·HTML 파일 저장</b>한 HTML은 입력값이 그대로 복원돼요. 그 밖의 HTML(예전 문서, 그룹웨어에서 복사한 소스)은 AI가 읽어서 칸을 채워요(Gemini 키 필요). <b>지금 입력값은 바뀌어요.</b>";
+      $("hiCode").value = ""; $("hiStatus").textContent = "";
+      $("hiOverlay").style.display = "flex";
+    }
+    const vcCloseImport = () => { $("hiOverlay").style.display = "none"; };
+    // 다른 탭에서 만든 HTML이면 그 탭으로 옮겨서 복원 (공지문 메이커 iframe도 이 함수를 부름)
+    async function vcDoImport(html, tab = vcImportTab, statusEl = $("hiStatus")) {
+      const st = vcReadStamp(html);
+      if (st) {
+        if (st.tab === "notice") {
+          vcGoTab("notice");
+          const fr = $("noticeFrame");
+          const run = () => { const err = fr.contentWindow?.vcImportHtml?.(st.html); if (err) alert(err); };
+          if (fr.contentWindow?.vcImportHtml) run(); else fr.addEventListener("load", run, { once: true });
+          vcCloseImport(); return;
+        }
+        if (!VC_IMPORT[st.tab]) { statusEl.textContent = "⚠️ 알 수 없는 형식의 저장 정보예요."; return; }
+        const sameGroup = st.tab === tab || (["result", "settle"].includes(st.tab) && ["result", "settle"].includes(tab));
+        if (sameGroup && VC_IMPORT[tab]) st.tab = tab; else vcGoTab(st.tab);
+        const h = VC_IMPORT[st.tab];
+        const msg = h.restore(st.state) || "✓ 저장된 입력값을 그대로 불러왔어요.";
+        vcCloseImport();
+        const tgt = h.statusEl?.(); if (tgt) tgt.textContent = (!sameGroup ? `ℹ️ ${VC_TAB_LABEL[st.tab]} 탭에서 만든 HTML이라 이 탭으로 옮겼어요. ` : "") + msg;
+        return;
+      }
+      const h = VC_IMPORT[tab];
+      if (!h?.fallback) { statusEl.textContent = "⚠️ 이 도구에서 만든 HTML이 아니라서 불러올 수 없어요."; return; }
+      if (!vcHtmlText(html)) { statusEl.textContent = "⚠️ 읽을 내용이 없어요."; return; }
+      const go = $("hiGo"); go.disabled = true;
+      try {
+        const msg = await h.fallback(html, statusEl);
+        vcCloseImport();
+        const tgt = h.statusEl?.(); if (tgt) tgt.textContent = msg || "✓ AI가 HTML 내용을 읽어서 채웠어요. 내용을 꼭 확인해 주세요.";
+      } catch (e) { statusEl.textContent = "오류가 났어요: " + (e.message || e); }
+      go.disabled = false;
+    }
+    window.vcRouteImport = (html) => vcDoImport(html, "notice", { set textContent(v) { if (v) alert(v); } });
+    (function setupHtmlImportModal() {
+      const drop = $("hiDrop"), fileIn = $("hiFile");
+      const readFile = (f) => {
+        if (!f) return;
+        if (!/\.html?$/i.test(f.name) && !/html/.test(f.type)) { $("hiStatus").textContent = "⚠️ .html 파일만 넣어주세요."; return; }
+        f.text().then((t) => vcDoImport(t));
+      };
+      drop.addEventListener("click", () => fileIn.click());
+      drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } });
+      fileIn.addEventListener("change", () => { readFile(fileIn.files[0]); fileIn.value = ""; });
+      ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("dragover"); }));
+      ["dragleave", "dragend", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("dragover"); }));
+      drop.addEventListener("drop", (e) => readFile(e.dataTransfer?.files?.[0]));
+      $("hiGo").onclick = () => { const t = $("hiCode").value.trim(); if (!t) { $("hiStatus").textContent = "파일을 넣거나 HTML 코드를 붙여넣어 주세요."; return; } vcDoImport(t); };
+      $("hiClose").onclick = $("hiCancel").onclick = vcCloseImport;
+      $("hiOverlay").addEventListener("click", (e) => { if (e.target === $("hiOverlay")) vcCloseImport(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("hiOverlay").style.display !== "none") vcCloseImport(); });
+    })();
     const modelTurn = (text) => ({ role: "model", parts: [{ text }] });
 
     const ITEMS = [
@@ -3263,8 +3385,60 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       };
 
       const flash = (msg) => { copyStatusEl.textContent = msg; setTimeout(() => { copyStatusEl.textContent = ""; }, 2500); };
+      // ---- HTML 불러오기 / 파일 저장
+      const enState = () => {
+        const d = Object.fromEntries(ids.map((k) => [k, el[k].value]));
+        return { ...d, hoursDirty, notices: readNotices(), cancel: cancelEl.checked, parking: parkingEl.checked, subject: subjectEl.value, subjectDirty };
+      };
+      const enStamped = () => vcStamp("enroll", enState(), codeEl.value);
+      function enApply(d = {}) {
+        ids.forEach((k) => { el[k].value = d[k] ?? ""; });
+        if (!el.enType.value) el.enType.value = "집합교육";
+        if (!el.enTimeStart.value && !d.enTimeStart) el.enTimeStart.value = "09:00";
+        if (!el.enTimeEnd.value && !d.enTimeEnd) el.enTimeEnd.value = "17:00";
+        hoursDirty = !!d.hoursDirty; cancelEl.checked = d.cancel !== false; parkingEl.checked = d.parking !== false;
+        noticesEl.innerHTML = ""; (d.notices || []).forEach((n) => addNotice(n));
+        subjectDirty = !!d.subjectDirty; if (subjectDirty) subjectEl.value = d.subject || "";
+        syncEnPlace(); update();
+      }
+      VC_IMPORT.enroll = {
+        statusEl: () => copyStatusEl,
+        restore: (d) => { enApply(d); return "✓ 저장된 입력값을 그대로 불러왔어요. (받는 사람은 저장되지 않아요)"; },
+        fallback: async (html, st) => {
+          const apiKey = apiKeyEl.value.trim();
+          if (!apiKey) throw new Error("이 도구에서 만든 HTML이 아니라서 AI로 읽어야 해요. Gemini API 키를 넣어주세요.");
+          st.textContent = "AI가 HTML을 읽고 칸을 채우는 중… ⏳";
+          const prompt = `아래는 사내 교육 '참석 안내 메일' HTML에서 뽑은 텍스트야. 입력 칸 값으로 되돌려줘.
+
+[텍스트]
+"""${vcHtmlText(html).slice(0, 20000)}"""
+
+[규칙]
+- 텍스트에 없는 값은 지어내지 말고 "" 로 둔다.
+- title: 과정명(차수 제외). round: "2차수" 같은 차수, 없으면 "". type: 교육 형태 배지(예: 집합교육, 온라인 실시간).
+- dateStart/dateEnd: YYYY-MM-DD (하루면 dateEnd ""), 연도 없으면 ${new Date().getFullYear()}년. timeStart/timeEnd: HH:MM. hours: "7H"·"2일 14H" 같은 표기.
+- place: 장소 문구 그대로.
+- notices: '사전 안내' 항목만(인사말·과정명/일시/장소·수강취소·주차·문의 문구는 제외). t=항목 제목, b=안내 문장(줄바꿈 \n, 강조는 **굵게**), x=회색 박스 내용("# 소제목" 줄과 "- 항목" 줄, 없으면 "").
+- cancel: 수강취소 안내 문구가 있으면 true. parking: 주차 안내 문구가 있으면 true.
+
+[출력] JSON 하나만.
+{"title":"","round":"","type":"","dateStart":"","dateEnd":"","timeStart":"","timeEnd":"","hours":"","place":"","notices":[{"t":"","b":"","x":""}],"cancel":true,"parking":true}`;
+          const { text } = await runGemini(apiKey, [userTurn(prompt)], null, false, st);
+          const j = vcParseJson(text), S = (v) => String(v ?? "").trim();
+          enApply({
+            enTitle: S(j.title), enRound: S(j.round), enType: S(j.type), enDateStart: S(j.dateStart), enDateEnd: S(j.dateEnd),
+            enTimeStart: S(j.timeStart) || "09:00", enTimeEnd: S(j.timeEnd) || "17:00", enHours: S(j.hours), hoursDirty: !!S(j.hours), enPlace: S(j.place),
+            notices: (Array.isArray(j.notices) ? j.notices : []).map((n) => ({ t: S(n.t), b: S(n.b), x: S(n.x) })).filter((n) => n.t || n.b || n.x),
+            cancel: j.cancel !== false, parking: j.parking !== false,
+          });
+          return "✓ AI가 HTML 내용을 읽어서 채웠어요. 날짜·장소·안내 문구를 꼭 확인해 주세요.";
+        },
+      };
+      $("enImport").onclick = () => vcOpenImport("enroll");
+      $("enSaveHtml").onclick = () => { vcDownloadHtml(subjectEl.value || "입과 안내문", subjectEl.value, enStamped()); flash("✓ HTML 파일을 저장했어요 · 📂 불러오기로 다시 편집할 수 있어요"); };
+
       $("enCopyCode").onclick = async () => {
-        try { await navigator.clipboard.writeText(codeEl.value); }
+        try { await navigator.clipboard.writeText(enStamped()); }
         catch (e) { codeEl.closest("details").open = true; codeEl.select(); document.execCommand("copy"); }
         flash("✓ HTML 코드를 복사했어요");
       };
@@ -4194,8 +4368,31 @@ background:
 
       // ---- 복사
       const flash = (msg) => { copyStatusEl.textContent = msg; setTimeout(() => { copyStatusEl.textContent = ""; }, 2500); };
+      // ---- HTML 불러오기 / 파일 저장
+      const apStamped = () => vcStamp("approval", { ...readState(), subject: f.apSubject.value, schedDirty, subjectDirty }, codeEl.value);
+      VC_IMPORT.approval = {
+        statusEl: () => aiStEl,
+        restore: (d) => {
+          setState(d || {}); schedDirty = !!d?.schedDirty; subjectDirty = !!d?.subjectDirty;
+          if (subjectDirty) f.apSubject.value = d.subject || "";
+          update(); return "✓ 저장된 입력값을 그대로 불러왔어요.";
+        },
+        // 주석 없는 품의서 HTML → 자료로 넣고 기존 'AI로 품의서 채우기' 흐름을 그대로 탐
+        fallback: async (html, st) => {
+          if (!apiKeyEl.value.trim()) throw new Error("이 도구에서 만든 HTML이 아니라서 AI로 읽어야 해요. Gemini API 키를 넣어주세요.");
+          setState({}); schedDirty = subjectDirty = false;
+          files = files.filter((x) => x.name !== "불러온 품의서.html");
+          files.push({ name: "불러온 품의서.html", kind: "text", text: vcHtmlText(html).slice(0, MAX_TEXT), size: html.length });
+          renderFiles(); update();
+          vcCloseImport(); aiBtn.click();
+          return "";
+        },
+      };
+      $("apImport").onclick = () => vcOpenImport("approval");
+      $("apSaveHtml").onclick = () => { vcDownloadHtml(f.apSubject.value || "실시 품의서", f.apSubject.value, apStamped()); flash("✓ HTML 파일을 저장했어요 · 📂 불러오기로 다시 편집할 수 있어요"); };
+
       $("apCopyCode").onclick = async () => {
-        try { await navigator.clipboard.writeText(codeEl.value); }
+        try { await navigator.clipboard.writeText(apStamped()); }
         catch (e) { codeEl.closest("details").open = true; codeEl.select(); document.execCommand("copy"); }
         flash("✓ HTML 코드를 복사했어요");
       };
@@ -4525,7 +4722,7 @@ background:
         saveJ(VIEW_KEY, viewOpts()); updateSettle();
       });
       ["stOptGubun", "stOptKor"].forEach((k) => $(k).addEventListener("change", () => { syncView(); saveJ(VIEW_KEY, viewOpts()); updateSettle(); }));
-      $("stCopyCode").onclick = () => { const h = $("stCode").value; if (h) copyTo(h, null, $("stCopyStatus"), "✓ 배분표 HTML을 복사했어요"); };
+      $("stCopyCode").onclick = () => { const h = $("stCode").value; if (h) copyTo(stStamped(), null, $("stCopyStatus"), "✓ 배분표 HTML을 복사했어요"); };
       // Outlook·그룹웨어 메일 본문에 표 그대로 붙여넣기 (일반 텍스트로 붙는 곳엔 탭 구분 → 엑셀에도 붙음)
       $("stCopyRich").onclick = () => {
         const R = computeSettle(), o = viewOpts(), h = allocTableHtml(R, o);
@@ -4685,7 +4882,56 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
         if (!confirm("결과 품의서 입력값을 지울까요? (교육비 정산 탭은 그대로)")) return;
         setRs({}); rsSchedDirty = rsSubjectDirty = false; $("rsStatus").textContent = ""; updateRs();
       };
-      $("rsCopyCode").onclick = () => copyTo($("rsCode").value, null, $("rsCopyStatus"), "✓ HTML 코드를 복사했어요");
+      // ---- HTML 불러오기 / 파일 저장 (결과 품의서·정산 배분표 둘 다 정산 입력값까지 같이 저장)
+      const rsBundle = () => ({ rs: { ...readRs(), subject: rf.rsSubject.value, schedDirty: rsSchedDirty, subjectDirty: rsSubjectDirty }, settle: readSettle() });
+      function rsApply(d = {}) {
+        if (d.settle) setSettle(d.settle);
+        const r = d.rs || {};
+        setRs(r); rsSchedDirty = !!r.schedDirty; rsSubjectDirty = !!r.subjectDirty;
+        if (rsSubjectDirty) rf.rsSubject.value = r.subject || "";
+        updateSettle(); updateRs();
+      }
+      async function rsFallback(html, st) {
+        const apiKey = apiKeyEl.value.trim();
+        if (!apiKey) throw new Error("이 도구에서 만든 HTML이 아니라서 AI로 읽어야 해요. Gemini API 키를 넣어주세요.");
+        st.textContent = "AI가 HTML을 읽고 칸을 채우는 중… ⏳";
+        const prompt = `아래는 사내 '교육 결과 보고 및 교육비 정산 품의서'(또는 법인별 교육비 배분표) HTML에서 뽑은 텍스트야(표 칸은 탭으로 구분). 입력 칸 값으로 되돌려줘.
+
+[텍스트]
+"""${vcHtmlText(html).slice(0, 20000)}"""
+
+[규칙]
+- 텍스트에 없는 값은 지어내지 말고 "" 또는 [] 로 둔다.
+- title: 과정명(차수 제외). round: 차수(예 "2차수"). lead: 첫 문장 중 "<과정명>에 대해 ..." 앞부분(보통 "...위해 실시한"으로 끝남), 없으면 "".
+- sched: '일 시' 문구 그대로. dateStart/dateEnd: YYYY-MM-DD(하루면 dateEnd ""), timeStart/timeEnd: HH:MM. place: '장 소' 문구 그대로.
+- allocNote: '법인 별 비용배분' 아래 설명 문장. attach: '별첨.' 뒤 내용('끝.' 제외).
+- items: 비용 사용내역 표의 항목(합계 줄 제외). supply=공급가액 숫자(원), vat=부가세가 있으면 true, note=비고, alloc=법인 배분 대상이면 true(배분 제외 표시가 있으면 false).
+- corps: 법인별 배분 표의 법인(약칭 또는 이름 그대로)과 인원(count, 정수). 합계 줄 제외.
+
+[출력] JSON 하나만.
+{"title":"","round":"","lead":"","sched":"","dateStart":"","dateEnd":"","timeStart":"","timeEnd":"","place":"","allocNote":"","attach":"","items":[{"item":"","supply":0,"vat":true,"note":"","alloc":true}],"corps":[{"corp":"","count":0}]}`;
+        const { text } = await runGemini(apiKey, [userTurn(prompt)], null, false, st);
+        const j = vcParseJson(text), S = (v) => String(v ?? "").trim(), arr = (v) => (Array.isArray(v) ? v : []);
+        const items = arr(j.items).map((c) => ({ item: S(c.item), supply: toNum(c.supply), vat: c.vat !== false, note: S(c.note), alloc: c.alloc !== false })).filter((c) => c.item || c.supply);
+        const corps = arr(j.corps).map((c) => ({ corp: S(c.corp), count: Math.max(0, Math.round(toNum(c.count))) })).filter((c) => c.corp);
+        const cur = readSettle();
+        rsApply({
+          settle: { title: S(j.title) || cur.title, round: S(j.round) || cur.round, items: items.length ? items : cur.items, corps: corps.length ? corps : cur.corps },
+          rs: { title: S(j.title), round: S(j.round), lead: S(j.lead), sched: S(j.sched), schedDirty: !!S(j.sched), dateStart: S(j.dateStart), dateEnd: S(j.dateEnd), timeStart: S(j.timeStart), timeEnd: S(j.timeEnd), place: S(j.place), allocNote: S(j.allocNote) || undefined, attach: S(j.attach) || undefined },
+        });
+        return "✓ AI가 HTML 내용을 읽어서 결과 품의서·교육비 정산 칸을 채웠어요. 금액·인원을 꼭 확인해 주세요.";
+      }
+      const RS_OK = "✓ 저장된 입력값을 그대로 불러왔어요. (교육비 정산 탭 비용·인원도 함께)";
+      VC_IMPORT.result = { statusEl: () => $("rsStatus"), restore: (d) => { rsApply(d); return RS_OK; }, fallback: rsFallback };
+      VC_IMPORT.settle = { statusEl: () => $("stCopyStatus"), restore: (d) => { rsApply(d); return RS_OK; }, fallback: rsFallback };
+      const rsStamped = () => vcStamp("result", rsBundle(), $("rsCode").value);
+      const stStamped = () => vcStamp("settle", rsBundle(), $("stCode").value);
+      $("rsImport").onclick = () => vcOpenImport("result");
+      $("stImport").onclick = () => vcOpenImport("settle");
+      $("rsSaveHtml").onclick = () => { vcDownloadHtml(rf.rsSubject.value || "결과 품의서", rf.rsSubject.value, rsStamped()); $("rsCopyStatus").textContent = "✓ HTML 파일을 저장했어요"; };
+      $("stSaveHtml").onclick = () => { const t = readSettle(); const n = `${t.title || "교육"}${t.round ? "_" + t.round : ""}_교육비정산`; vcDownloadHtml(n, n, stStamped()); $("stCopyStatus").textContent = "✓ HTML 파일을 저장했어요"; };
+
+      $("rsCopyCode").onclick = () => copyTo(rsStamped(), null, $("rsCopyStatus"), "✓ HTML 코드를 복사했어요");
       $("rsCopyRich").onclick = () => copyTo($("rsCode").value, $("rsCode").value, $("rsCopyStatus"), "✓ 서식째 복사했어요. 품의서 본문에 붙여넣으세요");
       $("rsCopySubject").onclick = () => copyTo(rf.rsSubject.value, null, $("rsCopyStatus"), "✓ 제목을 복사했어요");
 
