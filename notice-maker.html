@@ -93,6 +93,28 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tb .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
 .tb-sep{width:1px;height:20px;background:var(--line);margin:0 4px}
 .tb-sel{height:32px;border:1px solid var(--line);border-radius:8px;padding:0 6px;background:#fff;font-size:12.5px;cursor:pointer}
+.hl-wrap{position:relative;display:inline-flex}
+.hl-pop{position:absolute;top:36px;left:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:10px;display:none;width:214px}
+.hl-pop.on{display:block}
+.hl-pop .sws{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.hl-pop .sws button{width:28px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.08);cursor:pointer}
+.hl-pop .sws button:hover{transform:scale(1.08)}
+.hl-pop .row{display:flex;gap:6px;align-items:center;margin-top:10px;font-size:12px;color:var(--ink2)}
+.hl-pop .row label{position:relative;display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:5px 8px;border:1px solid var(--line);border-radius:8px}
+.hl-pop .row label input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.hl-pop .row button{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:12px}
+.hl-pop .pad{display:flex;gap:4px;margin-top:8px;font-size:11.5px;color:var(--ink3);align-items:center}
+.tb.on{background:var(--accent);color:#fff}
+#mail.move-mode [data-field],#mail.move-mode [data-item],#mail.move-mode [data-block]{cursor:move;user-select:none}
+#mail.move-mode [data-block]:hover{outline:none}
+#mail.move-mode .mv-hover{outline:1.5px dashed var(--accent)!important;outline-offset:2px}
+#mail.move-mode .mv-sel{outline:2px solid var(--accent)!important;outline-offset:2px}
+#mail.move-mode [data-ph]:empty::before{content:none}
+.mv-bar{position:sticky;top:0;z-index:20;display:none;align-items:center;gap:8px;margin:0 auto 10px;max-width:720px;background:#16191F;color:#fff;border-radius:10px;padding:7px 12px;font-size:12px}
+.mv-bar.on{display:flex}
+.mv-bar b{color:#fff}.mv-bar span{color:#A9B0BE}
+.mv-bar button{margin-left:auto;background:#2B303A;color:#fff;border:0;border-radius:7px;padding:5px 9px;font-size:12px;cursor:pointer}
+.mv-bar button+button{margin-left:0}
 .tb-color{position:relative;height:32px;width:34px;border-radius:8px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink2)}
 .tb-color:hover{background:var(--line2)}
 .tb-color b{font-size:14px;line-height:1}
@@ -206,6 +228,7 @@ button,input,select,textarea{font:inherit;color:inherit}
       <details class="card"><summary><span class="chip">디자인</span><span class="ttl">색상 · 로고 · 푸터</span></summary>
         <div class="body">
           <div class="f"><label>강조 색상</label><div class="swatches" id="swatches"></div></div>
+          <div class="f"><label>기본 글꼴 <span style="font-weight:400;color:var(--ink3)">(공지문 전체)</span></label><select id="baseFont" style="width:100%"></select></div>
           <div class="f"><label>제목 크기</label><div class="seg" id="segTitle"><button data-v="36">보통</button><button data-v="44">크게</button><button data-v="52">아주 크게</button></div></div>
           <div class="toggle">ITCEN 로고 표시<label class="switch"><input type="checkbox" id="logoOn"><span></span></label></div>
           <div class="toggle">Inspire with Technology 표시<label class="switch"><input type="checkbox" id="sloganOn"><span></span></label></div>
@@ -237,6 +260,8 @@ button,input,select,textarea{font:inherit;color:inherit}
         <span class="tb-sep"></span>
         <select class="tb-sel" id="selSize" title="글자 크기"><option value="">크기</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option><option>36</option><option>44</option></select>
         <select class="tb-sel" id="selWeight" title="굵기"><option value="">굵기</option><option value="400">보통</option><option value="500">중간</option><option value="700">굵게</option><option value="900">아주 굵게</option></select>
+        <select class="tb-sel" id="selSpacing" title="자간(글자 사이 간격)"><option value="">자간</option><option value="-2">-2 (아주 좁게)</option><option value="-1.5">-1.5</option><option value="-1">-1 (좁게)</option><option value="-0.5">-0.5</option><option value="0">0 (기본)</option><option value="0.5">+0.5</option><option value="1">+1 (넓게)</option><option value="2">+2</option><option value="3">+3</option><option value="5">+5 (아주 넓게)</option></select>
+        <select class="tb-sel" id="selFont" title="글꼴 (드래그한 글자)" style="max-width:120px"></select>
         <span class="tb-sep"></span>
         <button class="tb" data-cmd="bold" title="굵게"><b style="font-size:15px">B</b></button>
         <button class="tb" data-cmd="italic" title="기울임"><i style="font-size:15px;font-family:serif">I</i></button>
@@ -244,18 +269,23 @@ button,input,select,textarea{font:inherit;color:inherit}
         <button class="tb" data-cmd="strikeThrough" title="취소선"><s style="font-size:15px">S</s></button>
         <span class="tb-sep"></span>
         <button class="tb" data-quick="blue" title="파란 강조"><span class="dot" id="qBlue"></span>강조</button>
-        <button class="tb" data-quick="yellow" title="노랑 형광"><span class="dot" style="background:#FFF27A"></span>형광</button>
-        <button class="tb" data-quick="sky" title="하늘 형광"><span class="dot" style="background:#D9F1FB;border:1px solid #bfe3f3"></span>하늘</button>
+        <span class="hl-wrap"><button class="tb" id="btnHl" title="형광펜 색 고르기"><span class="dot" id="hlDot" style="background:#FFF27A"></span>형광 ▾</button>
+          <div class="hl-pop" id="hlPop">
+            <div class="sws" id="hlSws"></div>
+            <div class="pad">여백 <select class="tb-sel" id="hlPad" style="height:26px"><option value="0 3px">좁게</option><option value="0 6px">넓게</option><option value="0">없음</option></select></div>
+            <div class="row"><label title="직접 고르기"><span class="dot" id="hlCustomDot" style="width:14px;height:14px;border-radius:4px;background:#FFB3C7;display:inline-block"></span>직접 선택<input type="color" id="hlCustom" value="#FFB3C7"></label><button id="hlClear">형광 지우기</button></div>
+          </div></span>
         <label class="tb-color" title="글자 색 직접"><b>A</b><i id="fcBar" style="background:#E1544B"></i><input type="color" id="fc" value="#E1544B"></label>
         <span class="tb-sep"></span>
         <button class="tb" data-cmd="justifyLeft" title="왼쪽"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h14"/></svg></button>
         <button class="tb" data-cmd="justifyCenter" title="가운데"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M5 18h14"/></svg></button>
         <button class="tb" id="btnLink" title="링크"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>
         <button class="tb" data-cmd="removeFormat" title="서식 지우기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/><path d="M3 21L21 3" stroke="#E1544B"/></svg></button>
-        <div class="tb-right"><div class="seg" id="segDevice" style="width:140px"><button data-v="pc" class="on">PC</button><button data-v="mobile">모바일</button></div></div>
+        <div class="tb-right"><button class="tb" id="btnMove" title="요소를 끌어서 자유롭게 위치 이동 (PPT처럼)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>자유 이동</button><div class="seg" id="segDevice" style="width:140px"><button data-v="pc" class="on">PC</button><button data-v="mobile">모바일</button></div></div>
       </div>
       <div class="canvas">
         <div class="edit-tip">블록을 클릭해 선택 → 위 툴바로 이동·복제·삭제·옵션 · <b>+</b>로 블록 추가 · 항목에 마우스를 올리면 항목 추가/삭제 · 이미지는 클릭해서 교체 · <kbd>Del</kbd> 삭제 <kbd>Ctrl</kbd>+<kbd>Z</kbd> 되돌리기</div>
+        <div class="mv-bar" id="mvBar"><b>✥ 자유 이동</b><span id="mvInfo">글자·카드·블록을 끌어서 옮기세요 · 방향키 1px, Shift+방향키 10px · Shift+끌기 = 블록 통째로</span><button id="mvReset">선택 위치 초기화</button><button id="mvResetAll">모두 초기화</button><button id="mvDone">완료</button></div>
         <div class="frame" id="frame"><div id="mail"></div><div id="ov"></div><button id="addEnd" data-plus="end"><span>+</span> 블록 추가</button><input type="file" id="imgInput" accept="image/*" hidden></div>
       </div>
     </section>
@@ -295,7 +325,9 @@ const ASSETS = {"e1": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQM
 (function(){
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const NAVY='#1A2240', BODY='#3A4152', MUTED='#7A8296';
-const FONT="'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif";
+const BASEFONT="'Pretendard','Noto Sans KR','Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif";
+let FONT=BASEFONT; // S.font(기본 글꼴)을 고르면 render 때 맨 앞에 붙음
+const fontCss=f=>`'${String(f).replace(/['"\\;<>]/g,'')}'`;
 const THEMES=[{c:'#1F5BFF',n:'ITCEN 블루'},{c:'#1F3B73',n:'네이비'},{c:'#0F766E',n:'틸'},{c:'#6D28D9',n:'퍼플'},{c:'#E1544B',n:'코랄'},{c:'#333D4B',n:'차콜'}];
 let seq=1; const nid=p=>p+(seq++);
 
@@ -541,7 +573,16 @@ function renderMail(){
 }
 
 const mail=$('#mail');
-function render(){ mail.innerHTML=renderMail(); syncForm(); markPanel(); save(); requestAnimationFrame(placeOverlay); }
+function render(){ FONT=S.font?`${fontCss(S.font)},${BASEFONT}`:BASEFONT; mail.innerHTML=renderMail(); applyMoves(); syncForm(); markPanel(); save(); requestAnimationFrame(placeOverlay); }
+/* 자유 이동: S.mv[키]={x,y} → 해당 요소에 position:relative + left/top (메일·PNG·PDF·PPTX 모두 그대로 반영) */
+const mvKey=el=>el.dataset.field?'f:'+el.dataset.field:el.dataset.item?'i:'+el.dataset.item:el.dataset.block?'b:'+el.dataset.block:null;
+// 글자칸이 감싸개(배경 알약·제목 막대 등) 안에 혼자 있으면 감싸개째 이동
+const mvEl=k=>{ const [t,v]=[k.slice(0,1),k.slice(2)], a=t==='f'?'data-field':t==='i'?'data-item':'data-block'; const el=mail.querySelector(`[${a}="${CSS.escape(v)}"]`);
+  if(el&&t==='f'){ const w=el.closest('[data-wrap]'); if(w&&w.querySelectorAll('[data-field]').length===1&&!w.closest('[data-item]')===!el.closest('[data-item]')) return w; } return el; };
+function applyMoves(){
+  const M=S.mv||{}; Object.keys(M).forEach(k=>{ const el=mvEl(k), m=M[k]; if(!el||(!m.x&&!m.y)) return; el.style.position='relative'; el.style.left=m.x+'px'; el.style.top=m.y+'px'; });
+  if(typeof moveOn!=='undefined'&&moveOn) mail.querySelectorAll('[contenteditable]').forEach(e=>e.setAttribute('contenteditable','false'));
+}
 
 /* ---------- form ---------- */
 const I={up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>',
@@ -697,14 +738,68 @@ $('#toolbar').addEventListener('click',e=>{
   const q=e.target.closest('[data-quick]');
   if(q){ const k=q.dataset.quick;
     if(k==='blue') wrapSpan(st=>{ st.color=S.theme; st.fontWeight='700'; });
-    if(k==='yellow') wrapSpan(st=>{ st.backgroundColor='#FFF27A'; st.padding='0 3px'; });
-    if(k==='sky') wrapSpan(st=>{ st.backgroundColor='#D9F1FB'; st.padding='0 6px'; });
     return; }
   const b=e.target.closest('[data-cmd]'); if(!b) return; const c=b.dataset.cmd;
   if(c==='undo'||c==='redo'){ restore(); document.execCommand(c); syncAll(); return; }
   if(needSel()) exec(c);
 });
 $('#selSize').onchange=e=>{ const v=e.target.value; e.target.value=''; if(v) wrapSpan(st=>st.fontSize=v+'px'); };
+$('#selSpacing').onchange=e=>{ const v=e.target.value; e.target.value=''; if(v!=='') wrapSpan(st=>st.letterSpacing=(+v===0?'0':v+'px')); };
+
+/* 형광펜: 팔레트 + 직접 색 + 지우기 */
+const HL=['#FFF27A','#FFE08A','#FFD3A8','#FFB3C7','#F9C6F0','#E2CCFF','#D9F1FB','#BFE3FF','#C8F2D2','#DFF5B0','#E8ECF2','#FFFFFF'];
+$('#hlSws').innerHTML=HL.map(c=>`<button data-hl="${c}" style="background:${c}" title="${c}"></button>`).join('');
+const hlApply=c=>{ const pad=$('#hlPad').value; $('#hlDot').style.background=c; try{ localStorage.setItem('vc-hl',c); }catch(e){} wrapSpan(st=>{ st.backgroundColor=c; st.padding=pad; }); $('#hlPop').classList.remove('on'); };
+try{ const c=localStorage.getItem('vc-hl'); if(c) $('#hlDot').style.background=c; }catch(e){}
+$('#btnHl').addEventListener('mousedown',e=>e.preventDefault());
+$('#btnHl').onclick=e=>{ e.stopPropagation(); $('#hlPop').classList.toggle('on'); };
+$('#hlPop').addEventListener('mousedown',e=>{ if(!e.target.closest('select,input')) e.preventDefault(); });
+$('#hlSws').addEventListener('click',e=>{ const b=e.target.closest('[data-hl]'); if(b) hlApply(b.dataset.hl); });
+$('#hlCustom').oninput=e=>{ $('#hlCustomDot').style.background=e.target.value; };
+$('#hlCustom').onchange=e=>hlApply(e.target.value);
+$('#hlClear').onclick=()=>{ wrapSpan(st=>{ st.backgroundColor='transparent'; st.padding='0'; }); $('#hlPop').classList.remove('on'); };
+document.addEventListener('mousedown',e=>{ if(!e.target.closest('.hl-wrap')) $('#hlPop').classList.remove('on'); });
+
+/* 글꼴: 기본 목록 + 내 PC 글꼴(Local Font Access, 크롬·엣지) */
+const FONTS_BASIC=['Pretendard','맑은 고딕','나눔고딕','나눔스퀘어','나눔바른고딕','나눔명조','Noto Sans KR','굴림','돋움','바탕','궁서','Arial','Segoe UI'];
+let FONTS_PC=[]; try{ FONTS_PC=JSON.parse(localStorage.getItem('vc-pc-fonts')||'[]'); }catch(e){}
+function fontOptions(first){
+  const o=(f,label)=>`<option value="${esc(f)}" style="font-family:${esc(fontCss(f))}">${esc(label||f)}</option>`;
+  return first+`<optgroup label="기본 글꼴">${FONTS_BASIC.map(f=>o(f)).join('')}</optgroup>`
+    +(FONTS_PC.length?`<optgroup label="내 PC 글꼴 (${FONTS_PC.length})">${FONTS_PC.map(f=>o(f)).join('')}</optgroup>`:'')
+    +`<option value="__pc">${FONTS_PC.length?'↻ 내 PC 글꼴 다시 불러오기':'＋ 내 PC 글꼴 불러오기…'}</option>`;
+}
+function fillFontSelects(){
+  $('#selFont').innerHTML=fontOptions('<option value="">글꼴</option>');
+  $('#baseFont').innerHTML=fontOptions('<option value="">기본 (Pretendard → 맑은 고딕)</option>');
+  $('#baseFont').value=S.font||'';
+}
+async function loadPcFonts(){
+  if(!('queryLocalFonts' in window)){ toast('이 브라우저는 내 PC 글꼴 읽기를 지원하지 않아요 · 크롬이나 엣지에서 열어주세요'); return false; }
+  try{
+    const list=await window.queryLocalFonts();
+    const fam=[...new Set(list.map(f=>f.family))].filter(f=>f&&!/^\./.test(f));
+    const ko=f=>/[가-힣]/.test(f)?0:1;
+    FONTS_PC=fam.sort((a,b)=>ko(a)-ko(b)||a.localeCompare(b,'ko'));
+    try{ localStorage.setItem('vc-pc-fonts',JSON.stringify(FONTS_PC)); }catch(e){}
+    fillFontSelects(); toast(`내 PC 글꼴 ${FONTS_PC.length}개를 불러왔어요`); return true;
+  }catch(e){ toast('글꼴 읽기 권한이 거부됐어요 · 주소창 왼쪽 자물쇠에서 "글꼴" 권한을 허용해 주세요'); return false; }
+}
+$('#selFont').addEventListener('mousedown',()=>{ if(saved&&!saved.collapsed) fontRange=saved.cloneRange(); });
+let fontRange=null;
+$('#selFont').onchange=async e=>{
+  const v=e.target.value; e.target.value='';
+  if(v==='__pc'){ await loadPcFonts(); return; }
+  if(!v) return; if(fontRange) saved=fontRange;
+  wrapSpan(st=>st.fontFamily=`${fontCss(v)},${BASEFONT}`);
+};
+$('#baseFont').onchange=async e=>{
+  const v=e.target.value;
+  if(v==='__pc'){ e.target.value=S.font||''; await loadPcFonts(); return; }
+  snap(); S.font=v||''; render(); if(v) toast('받는 사람 PC에 없는 글꼴이면 메일에선 기본 글꼴로 보여요 · PNG/PDF는 그대로');
+};
+fillFontSelects();
+
 $('#selWeight').onchange=e=>{ const v=e.target.value; e.target.value=''; if(v) wrapSpan(st=>st.fontWeight=v); };
 $('#fc').oninput=e=>{ $('#fcBar').style.background=e.target.value; };
 $('#fc').onchange=e=>{ if(needSel()) exec('foreColor',e.target.value); };
@@ -948,6 +1043,41 @@ document.addEventListener('mouseup',()=>{
   let j=dropAt; if(j>i) j--; if(j!==i){ snap(); moveBlock(i,j); buildForm(); render(); }
 });
 
+/* ---------- 자유 이동 모드 ---------- */
+let moveOn=false, mvSelK=null, mvDrag=null;
+const mvTarget=(t,blockOnly)=>{ if(!t||!mail.contains(t)) return null; return (blockOnly?t.closest('[data-block]'):t.closest('[data-field],[data-item],[data-block]'))||null; };
+function setMove(on){
+  moveOn=on; $('#btnMove').classList.toggle('on',on); $('#mvBar').classList.toggle('on',on); mail.classList.toggle('move-mode',on);
+  if(on){ sel=null; hidePop(); getSelection().removeAllRanges(); }
+  mvSelK=null; render(); ov.classList.toggle('on',false); if(on) ov.style.display='none'; else ov.style.display='';
+}
+const mvMark=()=>{ mail.querySelectorAll('.mv-sel').forEach(e=>e.classList.remove('mv-sel')); const el=mvSelK&&mvEl(mvSelK); if(el) el.classList.add('mv-sel');
+  const m=mvSelK&&(S.mv||{})[mvSelK]; $('#mvInfo').textContent=mvSelK?`선택됨 · x ${m?.x||0}px, y ${m?.y||0}px · 방향키 1px, Shift+방향키 10px`:'글자·카드·블록을 끌어서 옮기세요 · 방향키 1px, Shift+방향키 10px · Shift+끌기 = 블록 통째로'; };
+function mvSet(k,x,y){ S.mv=S.mv||{}; if(!x&&!y) delete S.mv[k]; else S.mv[k]={x:Math.round(x),y:Math.round(y)}; const el=mvEl(k); if(el){ el.style.position=(x||y)?'relative':''; el.style.left=(x||y)?Math.round(x)+'px':''; el.style.top=(x||y)?Math.round(y)+'px':''; } save(); mvMark(); }
+$('#btnMove').onclick=()=>setMove(!moveOn);
+$('#mvDone').onclick=()=>setMove(false);
+$('#mvReset').onclick=()=>{ if(!mvSelK){ toast('먼저 옮긴 요소를 클릭해 주세요'); return; } snap(); mvSet(mvSelK,0,0); };
+$('#mvResetAll').onclick=()=>{ if(!S.mv||!Object.keys(S.mv).length) return; snap(); S.mv={}; render(); mvMark(); toast('모든 위치를 원래대로 돌렸어요'); };
+mail.addEventListener('pointerover',e=>{ if(!moveOn) return; mail.querySelectorAll('.mv-hover').forEach(x=>x.classList.remove('mv-hover')); const el=mvTarget(e.target,e.shiftKey); if(el) mvEl(mvKey(el))?.classList.add('mv-hover'); });
+mail.addEventListener('pointerleave',()=>mail.querySelectorAll('.mv-hover').forEach(x=>x.classList.remove('mv-hover')));
+mail.addEventListener('pointerdown',e=>{
+  if(!moveOn) return; const el=mvTarget(e.target,e.shiftKey); e.preventDefault(); e.stopPropagation();
+  if(!el){ mvSelK=null; mvMark(); return; }
+  const k=mvKey(el); mvSelK=k; const m=(S.mv||{})[k]||{x:0,y:0};
+  snap(); mvDrag={k,sx:e.clientX,sy:e.clientY,x0:m.x,y0:m.y,moved:false}; mail.setPointerCapture(e.pointerId); mvMark();
+},true);
+mail.addEventListener('pointermove',e=>{ if(!moveOn||!mvDrag) return; const dx=e.clientX-mvDrag.sx, dy=e.clientY-mvDrag.sy; if(!mvDrag.moved&&Math.abs(dx)+Math.abs(dy)<3) return; mvDrag.moved=true; mvSet(mvDrag.k,mvDrag.x0+dx,mvDrag.y0+dy); });
+mail.addEventListener('pointerup',e=>{ if(!mvDrag) return; if(!mvDrag.moved) hist.pop(); mvDrag=null; });
+['mousedown','click','dblclick'].forEach(ev=>mail.addEventListener(ev,e=>{ if(moveOn){ e.preventDefault(); e.stopPropagation(); } },true));
+document.addEventListener('keydown',e=>{
+  if(!moveOn) return;
+  if(e.key==='Escape'){ if(mvSelK){ mvSelK=null; mvMark(); } else setMove(false); e.preventDefault(); return; }
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key]; if(!d||!mvSelK) return;
+  if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'')) return;
+  e.preventDefault(); e.stopImmediatePropagation(); const m=(S.mv||{})[mvSelK]||{x:0,y:0}, st=e.shiftKey?10:1;
+  if(!e.repeat) snap(); mvSet(mvSelK,m.x+d[0]*st,m.y+d[1]*st);
+},true);
+
 /* undo for structure (Ctrl+Z when not typing) */
 const hist=[]; function snap(){ hist.push(JSON.stringify(S)); if(hist.length>40) hist.shift(); }
 document.addEventListener('keydown',e=>{
@@ -1074,8 +1204,10 @@ async function buildEditablePptx(name){
       const walk=(node,bg)=>{ for(const n of node.childNodes){
         if(n.nodeType===3){ let t=n.textContent.replace(/[\s\u00a0]+/g,m=>m.includes('\u00a0')&&m.length===1?' ':' '); if(!t) continue;
           const pe=n.parentElement, cs=getComputedStyle(pe), col=rgb(cs.color);
-          const o={fontFace:'맑은 고딕',fontSize:Math.round(parseFloat(cs.fontSize)*.75*2)/2,bold:+cs.fontWeight>=600,italic:cs.fontStyle==='italic',color:col?col.hex:'000000'};
+          const ff=(cs.fontFamily.split(',')[0]||'').replace(/['"]/g,'').trim(), ls=parseFloat(cs.letterSpacing);
+          const o={fontFace:(!ff||ff==='Pretendard'||ff==='Noto Sans KR')?'맑은 고딕':ff,fontSize:Math.round(parseFloat(cs.fontSize)*.75*2)/2,bold:+cs.fontWeight>=600,italic:cs.fontStyle==='italic',color:col?col.hex:'000000'};
           if(/underline/.test(cs.textDecorationLine)) o.underline={style:'sng'}; if(/line-through/.test(cs.textDecorationLine)) o.strike='sngStrike';
+          if(isFinite(ls)&&ls) o.charSpacing=Math.round(ls*.75*10)/10;
           if(bg) o.highlight=bg; const a=pe.closest('a'); if(a&&/^https?:/.test(a.getAttribute('href')||'')) o.hyperlink={url:a.getAttribute('href')};
           out.push({text:t,options:o}); }
         else if(n.nodeType===1){ if(n.tagName==='BR'){ out.push({text:'',options:{breakLine:true}}); continue; }
