@@ -1357,7 +1357,7 @@
       <div class="notice-frame-wrap">
         <div class="notice-frame-bar no-print">
           <span>과정 신청·비용 정산·일정 변경·설문 안내를 ITCEN 공지 디자인 HTML로 만들어요.</span>
-          <a href="notice-maker.html" target="_blank" rel="noopener">↗ 새 창으로 열기</a>
+          <a href="notice-maker.html" target="_blank" rel="noopener" onclick="this.href='notice-maker.html?t='+Date.now()">↗ 새 창으로 열기</a>
         </div>
         <iframe id="noticeFrame" data-src="notice-maker.html" title="공지문 메이커"></iframe>
       </div>
@@ -2890,7 +2890,7 @@ ${lines}
       btn.addEventListener("click", () => {
         document.querySelectorAll(".maintabs .maintab").forEach((b) => b.classList.toggle("active", b === btn));
         document.querySelectorAll(".tabpanel").forEach((p) => p.classList.toggle("hidden", p.id !== `panel-${btn.dataset.panel}`));
-        if (btn.dataset.panel === "notice") { const f = $("noticeFrame"); if (f && !f.src) f.src = f.dataset.src; }
+        if (btn.dataset.panel === "notice") { const f = $("noticeFrame"); if (f && !f.src) f.src = f.dataset.src + "?t=" + Date.now(); } // 매번 최신 파일 (GitHub Pages 캐시 10분 회피)
       });
     });
 
