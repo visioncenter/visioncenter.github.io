@@ -1,4 +1,4 @@
-# ITCEN VisionCenter 교육 기획·운영 AI Agent — 인수인계 문서
+# ITCEN VisionCenter AI Workspace — 인수인계 문서
 
 > 다른 사람이 이 프로젝트를 이어서 작업할 수 있도록 정리한 문서입니다.
 > 비개발자도 따라올 수 있게 "무엇을 / 왜 / 어디를 고치면 되는지" 중심으로 적었습니다.
@@ -368,6 +368,7 @@
 4. 수강생 엑셀 탭 간 공유, 교육장 선택(C·E·N/직접 입력)
 5. 배포 주소 변경 → `visioncenter.github.io`
 6. 도구 이름 변경 → ITCEN VisionCenter 교육 기획·운영 AI Agent
+7. 도구 이름 변경 → ITCEN VisionCenter AI Workspace (탭별로 정해진 AI 기능을 모은 도구라 Agent보다 정확한 이름으로)
 7. API 키 시작 화면 + 키 발급 안내, 탭별 사용 설명서, CEN-Class 엑셀 받는 경로 안내
 8. Gemini 보조 모델 교체(2.5-flash → 3.7 / 3.5 Flash-Lite) + 오류 원인 한국어 안내
 9. 📝 실시 품의서 탭(자료·메모 → AI 채우기 → 그룹웨어 품의서 HTML)
