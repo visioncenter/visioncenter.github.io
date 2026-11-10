@@ -822,6 +822,33 @@
       }
       .maintabs .maintab.mt-op.last::after { display: none; }
     }
+    /* 왼쪽 메뉴 그룹: 폴더 아이콘 + 굵은 제목 + 접기 화살표, 하위 메뉴는 왼쪽 세로선 안으로 */
+    .nav-group { display: contents; }
+    .ng-head { display: none; }
+    .ng-body { display: contents; }
+    @media (min-width: 900px) {
+      .nav-group { display: block; margin-top: 6px; }
+      .nav-group + .nav-group { margin-top: 10px; }
+      .ng-head {
+        display: flex; align-items: center; gap: 9px; width: 100%; margin: 0; padding: 9px 8px; border-radius: 8px;
+        background: transparent; color: var(--text); border: none; box-shadow: none; cursor: pointer;
+        font-size: 15px; font-weight: 800; letter-spacing: -.02em; text-align: left; position: relative; z-index: 1;
+      }
+      .ng-head:hover { background: var(--hover); filter: none; }
+      .ng-head:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+      .ng-folder { width: 19px; height: 19px; flex: 0 0 auto; }
+      .ng-label { flex: 1; }
+      .ng-chev { width: 17px; height: 17px; flex: 0 0 auto; color: var(--sub); transition: transform .25s; }
+      .nav-group.closed .ng-chev { transform: rotate(-90deg); }
+      .ng-body {
+        display: grid; grid-template-rows: 1fr; transition: grid-template-rows .25s ease;
+        margin: 2px 0 0 17px; padding-left: 8px; border-left: 1.5px solid var(--shell-line);
+      }
+      .ng-body > * { min-height: 0; }
+      .ng-body { grid-template-rows: none; display: flex; flex-direction: column; gap: 2px; overflow: hidden; max-height: 600px; transition: max-height .25s ease, opacity .2s; }
+      .nav-group.closed .ng-body { max-height: 0; opacity: 0; }
+      .maintabs .maintab.mt-op::after { display: none; }
+    }
     /* 사이드바 하단 도구(사용 설명서·키 변경·다크) */
     .sidebar-tools { display: flex; gap: 6px; flex-wrap: wrap; }
     .side-tool {
@@ -1057,16 +1084,24 @@
     <div class="maintabs no-print">
       <div class="sidebar-brand" id="homeLink" role="button" tabindex="0" title="홈으로"><img src="01_ITCEN_Logo_Black.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" /><div class="brand-name">VisionCenter<br>교육 기획·운영 AI Agent</div></div>
       <button type="button" class="maintab active" data-panel="home" hidden>홈</button>
-      <span class="maintab-group">교육 기획</span>
-      <button type="button" class="maintab mt-plan" data-panel="research"><span class="mt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span><span class="mt-label">교육 조사</span></button>
-      <button type="button" class="maintab mt-plan" data-panel="instructor"><span class="mt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M8 21h8"/></svg></span><span class="mt-label">강사·강의 찾기</span></button>
-      <span class="maintab-group">교육 운영</span>
-      <button type="button" class="maintab mt-op" data-panel="approval"><span class="mt-num" aria-hidden="true">1</span><span class="mt-label">실시 품의서</span></button>
-      <button type="button" class="maintab mt-op" data-panel="notice"><span class="mt-num" aria-hidden="true">2</span><span class="mt-label">공지문 메이커</span></button>
-      <button type="button" class="maintab mt-op" data-panel="enroll"><span class="mt-num" aria-hidden="true">3</span><span class="mt-label">입과 안내문</span></button>
-      <button type="button" class="maintab mt-op" data-panel="roster"><span class="mt-num" aria-hidden="true">4</span><span class="mt-label">출석부·명단</span></button>
-      <button type="button" class="maintab mt-op" data-panel="result"><span class="mt-num" aria-hidden="true">5</span><span class="mt-label">결과 품의서</span></button>
-      <button type="button" class="maintab mt-op last" data-panel="settle"><span class="mt-num" aria-hidden="true">6</span><span class="mt-label">교육비 정산</span></button>
+      <div class="nav-group" data-group="plan">
+        <button type="button" class="ng-head" aria-expanded="true"><svg class="ng-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="ng-label">교육 기획</span><svg class="ng-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="ng-body">
+          <button type="button" class="maintab mt-plan" data-panel="research"><span class="mt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span><span class="mt-label">교육 조사</span></button>
+          <button type="button" class="maintab mt-plan" data-panel="instructor"><span class="mt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M8 21h8"/></svg></span><span class="mt-label">강사·강의 찾기</span></button>
+        </div>
+      </div>
+      <div class="nav-group" data-group="ops">
+        <button type="button" class="ng-head" aria-expanded="true"><svg class="ng-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="ng-label">교육 운영</span><svg class="ng-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="ng-body">
+          <button type="button" class="maintab mt-op" data-panel="approval"><span class="mt-num" aria-hidden="true">1</span><span class="mt-label">실시 품의서</span></button>
+          <button type="button" class="maintab mt-op" data-panel="notice"><span class="mt-num" aria-hidden="true">2</span><span class="mt-label">공지문 메이커</span></button>
+          <button type="button" class="maintab mt-op" data-panel="enroll"><span class="mt-num" aria-hidden="true">3</span><span class="mt-label">입과 안내문</span></button>
+          <button type="button" class="maintab mt-op" data-panel="roster"><span class="mt-num" aria-hidden="true">4</span><span class="mt-label">출석부·명단</span></button>
+          <button type="button" class="maintab mt-op" data-panel="result"><span class="mt-num" aria-hidden="true">5</span><span class="mt-label">결과 품의서</span></button>
+          <button type="button" class="maintab mt-op last" data-panel="settle"><span class="mt-num" aria-hidden="true">6</span><span class="mt-label">교육비 정산</span></button>
+        </div>
+      </div>
       <div class="sidebar-tools">
         <button id="guideBtn" class="side-tool">📖 사용 설명서</button>
         <button id="changeKeyBtn" class="side-tool" title="Gemini API 키 변경">🔑 키 변경</button>
@@ -5562,12 +5597,22 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
     const crumb = document.getElementById("crumb");
     const setCrumb = () => {
       const b = bar.querySelector(".maintab.active"); if (!crumb || !b) return;
-      let g = b.previousElementSibling;
-      while (g && !(g.classList.contains("maintab-group") && !g.classList.contains("sep") && g.textContent.trim())) g = g.previousElementSibling;
+      const g = b.closest(".nav-group")?.querySelector(".ng-label");
       const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
       crumb.innerHTML = (g ? `<span>${esc(g.textContent.trim())}</span><span class="gt">›</span>` : "") + `<b>${esc((b.querySelector(".mt-label") || b).textContent.trim())}</b>`;
     };
     setCrumb();
+    // 그룹 접기/펼치기 (상태 저장)
+    bar.querySelectorAll(".nav-group").forEach((grp) => {
+      const key = "navGroupClosed:" + grp.dataset.group, head = grp.querySelector(".ng-head");
+      const set = (closed) => { grp.classList.toggle("closed", closed); head.setAttribute("aria-expanded", String(!closed)); };
+      try { set(localStorage.getItem(key) === "1"); } catch (e) {}
+      head.addEventListener("click", () => {
+        const closed = !grp.classList.contains("closed"); set(closed);
+        try { localStorage.setItem(key, closed ? "1" : "0"); } catch (e) {}
+        setTimeout(() => move(true), 260);
+      });
+    });
     new MutationObserver(() => { move(false); setCrumb(); }).observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
     let lastSize = "";
     new ResizeObserver(() => {
