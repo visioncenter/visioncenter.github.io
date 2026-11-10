@@ -783,6 +783,38 @@
     }
     #apPreviewCard, #rsPreviewCard { position: static; max-height: none; overflow: visible; }
     #apPreview, #rsPreview { min-height: calc(100vh - 330px) !important; }
+
+    /* --- 홈 화면 --- */
+    .sidebar-brand { cursor: pointer; border-radius: 10px; transition: background .15s; }
+    .sidebar-brand:hover { background: var(--hover); }
+    .sidebar-brand:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+    #panel-home { grid-template-columns: 1fr; gap: 28px; }
+    .home-hero { padding: 8px 2px 0; }
+    .home-date { font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+    .home-title { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -.03em; color: var(--text); }
+    .home-sub { margin: 0; color: var(--sub); font-size: 14.5px; }
+    .home-sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; }
+    .home-sec-head h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+    .home-sec-head span { font-size: 13px; color: var(--muted); }
+    .home-grid.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .home-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    @media (min-width: 1500px) { .home-flow { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+    @media (max-width: 760px) { .home-grid.two, .home-flow { grid-template-columns: 1fr; } }
+    .home-card {
+      margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left;
+      padding: 18px; min-height: 128px; border-radius: 14px; cursor: pointer;
+      background: var(--card); color: var(--text); border: 1px solid var(--line); box-shadow: none;
+      font-weight: 400; transition: border-color .15s, transform .15s, box-shadow .15s;
+    }
+    .home-card:hover { background: var(--card); border-color: color-mix(in srgb, var(--text) 30%, var(--line)); transform: translateY(-2px); box-shadow: 0 10px 24px -16px rgba(16, 24, 40, .35); }
+    .home-card:active { transform: translateY(0); }
+    .hc-icon { font-size: 22px; line-height: 1; margin-bottom: 4px; }
+    .hc-step {
+      width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+      background: var(--primary); color: var(--primary-text); font-size: 12px; font-weight: 800; margin-bottom: 4px;
+    }
+    .hc-title { font-size: 15.5px; font-weight: 800; letter-spacing: -.02em; }
+    .hc-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
     @media print {
       :root, :root[data-theme="dark"] {
         --bg: #fff; --card: #fff; --text: #191f28; --sub: #4e5968; --muted: #8b95a1;
@@ -846,9 +878,10 @@
     </div>
 
     <div class="maintabs no-print">
-      <div class="sidebar-brand"><img src="01_ITCEN_Logo_Black.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" /><div class="brand-name">VisionCenter<br>교육 기획·운영 AI Agent</div></div>
+      <div class="sidebar-brand" id="homeLink" role="button" tabindex="0" title="홈으로"><img src="01_ITCEN_Logo_Black.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" /><div class="brand-name">VisionCenter<br>교육 기획·운영 AI Agent</div></div>
+      <button type="button" class="maintab active" data-panel="home" hidden>홈</button>
       <span class="maintab-group">교육 기획</span>
-      <button type="button" class="maintab active" data-panel="research">교육 조사</button>
+      <button type="button" class="maintab" data-panel="research">교육 조사</button>
       <button type="button" class="maintab" data-panel="instructor">강사·강의 찾기</button>
       <span class="maintab-group">교육 운영</span>
       <button type="button" class="maintab" data-panel="enroll">입과 안내문</button>
@@ -861,7 +894,62 @@
       <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">이 탭 사용법</button>
     </div>
 
-    <div id="panel-research" class="tabpanel">
+    <!-- 홈: 로고를 누르면 열림. 업무 흐름대로 각 탭 바로가기 -->
+    <div id="panel-home" class="tabpanel">
+      <section class="home-hero card-wide">
+        <div>
+          <div class="home-date" id="homeDate"></div>
+          <h2 class="home-title">교육 기획부터 운영 서류까지, 한곳에서</h2>
+          <p class="home-sub">필요한 작업을 고르면 바로 시작할 수 있어요. 입력값은 이 브라우저에 자동 저장돼요.</p>
+        </div>
+      </section>
+
+      <section class="home-sec card-wide">
+        <div class="home-sec-head"><h3>교육 기획</h3><span>과정을 만들기 전 근거 찾기</span></div>
+        <div class="home-grid two">
+          <button type="button" class="home-card" data-go="research">
+            <span class="hc-icon">📊</span><span class="hc-title">교육 조사</span>
+            <span class="hc-desc">주제 키워드로 트렌드·사례·커리큘럼·예산을 조사해 보고서로 정리</span>
+          </button>
+          <button type="button" class="home-card" data-go="instructor">
+            <span class="hc-icon">🎤</span><span class="hc-title">강사·강의 찾기</span>
+            <span class="hc-desc">주제에 맞는 강사·강의 후보를 찾아 비교하고 저장함에 모아두기</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="home-sec card-wide">
+        <div class="home-sec-head"><h3>교육 운영</h3><span>보통 이 순서로 진행돼요</span></div>
+        <div class="home-flow">
+          <button type="button" class="home-card step" data-go="approval">
+            <span class="hc-step">1</span><span class="hc-title">실시 품의서</span>
+            <span class="hc-desc">자료를 넣으면 AI가 그룹웨어 실시 품의서를 채워줘요</span>
+          </button>
+          <button type="button" class="home-card step" data-go="notice">
+            <span class="hc-step">2</span><span class="hc-title">공지문 메이커</span>
+            <span class="hc-desc">과정 신청·일정 변경·설문 안내 포스터 만들기</span>
+          </button>
+          <button type="button" class="home-card step" data-go="enroll">
+            <span class="hc-step">3</span><span class="hc-title">입과 안내문</span>
+            <span class="hc-desc">수강생 엑셀로 참석 안내 메일 HTML·받는 사람 자동 작성</span>
+          </button>
+          <button type="button" class="home-card step" data-go="roster">
+            <span class="hc-step">4</span><span class="hc-title">출석부·명단</span>
+            <span class="hc-desc">Cen-Class 엑셀로 출석부·학습자 명단 Word 만들기</span>
+          </button>
+          <button type="button" class="home-card step" data-go="result">
+            <span class="hc-step">5</span><span class="hc-title">결과 품의서</span>
+            <span class="hc-desc">교육 결과 보고 및 교육비 정산 품의 작성</span>
+          </button>
+          <button type="button" class="home-card step" data-go="settle">
+            <span class="hc-step">6</span><span class="hc-title">교육비 정산</span>
+            <span class="hc-desc">수료 인원으로 법인별 n분의 1 배분표 만들기</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div id="panel-research" class="tabpanel hidden">
 
     <div class="card card-wide no-print">
       <!-- 회사 맥락은 IT 대기업으로 고정 -->
@@ -3327,7 +3415,7 @@ ${lines}
       guideOverlay.querySelector(".guide-card").scrollTop = 0;
     }
     guideTabBtns.forEach((b) => b.addEventListener("click", () => showGuideSection(b.dataset.g)));
-    const currentPanelKey = () => document.querySelector(".maintabs .maintab.active")?.dataset.panel || "start";
+    const currentPanelKey = () => { const k = document.querySelector(".maintabs .maintab.active")?.dataset.panel; return !k || k === "home" ? "start" : k; };
     const openGuide = (key) => { showGuideSection(typeof key === "string" ? key : currentPanelKey()); guideOverlay.style.display = "flex"; };
     $("tabHelpBtn").addEventListener("click", () => openGuide(currentPanelKey()));
     const closeGuide = () => { guideOverlay.style.display = "none"; localStorage.setItem("edu_seen_guide", "1"); };
@@ -5263,7 +5351,7 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
     bar.prepend(sl); bar.classList.add("has-slider");
     const move = (instant) => {
       const b = bar.querySelector(".maintab.active");
-      if (!b || !b.offsetWidth) return;
+      if (!b || !b.offsetWidth) { sl.style.opacity = 0; return; }
       sl.classList.toggle("no-anim", !!instant);
       Object.assign(sl.style, { left: b.offsetLeft + "px", top: b.offsetTop + "px", width: b.offsetWidth + "px", height: b.offsetHeight + "px", opacity: 1 });
       if (instant) { sl.offsetWidth; sl.classList.remove("no-anim"); }
@@ -5302,6 +5390,22 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
       f.addEventListener("load", () => { fit(); setTimeout(fit, 60); });
       addEventListener("resize", fit);
     });
+  })();
+</script>
+
+<script>
+  /* 홈: 로고 클릭 → 홈, 카드 클릭 → 해당 탭 */
+  (() => {
+    const go = (k) => document.querySelector(`.maintab[data-panel="${k}"]`)?.click();
+    const home = document.getElementById("homeLink");
+    if (home) {
+      home.addEventListener("click", () => go("home"));
+      home.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("home"); } });
+    }
+    document.querySelectorAll(".home-card[data-go]").forEach((c) => c.addEventListener("click", () => go(c.dataset.go)));
+    const d = new Date(), W = "일월화수목금토";
+    const el = document.getElementById("homeDate");
+    if (el) el.textContent = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${W[d.getDay()]}요일`;
   })();
 </script>
 </body>
