@@ -1683,11 +1683,24 @@
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
       const body = { contents };
       if (useSearch) body.tools = [{ google_search: {} }]; // 키워드 추천 등은 검색 없이 더 빠르게
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      // 응답이 멈춘 채 안 오는 경우 대비: 첫 응답 90초, 조각 사이 60초 넘게 조용하면 끊고 재시도
+      const ctrl = new AbortController();
+      let idleTimer = setTimeout(() => ctrl.abort(), 90000);
+      const kick = () => { clearTimeout(idleTimer); idleTimer = setTimeout(() => ctrl.abort(), 60000); };
+      try {
+      let res;
+      try {
+        res = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+          signal: ctrl.signal,
+        });
+      } catch (e) {
+        if (e.name === "AbortError") throw makeError("응답 없음(timeout) try again", 504);
+        throw e;
+      }
+      kick();
       if (!res.ok || !res.body) {
         let detail = `HTTP ${res.status}`, retryDelayMs = 0;
         try {
@@ -1702,8 +1715,11 @@
       const decoder = new TextDecoder();
       let buf = "", full = "", cites = [], supports = [];
       while (true) {
-        const { done, value } = await reader.read();
+        let done, value;
+        try { ({ done, value } = await reader.read()); }
+        catch (e) { if (e.name === "AbortError") throw makeError("응답이 중간에 멈춤(timeout) try again", 504); throw e; }
         if (done) break;
+        kick();
         buf += decoder.decode(value, { stream: true });
         // SSE는 "data: {json}\n\n" 형태. 줄 단위로 끊어 처리하고 마지막 미완성 줄은 버퍼에 남긴다.
         const lines = buf.split("\n");
@@ -1731,6 +1747,7 @@
       if (!full.trim()) throw makeError("empty response (try again)", 503);
       // rawText: groundingSupports의 바이트 오프셋과 정렬을 맞추려면 trim 전의 원본 본문이 필요
       return { text: full.trim(), rawText: full, cites, supports };
+      } finally { clearTimeout(idleTimer); }
     }
 
     // 혼잡하면 잠시 기다렸다 재시도하고, 그래도 안 되면 다음 모델로 자동 전환
