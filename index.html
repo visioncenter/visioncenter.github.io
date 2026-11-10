@@ -3580,7 +3580,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         save();
       }
       previewEl.addEventListener("load", () => {
-        try { previewEl.style.height = previewEl.contentDocument.documentElement.scrollHeight + 4 + "px"; } catch (e) {}
+        try { previewEl.style.height = Math.ceil(previewEl.contentDocument.documentElement.getBoundingClientRect().height) + 4 + "px"; } catch (e) {} // scrollHeight는 iframe 높이보다 작아지지 않아 렌더마다 늘어나던 문제 → 실제 내용 높이로 계산
       });
 
       ids.forEach((k) => el[k].addEventListener("input", () => {
