@@ -1645,10 +1645,13 @@
     }
 
     // 일시적 오류(혼잡/과부하/요청량 초과)는 잠시 후 재시도하면 풀린다
-    function makeError(detail, status) {
+    function makeError(detail, status, retryDelayMs = 0) {
       const e = new Error(detail);
-      e.retryable = status === 429 || status === 503 ||
-        /high demand|overload|unavailable|try again/i.test(detail);
+      e.status = status;
+      e.quota = status === 429 || /quota|RESOURCE_EXHAUSTED|rate limit/i.test(detail); // 모델별 요청량 한도
+      e.retryable = e.quota || status === 500 || status === 502 || status === 503 || status === 504 ||
+        /high demand|overload|unavailable|try again|internal error/i.test(detail);
+      e.retryDelayMs = retryDelayMs; // 서버가 알려준 '몇 초 뒤 다시' 값(있을 때만)
       return e;
     }
     // 한 응답 조각(chunk)에서 본문 텍스트를 뽑는다 (스트리밍은 조각을 이어붙임 → trim 안 함)
@@ -1686,9 +1689,14 @@
         body: JSON.stringify(body),
       });
       if (!res.ok || !res.body) {
-        let detail = `HTTP ${res.status}`;
-        try { detail = (await res.json()).error?.message || detail; } catch (_) {}
-        throw makeError(detail, res.status);
+        let detail = `HTTP ${res.status}`, retryDelayMs = 0;
+        try {
+          const err = (await res.json()).error || {};
+          detail = err.message || detail;
+          const ri = (err.details || []).find((d) => /RetryInfo/.test(d["@type"] || ""));
+          if (ri && ri.retryDelay) retryDelayMs = Math.round(parseFloat(ri.retryDelay) * 1000) || 0; // "31s" → 31000
+        } catch (_) {}
+        throw makeError(detail, res.status, retryDelayMs);
       }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -1705,8 +1713,11 @@
           if (!line.startsWith("data:")) continue;
           const json = line.slice(5).trim();
           if (!json || json === "[DONE]") continue;
+          let obj;
+          try { obj = JSON.parse(json); } catch (_) { continue; }
+          // 스트리밍 도중 서버가 오류 조각을 보내는 경우(혼잡 등) → 재시도 대상
+          if (obj.error) throw makeError(obj.error.message || "stream error", obj.error.code || 503);
           try {
-            const obj = JSON.parse(json);
             const t = chunkText(obj);
             if (t) { full += t; if (onText) onText(full); }
             const c = chunkCites(obj);
@@ -1716,6 +1727,8 @@
           } catch (_) { /* 조각이 쪼개져 들어오면 무시(다음 조각에서 합쳐짐) */ }
         }
       }
+      // 빈 응답(중간에 끊김 등)도 혼잡처럼 다시 시도
+      if (!full.trim()) throw makeError("empty response (try again)", 503);
       // rawText: groundingSupports의 바이트 오프셋과 정렬을 맞추려면 trim 전의 원본 본문이 필요
       return { text: full.trim(), rawText: full, cites, supports };
     }
@@ -1735,19 +1748,30 @@
       return out;
     }
     async function runGemini(apiKey, contents, onText, useSearch = true, statusTarget = statusEl) {
+      // 1차: 모델을 돌아가며 시도(503 혼잡이면 같은 모델 최대 3번, 429 한도면 바로 다음 모델)
+      // 2차: 전부 막히면 한 번 더 길게 쉬었다가 전체를 다시 돈다 → 순간 혼잡은 대부분 여기서 풀림
+      const say = (t) => { if (statusTarget) statusTarget.textContent = t; };
       let bestErr = null, lastErr = null;
-      for (const model of MODELS) {
-        for (let attempt = 1; attempt <= 2; attempt++) {
-          try { return await callGeminiStream(model, apiKey, contents, onText, useSearch); }
-          catch (e) {
-            lastErr = e;
-            const modelGone = /no longer available|not found|not supported|is not available/i.test(e.message || "");
-            if (modelGone) break;                       // 이 모델은 못 씀 → 다음 모델로
-            if (!bestErr) bestErr = e;                   // '모델 없음'보다 실제 원인을 보여주기 위해 기억
-            if (!e.retryable) throw friendlyError(e);    // 키 오류 등은 즉시 표시
-            if (statusTarget) statusTarget.textContent = `지금 혼잡해서 다시 시도 중… (${model} ${attempt}/2)`;
-            await sleep(1500 * attempt);
+      for (let round = 1; round <= 2; round++) {
+        for (const model of MODELS) {
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try { return await callGeminiStream(model, apiKey, contents, onText, useSearch); }
+            catch (e) {
+              lastErr = e;
+              const modelGone = /no longer available|not found|not supported|is not available/i.test(e.message || "");
+              if (modelGone) break;                       // 이 모델은 못 씀 → 다음 모델로
+              if (!bestErr || !bestErr.retryable) bestErr = e; // '모델 없음'보다 실제 원인을 보여주기 위해 기억
+              if (!e.retryable) throw friendlyError(e);    // 키 오류 등은 즉시 표시
+              if (e.quota) { say(`${model} 사용량 한도 → 다른 모델로 바꿔서 시도 중…`); break; } // 한도는 모델별이라 기다리지 말고 넘김
+              if (attempt === 3) break;
+              const wait = Math.min(e.retryDelayMs || (2000 * attempt + Math.random() * 1000), 15000);
+              say(`Gemini 서버 혼잡(${e.status || "503"}) — ${Math.ceil(wait / 1000)}초 뒤 다시 시도… (${model} ${attempt + 1}/3)`);
+              await sleep(wait);
+            }
           }
+        }
+        if (round === 1) {
+          for (let sec = 20; sec > 0; sec--) { say(`모든 모델이 혼잡해요. ${sec}초 쉬었다가 한 번 더 시도할게요… ⏳`); await sleep(1000); }
         }
       }
       throw friendlyError(bestErr || lastErr);
