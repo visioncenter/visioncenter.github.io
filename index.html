@@ -854,6 +854,16 @@
       .sidebar-brand { text-align: center; padding: 6px 8px 22px; }
       .sidebar-brand .brand-logo { height: 32px; margin: 0 auto 10px; }
     }
+    /* 사이드바 이름: VisionCenter / AI Workspace 두 줄 */
+    @media (min-width: 900px) {
+      .sidebar-brand .brand-name { display: flex; flex-direction: column; align-items: center; gap: 3px; line-height: 1.15; }
+      .sidebar-brand .bn-main { font-size: 20px; font-weight: 800; letter-spacing: -.035em; color: var(--text); }
+      .sidebar-brand .bn-sub {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+      }
+      .sidebar-brand .bn-sub::before, .sidebar-brand .bn-sub::after { content: ""; width: 14px; height: 1px; background: currentColor; opacity: .6; }
+    }
     /* 사이드바 하단 도구(사용 설명서·키 변경·다크) */
     .sidebar-tools { display: flex; gap: 6px; flex-wrap: wrap; }
     .side-tool {
@@ -1087,7 +1097,7 @@
     </div>
 
     <div class="maintabs no-print">
-      <div class="sidebar-brand" id="homeLink" role="button" tabindex="0" title="홈으로"><img src="01_ITCEN_Logo_Basic.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" /><div class="brand-name">VisionCenter AI Workspace</div></div>
+      <div class="sidebar-brand" id="homeLink" role="button" tabindex="0" title="홈으로"><img src="01_ITCEN_Logo_Basic.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" /><div class="brand-name"><span class="bn-main">VisionCenter</span><span class="bn-sub">AI Workspace</span></div></div>
       <button type="button" class="maintab active" data-panel="home" hidden>홈</button>
       <div class="nav-group" data-group="plan">
         <button type="button" class="ng-head" aria-expanded="true"><svg class="ng-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="ng-label">교육 기획</span><svg class="ng-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
