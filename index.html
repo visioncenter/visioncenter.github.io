@@ -1072,6 +1072,11 @@
     .hm-col { grid-template-rows: auto 1fr 1fr; }
     .hm-fld, .hm-res { display: flex; align-items: center; }
     .hm-a { align-self: center; }
+    /* 글래스 카드 잔상 방지: backdrop-filter 대신 반투명 배경만 사용 (Windows 크롬/엣지 렌더링 버그) */
+    .hm-glass {
+      backdrop-filter: none; -webkit-backdrop-filter: none;
+      background: linear-gradient(135deg, rgba(255,255,255,.17), rgba(255,255,255,.07));
+    }
     /* 색 빼기: 홈 카드·메뉴의 아이콘/글자를 무채색으로 (선택·호버 시엔 검정/흰색 채움) */
     :root, :root[data-theme="dark"] { --hp: var(--text); --ho: var(--text); }
     .home-card[data-go="instructor"], :root[data-theme="dark"] .home-card[data-go="instructor"] { --c: var(--text); }
