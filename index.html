@@ -1147,6 +1147,9 @@
         <label class="field" for="apSched">교육일정 표기</label>
         <input type="text" id="apSched" placeholder="날짜·시간으로 자동 작성돼요" />
         <div class="hint">자동 작성돼요(주말 제외, 6시간 이상이면 점심 1시간 제외). 직접 고치면 그 값을 씁니다.</div>
+        <label class="field">차수별 일정 <span class="hint" style="font-weight:400;">— 여러 차수를 한 품의로 올릴 때. 차수를 넣으면 위 날짜 대신 차수별로 한 줄씩 들어가요</span></label>
+        <div id="apSessions"></div>
+        <button type="button" class="btn-sm" id="apAddSess" style="margin-top:8px;">+ 차수 추가</button>
         <label class="field" for="apTarget">교육대상</label>
         <input type="text" id="apTarget" placeholder="예: 백엔드·풀스택·DevOps 개발자 (최대 20명)" />
         <label class="field" for="apPlaceSel">교육장소</label>
@@ -4044,8 +4047,8 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       };
 
       // ---- 교육일정 자동 표기: 2026년 11월 26일(목) 09:00 ~ 17:00 (1일, 7시간)
-      function schedInfo() {
-        const s = parseD(f.apDateStart.value); let e = parseD(f.apDateEnd.value);
+      function schedInfo(ds = f.apDateStart.value, de = f.apDateEnd.value, ts = f.apTimeStart.value, te = f.apTimeEnd.value) {
+        const s = parseD(ds); let e = parseD(de);
         if (!s) return { text: "", hours: 0 };
         if (e && e <= s) e = null;
         const md = (d, y, m) => `${y ? d.getFullYear() + "년 " : ""}${m ? d.getMonth() + 1 + "월 " : ""}${d.getDate()}일(${WD[d.getDay()]})`;
@@ -4053,7 +4056,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         if (e) when += " ~ " + md(e, e.getFullYear() !== s.getFullYear(), e.getFullYear() !== s.getFullYear() || e.getMonth() !== s.getMonth());
         let days = 1;
         if (e) { days = 0; for (const d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) if (d.getDay() % 6) days++; days = Math.max(days, 1); }
-        const ts = f.apTimeStart.value, te = f.apTimeEnd.value; let time = "", per = 0;
+        let time = "", per = 0;
         if (ts && te) {
           const [a, b] = ts.split(":").map(Number), [c, d] = te.split(":").map(Number);
           const diff = (c * 60 + d - a * 60 - b) / 60;
@@ -4071,6 +4074,23 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         q(d, ".ap-m-topic").value = m.topic || ""; q(d, ".ap-m-hours").value = m.hours || "";
         q(d, ".ap-m-items").value = (m.items || []).join("\n");
         modsEl.appendChild(d); return d;
+      }
+      const sessEl = $("apSessions");
+      function addSess(x = {}) {
+        const d = document.createElement("div"); d.className = "en-item ap-sess";
+        const n = sessEl.children.length + 1;
+        d.innerHTML = `<div class="ap-line"><input type="text" class="ap-s-label" placeholder="${n}차수" style="flex:0 0 78px;" /><input type="date" class="ap-s-date" /><input type="time" class="ap-s-ts" /><span>~</span><input type="time" class="ap-s-te" /><button type="button" class="btn-sm ap-del" title="삭제">✕</button></div>`;
+        q(d, ".ap-s-label").value = x.label || `${n}차수`; q(d, ".ap-s-date").value = x.date || "";
+        q(d, ".ap-s-ts").value = x.timeStart || f.apTimeStart.value || "09:00"; q(d, ".ap-s-te").value = x.timeEnd || f.apTimeEnd.value || "17:00";
+        sessEl.appendChild(d); return d;
+      }
+      // 차수별 표기: 2026년 11월 24일(화) 13:00 ~ 17:00 (1일, 4시간)
+      const sessText = (x) => schedInfo(x.date, "", x.timeStart, x.timeEnd);
+      function syncSessUi() { // 차수를 쓰면 단일 날짜 칸은 접어둠
+        const on = sessEl.children.length > 0;
+        [f.apDateStart, f.apTimeStart, f.apSched].forEach((el) => { const row = el.closest(".row") || el; row.style.display = on ? "none" : ""; });
+        f.apSched.previousElementSibling.style.display = on ? "none" : "";
+        f.apSched.nextElementSibling.style.display = on ? "none" : "";
       }
       function addInstr(p = {}) {
         const d = document.createElement("div"); d.className = "en-item ap-instr";
@@ -4097,6 +4117,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
           title: f.apTitle.value.trim(), round: f.apRound.value.trim(), intro: f.apIntro.value.trim(), background: lines(f.apBg.value),
           dateStart: f.apDateStart.value, dateEnd: f.apDateEnd.value, timeStart: f.apTimeStart.value, timeEnd: f.apTimeEnd.value,
           sched: f.apSched.value.trim(), target: f.apTarget.value.trim(), place: f.apPlace.value.trim(),
+          sessions: all(sessEl, ".ap-sess", (b) => ({ label: q(b, ".ap-s-label").value.trim(), date: q(b, ".ap-s-date").value, timeStart: q(b, ".ap-s-ts").value, timeEnd: q(b, ".ap-s-te").value })),
           modules: all(modsEl, ".ap-mod", (b) => ({ topic: q(b, ".ap-m-topic").value.trim(), hours: q(b, ".ap-m-hours").value.trim(), items: lines(q(b, ".ap-m-items").value) }))
             .filter((m) => m.topic || m.items.length),
           instrOn: instrOnEl.checked,
@@ -4113,6 +4134,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         f.apDateStart.value = s.dateStart || ""; f.apDateEnd.value = s.dateEnd || "";
         f.apTimeStart.value = s.timeStart || "09:00"; f.apTimeEnd.value = s.timeEnd || "17:00";
         f.apSched.value = s.sched || ""; f.apTarget.value = s.target || ""; f.apPlace.value = s.place || "";
+        sessEl.innerHTML = ""; (s.sessions || []).forEach(addSess); syncSessUi();
         modsEl.innerHTML = ""; (s.modules || []).forEach(addMod); if (!modsEl.children.length) addMod();
         instrOnEl.checked = s.instrOn !== false;
         instrsEl.innerHTML = ""; (s.instructors || []).forEach(addInstr); if (!instrsEl.children.length) addInstr();
@@ -4147,7 +4169,14 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         out.push(H("과정개요")); let sub = 0;
         const S = (label, val) => P(SP(`&nbsp;${++sub}) ${label}${val != null ? " : " + esc(val) : ""}`));
         out.push(S("과정명", s.title + (s.round ? ` (${s.round})` : "")));
-        if (s.sched) out.push(S("교육일정"), TABLE(650, [[TD(163, P(SP(esc(s.title || "과정명")), CENTER), { head: true }), TD(484, P(SP("&nbsp;" + esc(s.sched))))]]));
+        const sess = (s.sessions || []).filter((x) => x.date);
+        if (sess.length) {
+          out.push(S("교육일정"), TABLE(650, sess.map((x, i) => [
+            ...(i === 0 ? [TD(163, P(SP(esc(s.title || "과정명")), CENTER), { head: true, rs: sess.length })] : []),
+            TD(80, P(SP(esc(x.label || `${i + 1}차수`)), CENTER), { head: true }),
+            TD(404, P(SP("&nbsp;" + esc(sessText(x).text)))),
+          ])));
+        } else if (s.sched) out.push(S("교육일정"), TABLE(650, [[TD(163, P(SP(esc(s.title || "과정명")), CENTER), { head: true }), TD(484, P(SP("&nbsp;" + esc(s.sched))))]]));
         if (s.target) out.push(S("교육대상", s.target));
         if (s.place) out.push(S("교육장소", s.place));
         if (s.modules.length) {
@@ -4194,9 +4223,11 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
       }
 
       function update() {
-        const info = schedInfo();
+        let info = schedInfo();
         if (!schedDirty) f.apSched.value = info.text;
         const s = readState();
+        const s1 = s.sessions.find((x) => x.date);
+        if (s1) info = sessText(s1); // 모듈 합계는 차수 1회 기준으로 비교
         if (!subjectDirty) f.apSubject.value = s.title ? `[교육] ${s.title} 실시 품의${s.round ? ` (${s.round})` : ""}` : "";
         // 모듈 시간 합계 확인
         const modH = s.modules.reduce((a, m) => a + toNum(m.hours), 0);
@@ -4284,6 +4315,7 @@ ${texts ? `\n[텍스트 자료]\n${texts}\n` : ""}
 - intro: 아래 예시처럼 한 문장. "{연도}년 {대상} {목적}를 위해, {과정 핵심을 한 구절로 설명하는} 과정 <과정명>을 아래와 같이 실시하고자 품의를 상신합니다." 과정명은 <>로 감싸고 차수는 뺀다.
 - background: 개설배경 2~3개. 각 1~2문장, 개조식으로 '~임/~함/~하고자 함'으로 끝낸다. 자료의 교육 목적·필요성을 근거로 쓴다(문장은 다듬어도 되지만 사실은 지어내지 않는다).
 - dateStart/dateEnd: YYYY-MM-DD (하루 교육이면 dateEnd ""). timeStart/timeEnd: HH:MM.
+- sessions: 한 품의에 차수가 2개 이상(예: 1차수 11/24, 2차수 12/1)이면 차수마다 {"label":"1차수","date":"YYYY-MM-DD","timeStart":"HH:MM","timeEnd":"HH:MM"}로 나눠 넣고, 이때 round는 ""로, dateStart/dateEnd는 첫 차수 날짜/""로 둔다. 차수가 하나면 sessions는 [].
 - target: 예 "백엔드·풀스택·DevOps 개발자 (최대 20명)". place: 예 "과천아이티센타워 3층 C교육장".
 - modules: 커리큘럼의 모듈/세션 단위. topic은 짧은 명사구, items는 2~4개의 짧은 명사형 항목, hours는 "1H" "0.5H" "1.5H" 형식(모르면 "").
 - instructors: 외부 강사만. role은 직함 한 줄, company는 교육업체명, career는 경력 한 줄씩(現/前 표기 등 자료 그대로).
@@ -4299,7 +4331,7 @@ background:
 - 도구 활용법 중심의 기존 교육에서 나아가, AI 생성 결과물에 대한 통과 기준(루브릭) 수립 및 AI 검토·자동화 테스트·사람 판단을 결합한 검증 워크플로우를 직접 설계·적용함으로써, 개발 조직의 AI 활용 품질 표준화 기반을 마련하고자 함
 
 [출력] 아래 JSON 하나만. 설명·코드블록 없이.
-{"title":"","round":"","intro":"","background":[""],"dateStart":"","dateEnd":"","timeStart":"","timeEnd":"","target":"","place":"",
+{"title":"","round":"","intro":"","background":[""],"dateStart":"","dateEnd":"","timeStart":"","timeEnd":"","sessions":[],"target":"","place":"",
 "modules":[{"topic":"","items":[""],"hours":""}],
 "instructors":[{"name":"","role":"","company":"","career":[""]}],
 "costs":[{"category":"","item":"","supply":0,"vat":true,"note":""}],
@@ -4317,11 +4349,13 @@ background:
         const mods = arr(j.modules).map((m) => ({ topic: String(m.topic || "").trim(), hours: String(m.hours || "").trim(), items: strs(m.items) })).filter((m) => m.topic || m.items.length);
         const ins = arr(j.instructors).map((p) => ({ name: String(p.name || "").trim(), role: String(p.role || "").trim(), company: String(p.company || "").trim(), career: strs(p.career) })).filter((p) => p.name || p.career.length);
         const costs = arr(j.costs).map((c) => ({ category: String(c.category || "").trim(), item: String(c.item || "").trim(), supply: toNum(c.supply), vat: c.vat !== false, note: String(c.note || "").trim() })).filter((c) => c.item || c.supply);
+        const sess = arr(j.sessions).map((x, i) => ({ label: String(x.label || `${i + 1}차수`).trim(), date: String(x.date || "").trim(), timeStart: String(x.timeStart || j.timeStart || "").trim(), timeEnd: String(x.timeEnd || j.timeEnd || "").trim() })).filter((x) => x.date);
         const bg = strs(j.background), cn = strs(j.costNotes).map((t) => t.replace(/^※\s*/, "")), rm = strs(j.remarks);
         setState({
           title: pick("title"), round: pick("round"), intro: pick("intro"), background: bg.length ? bg : cur.background,
           dateStart: pick("dateStart"), dateEnd: typeof j.dateStart === "string" && j.dateStart ? (j.dateEnd || "") : cur.dateEnd,
           timeStart: pick("timeStart"), timeEnd: pick("timeEnd"), target: pick("target"), place: pick("place"),
+          sessions: sess.length >= 2 ? sess : cur.sessions, ...(sess.length >= 2 ? { round: "" } : {}),
           modules: mods.length ? mods : cur.modules, instrOn: ins.length ? true : cur.instrOn,
           instructors: ins.length ? ins : cur.instructors, costs: costs.length ? costs : cur.costs,
           costNotes: cn.length ? cn : cur.costNotes, remarks: rm.length ? rm : cur.remarks,
@@ -4361,11 +4395,17 @@ background:
       });
       formCard.addEventListener("click", (e) => {
         const del = e.target.closest(".ap-del"), up = e.target.closest(".ap-up");
-        if (del) { del.closest(".en-item").remove(); update(); }
+        if (del) { del.closest(".en-item").remove(); syncSessUi(); update(); }
         if (up) { const it = up.closest(".en-item"); if (it.previousElementSibling) it.parentNode.insertBefore(it, it.previousElementSibling); update(); }
       });
       f.apSubject.addEventListener("input", () => { subjectDirty = !!f.apSubject.value.trim(); if (!subjectDirty) update(); else save(); });
       $("apAddMod").onclick = () => { q(addMod(), ".ap-m-topic").focus(); };
+      $("apAddSess").onclick = () => {
+        // 첫 차수를 추가할 때 위에 이미 넣은 날짜가 있으면 1차수로 옮겨줌
+        const first = !sessEl.children.length && f.apDateStart.value ? { date: f.apDateStart.value } : {};
+        const d = addSess(first); if (first.date) addSess();
+        syncSessUi(); update(); q(sessEl.lastElementChild, ".ap-s-date").focus();
+      };
       $("apAddInstr").onclick = () => { q(addInstr(), ".ap-i-name").focus(); };
       $("apAddCost").onclick = () => { q(addCost(), ".ap-c-cat").focus(); };
       const syncPlace = bindPlaceSelect($("apPlaceSel"), f.apPlace);
