@@ -722,20 +722,20 @@
     .notice-frame-bar { border-bottom-color: var(--soft-line); }
 
 
-    /* --- 탭 이동 물방울 효과: 파란 방울이 늘어나며 흘러가고 작은 방울이 뒤따름 --- */
+    /* --- 탭 이동 슬라이딩 효과: 은은한 하이라이트가 선택한 탭으로 미끄러지듯 이동 --- */
     .maintabs { position: relative; }
     .maintabs .maintab, .maintabs .maintab-group, .maintabs .maintab-help { position: relative; z-index: 1; }
-    .maintabs.has-blob .maintab.active { background: transparent; box-shadow: none; }
-    .tab-blob, .tab-drop {
-      position: absolute; z-index: 0; pointer-events: none; left: 0; top: 0; width: 0; height: 0;
-      background: var(--btn-grad); border-radius: 12px; opacity: 0;
+    .maintabs.has-slider .maintab.active { background: transparent; box-shadow: none; color: var(--accent); }
+    .tab-slider {
+      position: absolute; z-index: 0; pointer-events: none; left: 0; top: 0; width: 0; height: 0; opacity: 0;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--accent) 13%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+      transition: top .32s cubic-bezier(.3, .7, .2, 1), left .32s cubic-bezier(.3, .7, .2, 1),
+                  width .32s cubic-bezier(.3, .7, .2, 1), height .32s cubic-bezier(.3, .7, .2, 1), opacity .2s;
     }
-    .tab-blob { box-shadow: 0 8px 18px -8px rgba(31, 95, 255, .7), inset 0 1px 0 rgba(255, 255, 255, .3); }
-    .tab-blob::after {
-      content: ""; position: absolute; left: 12px; right: 45%; top: 3px; height: 9px; max-height: 30%;
-      border-radius: 999px; background: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, 0));
-    }
-    .tab-drop { border-radius: 50%; }
+    .tab-slider.no-anim { transition: none; }
+    @media (prefers-reduced-motion: reduce) { .tab-slider { transition: none; } }
     @media print {
       :root, :root[data-theme="dark"] {
         --bg: #fff; --card: #fff; --text: #191f28; --sub: #4e5968; --muted: #8b95a1;
@@ -5206,70 +5206,24 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
   </script>
 
 <script>
-  /* 탭 물방울 효과: 활성 탭이 바뀌면(클래스 변화 감지) 방울이 늘어나며 이동 → 탄성 있게 안착 */
+  /* 탭 슬라이딩 효과: 활성 탭이 바뀌면(클래스 변화 감지) 하이라이트가 그 탭으로 미끄러져 이동 */
   (() => {
     const bar = document.querySelector(".maintabs");
-    if (!bar || !bar.animate) return;
-    const blob = document.createElement("span"); blob.className = "tab-blob";
-    const drop = document.createElement("span"); drop.className = "tab-drop";
-    bar.prepend(drop); bar.prepend(blob);
-    bar.classList.add("has-blob");
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
-    let cur = null;
-    const rectOf = (btn) => ({ x: btn.offsetLeft, y: btn.offsetTop, w: btn.offsetWidth, h: btn.offsetHeight });
-    const place = (r) => Object.assign(blob.style, { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px", opacity: 1 });
-    const frame = (r, extra = {}) => ({ left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px", ...extra });
-    function move(btn, animate) {
-      const to = rectOf(btn);
-      if (!to.w) return;
-      const from = cur; cur = to;
-      if (from && from.x === to.x && from.y === to.y && from.w === to.w && from.h === to.h) return;
-      if (!animate || !from || reduce.matches) {
-        blob.getAnimations().forEach((a) => a.cancel()); place(to); return;
-      }
-      const vertical = Math.abs(to.y - from.y) >= Math.abs(to.x - from.x);
-      // 축 하나로 계산: 앞쪽 끝이 먼저 도착하고(늘어남) 뒤쪽 끝이 따라붙으며(줄어듦) 탄성 있게 안착
-      const P = vertical ? ["y", "h", "x", "w"] : ["x", "w", "y", "h"];
-      const [pos, len, cpos, clen] = P;
-      const down = to[pos] > from[pos];
-      const D = Math.abs(to[pos] - from[pos]);
-      const mk = (start, end, cross) => {
-        const r = {}; r[pos] = start; r[len] = end - start;
-        const cw = from[clen] * cross; r[clen] = cw; r[cpos] = to[cpos] + (to[clen] - cw) / 2;
-        return r;
-      };
-      const fS = from[pos], fE = from[pos] + from[len], tS = to[pos], tE = to[pos] + to[len];
-      const k1 = down ? mk(fS + D * .12, tE + 5, .72) : mk(tS - 5, fE - D * .12, .72);   // 앞끝 도착(살짝 넘침), 가늘게
-      const k2 = down ? mk(tS + 4, tE + 1, 1.05) : mk(tS - 1, tE - 4, 1.05);           // 뒤끝 도착, 납작하게
-      const k3 = down ? mk(tS - 1, tE, .98) : mk(tS, tE + 1, .98);                      // 반동
-      place(to);
-      blob.animate([
-        frame(from, { borderRadius: "12px", easing: "cubic-bezier(.55,0,.35,1)" }),
-        frame(k1, { borderRadius: "999px", offset: .42, easing: "cubic-bezier(.35,0,.25,1)" }),
-        frame(k2, { borderRadius: "14px", offset: .72 }),
-        frame(k3, { borderRadius: "12px", offset: .87 }),
-        frame(to, { borderRadius: "12px" }),
-      ], { duration: 680, easing: "linear" });
-      // 뒤따르는 작은 방울: 출발점에서 떨어져 나와 따라가다 흡수됨
-      const d = Math.min(from.h, from.w) * .42;
-      const c = (r) => ({ x: r.x + r.w / 2 - d / 2, y: r.y + r.h / 2 - d / 2 });
-      const a = c(from), b = c(to);
-      drop.animate([
-        { left: a.x + "px", top: a.y + "px", width: d + "px", height: d + "px", opacity: 0, transform: "scale(.6)" },
-        { left: a.x + "px", top: a.y + "px", width: d + "px", height: d + "px", opacity: .9, transform: "scale(1)", offset: .18 },
-        { left: (a.x + (b.x - a.x) * .6) + "px", top: (a.y + (b.y - a.y) * .6) + "px", width: d + "px", height: d + "px", opacity: .8, transform: "scale(.85)", offset: .62 },
-        { left: b.x + "px", top: b.y + "px", width: d + "px", height: d + "px", opacity: 0, transform: "scale(.3)" },
-      ], { duration: 640, delay: 40, easing: "cubic-bezier(.5,0,.3,1)", fill: "none" });
-    }
-    const active = () => bar.querySelector(".maintab.active");
-    new MutationObserver(() => { const b = active(); if (b) move(b, true); })
-      .observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
-    // 화면 크기·레이아웃이 바뀌면(세로 메뉴 ↔ 가로 탭, 앱 화면 표시) 즉시 제자리로
+    if (!bar) return;
+    const sl = document.createElement("span"); sl.className = "tab-slider";
+    bar.prepend(sl); bar.classList.add("has-slider");
+    const move = (instant) => {
+      const b = bar.querySelector(".maintab.active");
+      if (!b || !b.offsetWidth) return;
+      sl.classList.toggle("no-anim", !!instant);
+      Object.assign(sl.style, { left: b.offsetLeft + "px", top: b.offsetTop + "px", width: b.offsetWidth + "px", height: b.offsetHeight + "px", opacity: 1 });
+      if (instant) { sl.offsetWidth; sl.classList.remove("no-anim"); }
+    };
+    new MutationObserver(() => move(false)).observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
     let lastSize = "";
     new ResizeObserver(() => {
       const sz = bar.offsetWidth + "x" + bar.offsetHeight;
-      if (sz === lastSize) return; lastSize = sz;
-      cur = null; const b = active(); if (b) move(b, false);
+      if (sz !== lastSize) { lastSize = sz; move(true); }
     }).observe(bar);
   })();
 </script>
