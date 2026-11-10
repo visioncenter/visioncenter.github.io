@@ -849,6 +849,11 @@
       .nav-group.closed .ng-body { max-height: 0; opacity: 0; }
       .maintabs .maintab.mt-op::after { display: none; }
     }
+    /* 사이드바 홈 로고: 크게 + 가운데 정렬 */
+    @media (min-width: 900px) {
+      .sidebar-brand { text-align: center; padding: 6px 8px 22px; }
+      .sidebar-brand .brand-logo { height: 32px; margin: 0 auto 10px; }
+    }
     /* 사이드바 하단 도구(사용 설명서·키 변경·다크) */
     .sidebar-tools { display: flex; gap: 6px; flex-wrap: wrap; }
     .side-tool {
