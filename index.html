@@ -982,6 +982,18 @@
     #panel-home .home-flow .home-card:nth-child(5) { animation-delay: .30s; }
     #panel-home .home-flow .home-card:nth-child(6) { animation-delay: .33s; }
     @media (prefers-reduced-motion: reduce) { #panel-home * { animation: none !important; transition: none !important; } }
+    /* 색 빼기: 홈 카드·메뉴의 아이콘/글자를 무채색으로 (선택·호버 시엔 검정/흰색 채움) */
+    :root, :root[data-theme="dark"] { --hp: var(--text); --ho: var(--text); }
+    .home-card[data-go="instructor"], :root[data-theme="dark"] .home-card[data-go="instructor"] { --c: var(--text); }
+    .home-sec.plan .tag, .home-sec.ops .tag { color: var(--sub); background: color-mix(in srgb, var(--text) 7%, transparent); }
+    .hc-icon { color: var(--text); background: color-mix(in srgb, var(--text) 6%, var(--card)); }
+    .home-card:hover .hc-icon { background: var(--primary); color: var(--primary-text); }
+    .hc-step { color: var(--muted); }
+    .home-card:hover { border-color: color-mix(in srgb, var(--text) 28%, var(--line)); box-shadow: 0 14px 30px -18px rgba(16, 24, 40, .35); }
+    .home-card::before { background: radial-gradient(360px 160px at 100% 0%, color-mix(in srgb, var(--text) 4%, transparent), transparent 70%); }
+    .hc-bar b.on { background: var(--text); }
+    .maintabs .maintab.mt-plan.active .mt-ic, .maintabs .maintab.mt-op.active .mt-num { color: var(--primary-text); background: var(--primary); }
+    .maintabs .maintab.mt-plan:hover .mt-ic, .maintabs .maintab.mt-op:hover .mt-num { color: var(--text); background: color-mix(in srgb, var(--text) 12%, transparent); }
     @media print {
       :root, :root[data-theme="dark"] {
         --bg: #fff; --card: #fff; --text: #191f28; --sub: #4e5968; --muted: #8b95a1;
