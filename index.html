@@ -788,33 +788,135 @@
     .sidebar-brand { cursor: pointer; border-radius: 10px; transition: background .15s; }
     .sidebar-brand:hover { background: var(--hover); }
     .sidebar-brand:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-    #panel-home { grid-template-columns: 1fr; gap: 28px; }
-    .home-hero { padding: 8px 2px 0; }
-    .home-date { font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
-    .home-title { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -.03em; color: var(--text); }
-    .home-sub { margin: 0; color: var(--sub); font-size: 14.5px; }
-    .home-sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; }
-    .home-sec-head h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
-    .home-sec-head span { font-size: 13px; color: var(--muted); }
-    .home-grid.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .home-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-    @media (min-width: 1500px) { .home-flow { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
-    @media (max-width: 760px) { .home-grid.two, .home-flow { grid-template-columns: 1fr; } }
+    :root { --hp: #3182f6; --ho: #7c5cfc; --hero-a: #0f1d3d; --hero-b: #1e3a8a; --hero-c: #4338ca; }
+    :root[data-theme="dark"] { --hp: #5b9dff; --ho: #9d85ff; --hero-a: #0b1430; --hero-b: #172c6b; --hero-c: #36309c; }
+    #panel-home { grid-template-columns: 1fr; gap: 30px; }
+
+    /* 히어로 배너 */
+    .home-hero {
+      position: relative; overflow: hidden; isolation: isolate;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      padding: 34px 36px; min-height: 196px; border-radius: 20px; color: #fff;
+      background: linear-gradient(120deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
+    }
+    .home-hero::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; opacity: .55;
+      background-image: linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+      background-size: 28px 28px;
+      -webkit-mask-image: radial-gradient(ellipse 70% 90% at 78% 40%, #000 20%, transparent 75%);
+              mask-image: radial-gradient(ellipse 70% 90% at 78% 40%, #000 20%, transparent 75%);
+    }
+    .home-hero::after {
+      content: ""; position: absolute; z-index: -1; width: 420px; height: 420px; right: -80px; top: -170px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 165, 250, .55), transparent 65%); filter: blur(10px);
+    }
+    .home-hero-text { position: relative; max-width: 620px; }
+    .home-date {
+      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px; padding: 5px 11px; border-radius: 999px;
+      font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.88);
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.16);
+    }
+    .home-date::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,.25); }
+    .home-title { margin: 0 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -.035em; line-height: 1.3; color: #fff; }
+    .home-title em { font-style: normal; background: linear-gradient(90deg, #93c5fd, #c4b5fd); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .home-sub { margin: 0; color: rgba(255,255,255,.72); font-size: 14.5px; }
+    .home-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+    .home-chips span {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 8px;
+      font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.9); background: rgba(255,255,255,.08);
+    }
+    .home-chips svg { width: 14px; height: 14px; opacity: .85; }
+    .home-art { position: relative; flex: 0 0 auto; width: 250px; height: 150px; margin-right: 6px; }
+    .home-art .doc {
+      position: absolute; width: 132px; height: 112px; padding: 14px; border-radius: 14px;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 16px 40px -18px rgba(0,0,0,.5);
+    }
+    .home-art .doc i { display: block; height: 7px; border-radius: 4px; background: rgba(255,255,255,.28); margin-bottom: 8px; }
+    .home-art .doc i:nth-child(1) { width: 55%; background: rgba(255,255,255,.55); }
+    .home-art .doc i:nth-child(3) { width: 80%; }
+    .home-art .doc i:nth-child(4) { width: 64%; }
+    .home-art .d1 { left: 0; top: 26px; transform: rotate(-7deg); }
+    .home-art .d2 { left: 62px; top: 4px; transform: rotate(3deg); background: rgba(255,255,255,.16); }
+    .home-art .d3 { left: 122px; top: 34px; transform: rotate(9deg); }
+    .home-art .ok {
+      position: absolute; right: 2px; bottom: 0; width: 42px; height: 42px; border-radius: 50%;
+      display: grid; place-items: center; background: #4ade80; color: #052e16;
+      box-shadow: 0 0 0 6px rgba(74,222,128,.2), 0 10px 24px -8px rgba(0,0,0,.45);
+    }
+    .home-art .ok svg { width: 22px; height: 22px; }
+    @media (max-width: 1100px) { .home-art { display: none; } }
+
+    /* 섹션 머리 */
+    .home-sec-head { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; }
+    .home-sec-head h3 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.02em; color: var(--text); }
+    .home-sec-head .tag { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+    .home-sec.plan .tag { color: var(--hp); background: color-mix(in srgb, var(--hp) 12%, transparent); }
+    .home-sec.ops .tag { color: var(--ho); background: color-mix(in srgb, var(--ho) 12%, transparent); }
+    .home-sec-head span:last-child { font-size: 13px; color: var(--muted); }
+
+    .home-grid.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .home-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    @media (min-width: 1680px) { .home-flow { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+    @media (max-width: 760px) { .home-grid.two, .home-flow { grid-template-columns: 1fr; } .home-hero { padding: 26px 22px; } .home-title { font-size: 23px; } }
+
+    /* 카드 */
     .home-card {
-      margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left;
-      padding: 18px; min-height: 128px; border-radius: 14px; cursor: pointer;
-      background: var(--card); color: var(--text); border: 1px solid var(--line); box-shadow: none;
-      font-weight: 400; transition: border-color .15s, transform .15s, box-shadow .15s;
+      --c: var(--hp);
+      position: relative; overflow: hidden; margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left;
+      padding: 20px; min-height: 150px; border-radius: 16px; cursor: pointer;
+      background: var(--card); color: var(--text); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+      font-weight: 400; transition: border-color .2s, transform .2s, box-shadow .2s;
     }
-    .home-card:hover { background: var(--card); border-color: color-mix(in srgb, var(--text) 30%, var(--line)); transform: translateY(-2px); box-shadow: 0 10px 24px -16px rgba(16, 24, 40, .35); }
-    .home-card:active { transform: translateY(0); }
-    .hc-icon { font-size: 22px; line-height: 1; margin-bottom: 4px; }
-    .hc-step {
-      width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-      background: var(--primary); color: var(--primary-text); font-size: 12px; font-weight: 800; margin-bottom: 4px;
+    .home-card.step { --c: var(--ho); }
+    .home-card::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s;
+      background: radial-gradient(360px 160px at 100% 0%, color-mix(in srgb, var(--c) 10%, transparent), transparent 70%);
     }
-    .hc-title { font-size: 15.5px; font-weight: 800; letter-spacing: -.02em; }
-    .hc-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+    .home-card:hover { background: var(--card); border-color: color-mix(in srgb, var(--c) 45%, var(--line)); transform: translateY(-3px); box-shadow: 0 14px 30px -18px color-mix(in srgb, var(--c) 60%, rgba(16, 24, 40, .5)); }
+    .home-card:hover::before { opacity: 1; }
+    .home-card:active { transform: translateY(-1px); }
+    .home-card:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+    .hc-top { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 12px; }
+    .hc-icon {
+      width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: 0 0 auto;
+      color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--card));
+      transition: background .2s, color .2s;
+    }
+    .hc-icon svg { width: 21px; height: 21px; }
+    .home-card:hover .hc-icon { background: var(--c); color: #fff; }
+    .hc-go {
+      width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: var(--muted);
+      background: var(--soft); transition: transform .2s, background .2s, color .2s;
+    }
+    .hc-go svg { width: 14px; height: 14px; }
+    .home-card:hover .hc-go { transform: translateX(3px); color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--card)); }
+    .hc-step { font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: var(--c); }
+    .hc-bar { display: flex; gap: 3px; margin-top: 8px; }
+    .hc-bar b { width: 14px; height: 4px; border-radius: 2px; background: var(--line); }
+    .hc-bar b.on { background: var(--c); }
+    .hc-title { font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
+    .hc-desc { font-size: 13px; color: var(--sub); line-height: 1.55; }
+    .home-grid.two .home-card { min-height: 168px; padding: 24px; }
+    .home-grid.two .hc-title { font-size: 18px; }
+    .home-grid.two .hc-desc { font-size: 13.5px; }
+    .home-card[data-go="instructor"] { --c: #0ea5a4; }
+    :root[data-theme="dark"] .home-card[data-go="instructor"] { --c: #2dd4bf; }
+
+    /* 등장 효과: 홈을 열 때마다 은은하게 */
+    @keyframes homeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    #panel-home:not(.hidden) .home-hero, #panel-home:not(.hidden) .home-sec-head, #panel-home:not(.hidden) .home-card { animation: homeUp .45s cubic-bezier(.2, .7, .2, 1) both; }
+    #panel-home .home-sec.plan .home-sec-head { animation-delay: .06s; }
+    #panel-home .home-sec.plan .home-card:nth-child(1) { animation-delay: .09s; }
+    #panel-home .home-sec.plan .home-card:nth-child(2) { animation-delay: .12s; }
+    #panel-home .home-sec.ops .home-sec-head { animation-delay: .15s; }
+    #panel-home .home-flow .home-card:nth-child(1) { animation-delay: .18s; }
+    #panel-home .home-flow .home-card:nth-child(2) { animation-delay: .21s; }
+    #panel-home .home-flow .home-card:nth-child(3) { animation-delay: .24s; }
+    #panel-home .home-flow .home-card:nth-child(4) { animation-delay: .27s; }
+    #panel-home .home-flow .home-card:nth-child(5) { animation-delay: .30s; }
+    #panel-home .home-flow .home-card:nth-child(6) { animation-delay: .33s; }
+    @media (prefers-reduced-motion: reduce) { #panel-home * { animation: none !important; transition: none !important; } }
     @media print {
       :root, :root[data-theme="dark"] {
         --bg: #fff; --card: #fff; --text: #191f28; --sub: #4e5968; --muted: #8b95a1;
@@ -897,58 +999,82 @@
     <!-- 홈: 로고를 누르면 열림. 업무 흐름대로 각 탭 바로가기 -->
     <div id="panel-home" class="tabpanel">
       <section class="home-hero card-wide">
-        <div>
+        <div class="home-hero-text">
           <div class="home-date" id="homeDate"></div>
-          <h2 class="home-title">교육 기획부터 운영 서류까지, 한곳에서</h2>
-          <p class="home-sub">필요한 작업을 고르면 바로 시작할 수 있어요. 입력값은 이 브라우저에 자동 저장돼요.</p>
+          <h2 class="home-title">교육 기획부터 운영 서류까지,<br><em>한곳에서</em></h2>
+          <p class="home-sub">필요한 작업을 고르면 바로 시작할 수 있어요.</p>
+          <div class="home-chips">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>AI 조사·작성</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 14l2 2 4-4"/></svg>운영 서류 자동 생성</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>입력값은 이 브라우저에만 저장</span>
+          </div>
+        </div>
+        <div class="home-art" aria-hidden="true">
+          <div class="doc d1"><i></i><i></i><i></i><i></i></div>
+          <div class="doc d3"><i></i><i></i><i></i><i></i></div>
+          <div class="doc d2"><i></i><i></i><i></i><i></i></div>
+          <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
         </div>
       </section>
 
-      <section class="home-sec card-wide">
-        <div class="home-sec-head"><h3>교육 기획</h3><span>과정을 만들기 전 근거 찾기</span></div>
+      <section class="home-sec plan card-wide">
+        <div class="home-sec-head"><h3>교육 기획</h3><span class="tag">PLAN</span><span>과정을 만들기 전 근거 찾기</span></div>
         <div class="home-grid two">
           <button type="button" class="home-card" data-go="research">
-            <span class="hc-icon">📊</span><span class="hc-title">교육 조사</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span><span class="hc-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+            <span class="hc-title">교육 조사</span>
             <span class="hc-desc">주제 키워드로 트렌드·사례·커리큘럼·예산을 조사해 보고서로 정리</span>
           </button>
           <button type="button" class="home-card" data-go="instructor">
-            <span class="hc-icon">🎤</span><span class="hc-title">강사·강의 찾기</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M8 21h8"/></svg></span><span class="hc-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+            <span class="hc-title">강사·강의 찾기</span>
             <span class="hc-desc">주제에 맞는 강사·강의 후보를 찾아 비교하고 저장함에 모아두기</span>
           </button>
         </div>
       </section>
 
-      <section class="home-sec card-wide">
-        <div class="home-sec-head"><h3>교육 운영</h3><span>보통 이 순서로 진행돼요</span></div>
+      <section class="home-sec ops card-wide">
+        <div class="home-sec-head"><h3>교육 운영</h3><span class="tag">FLOW</span><span>보통 이 순서로 진행돼요</span></div>
         <div class="home-flow">
           <button type="button" class="home-card step" data-go="approval">
-            <span class="hc-step">1</span><span class="hc-title">실시 품의서</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 15l2 2 4-4"/></svg></span><span class="hc-step">STEP 01</span></span>
+            <span class="hc-title">실시 품의서</span>
             <span class="hc-desc">자료를 넣으면 AI가 그룹웨어 실시 품의서를 채워줘요</span>
+            <span class="hc-bar"><b class="on"></b><b></b><b></b><b></b><b></b><b></b></span>
           </button>
           <button type="button" class="home-card step" data-go="notice">
-            <span class="hc-step">2</span><span class="hc-title">공지문 메이커</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></span><span class="hc-step">STEP 02</span></span>
+            <span class="hc-title">공지문 메이커</span>
             <span class="hc-desc">과정 신청·일정 변경·설문 안내 포스터 만들기</span>
+            <span class="hc-bar"><b class="on"></b><b class="on"></b><b></b><b></b><b></b><b></b></span>
           </button>
           <button type="button" class="home-card step" data-go="enroll">
-            <span class="hc-step">3</span><span class="hc-title">입과 안내문</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><span class="hc-step">STEP 03</span></span>
+            <span class="hc-title">입과 안내문</span>
             <span class="hc-desc">수강생 엑셀로 참석 안내 메일 HTML·받는 사람 자동 작성</span>
+            <span class="hc-bar"><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b><b></b></span>
           </button>
           <button type="button" class="home-card step" data-go="roster">
-            <span class="hc-step">4</span><span class="hc-title">출석부·명단</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg></span><span class="hc-step">STEP 04</span></span>
+            <span class="hc-title">출석부·명단</span>
             <span class="hc-desc">Cen-Class 엑셀로 출석부·학습자 명단 Word 만들기</span>
+            <span class="hc-bar"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b></span>
           </button>
           <button type="button" class="home-card step" data-go="result">
-            <span class="hc-step">5</span><span class="hc-title">결과 품의서</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 17v-3M12 17v-5M15 17v-2"/></svg></span><span class="hc-step">STEP 05</span></span>
+            <span class="hc-title">결과 품의서</span>
             <span class="hc-desc">교육 결과 보고 및 교육비 정산 품의 작성</span>
+            <span class="hc-bar"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b></b></span>
           </button>
           <button type="button" class="home-card step" data-go="settle">
-            <span class="hc-step">6</span><span class="hc-title">교육비 정산</span>
+            <span class="hc-top"><span class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h.01M12 18h4"/></svg></span><span class="hc-step">STEP 06</span></span>
+            <span class="hc-title">교육비 정산</span>
             <span class="hc-desc">수료 인원으로 법인별 n분의 1 배분표 만들기</span>
+            <span class="hc-bar"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b></span>
           </button>
         </div>
       </section>
     </div>
-
     <div id="panel-research" class="tabpanel hidden">
 
     <div class="card card-wide no-print">
