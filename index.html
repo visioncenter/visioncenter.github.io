@@ -800,6 +800,28 @@
       }
       :root[data-theme="dark"] .vc-slogan em { color: #7aa7ff; -webkit-text-emphasis-color: #7aa7ff; text-emphasis-color: #7aa7ff; }
     }
+    /* 왼쪽 메뉴: 교육 기획은 아이콘 타일, 교육 운영은 단계 번호 + 연결선 */
+    .maintabs .maintab.mt-plan, .maintabs .maintab.mt-op { display: inline-flex; align-items: center; gap: 10px; }
+    .mt-ic, .mt-num {
+      flex: 0 0 auto; display: grid; place-items: center; color: var(--muted);
+      background: color-mix(in srgb, var(--text) 6%, transparent); transition: background .2s, color .2s;
+    }
+    .mt-ic { width: 26px; height: 26px; border-radius: 8px; }
+    .mt-ic svg { width: 15px; height: 15px; }
+    .mt-num { width: 22px; height: 22px; margin: 0 2px; border-radius: 50%; font-size: 11px; font-weight: 800; font-family: var(--font); }
+    .maintabs .maintab.mt-plan:hover .mt-ic { color: var(--hp); background: color-mix(in srgb, var(--hp) 14%, transparent); }
+    .maintabs .maintab.mt-op:hover .mt-num { color: var(--ho); background: color-mix(in srgb, var(--ho) 14%, transparent); }
+    .maintabs .maintab.mt-plan.active .mt-ic { color: #fff; background: var(--hp); }
+    .maintabs .maintab.mt-op.active .mt-num { color: #fff; background: var(--ho); }
+    @media (min-width: 900px) {
+      .maintabs .maintab.mt-plan, .maintabs .maintab.mt-op { display: flex; width: 100%; }
+      .maintabs .maintab.mt-plan { padding-top: 6px; padding-bottom: 6px; }
+      .maintabs .maintab.mt-op::after {
+        content: ""; position: absolute; left: 22px; top: calc(50% + 11px); width: 2px; height: calc(100% - 20px);
+        background: color-mix(in srgb, var(--text) 10%, transparent); pointer-events: none;
+      }
+      .maintabs .maintab.mt-op.last::after { display: none; }
+    }
     /* 사이드바 하단 도구(사용 설명서·키 변경·다크) */
     .sidebar-tools { display: flex; gap: 6px; flex-wrap: wrap; }
     .side-tool {
@@ -1024,15 +1046,15 @@
       <div class="sidebar-brand" id="homeLink" role="button" tabindex="0" title="홈으로"><img src="01_ITCEN_Logo_Black.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" /><div class="brand-name">VisionCenter<br>교육 기획·운영 AI Agent</div></div>
       <button type="button" class="maintab active" data-panel="home" hidden>홈</button>
       <span class="maintab-group">교육 기획</span>
-      <button type="button" class="maintab" data-panel="research">교육 조사</button>
-      <button type="button" class="maintab" data-panel="instructor">강사·강의 찾기</button>
+      <button type="button" class="maintab mt-plan" data-panel="research"><span class="mt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span><span class="mt-label">교육 조사</span></button>
+      <button type="button" class="maintab mt-plan" data-panel="instructor"><span class="mt-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M8 21h8"/></svg></span><span class="mt-label">강사·강의 찾기</span></button>
       <span class="maintab-group">교육 운영</span>
-      <button type="button" class="maintab" data-panel="approval">실시 품의서</button>
-      <button type="button" class="maintab" data-panel="notice">공지문 메이커</button>
-      <button type="button" class="maintab" data-panel="enroll">입과 안내문</button>
-      <button type="button" class="maintab" data-panel="roster">출석부·명단</button>
-      <button type="button" class="maintab" data-panel="result">결과 품의서</button>
-      <button type="button" class="maintab" data-panel="settle">교육비 정산</button>
+      <button type="button" class="maintab mt-op" data-panel="approval"><span class="mt-num" aria-hidden="true">1</span><span class="mt-label">실시 품의서</span></button>
+      <button type="button" class="maintab mt-op" data-panel="notice"><span class="mt-num" aria-hidden="true">2</span><span class="mt-label">공지문 메이커</span></button>
+      <button type="button" class="maintab mt-op" data-panel="enroll"><span class="mt-num" aria-hidden="true">3</span><span class="mt-label">입과 안내문</span></button>
+      <button type="button" class="maintab mt-op" data-panel="roster"><span class="mt-num" aria-hidden="true">4</span><span class="mt-label">출석부·명단</span></button>
+      <button type="button" class="maintab mt-op" data-panel="result"><span class="mt-num" aria-hidden="true">5</span><span class="mt-label">결과 품의서</span></button>
+      <button type="button" class="maintab mt-op last" data-panel="settle"><span class="mt-num" aria-hidden="true">6</span><span class="mt-label">교육비 정산</span></button>
       <div class="sidebar-tools">
         <button id="guideBtn" class="side-tool">📖 사용 설명서</button>
         <button id="changeKeyBtn" class="side-tool" title="Gemini API 키 변경">🔑 키 변경</button>
@@ -5531,7 +5553,7 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
       let g = b.previousElementSibling;
       while (g && !(g.classList.contains("maintab-group") && !g.classList.contains("sep") && g.textContent.trim())) g = g.previousElementSibling;
       const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-      crumb.innerHTML = (g ? `<span>${esc(g.textContent.trim())}</span><span class="gt">›</span>` : "") + `<b>${esc(b.textContent.trim())}</b>`;
+      crumb.innerHTML = (g ? `<span>${esc(g.textContent.trim())}</span><span class="gt">›</span>` : "") + `<b>${esc((b.querySelector(".mt-label") || b).textContent.trim())}</b>`;
     };
     setCrumb();
     new MutationObserver(() => { move(false); setCrumb(); }).observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
