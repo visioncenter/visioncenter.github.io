@@ -1023,6 +1023,48 @@
     #panel-home .home-flow .home-card:nth-child(5) { animation-delay: .30s; }
     #panel-home .home-flow .home-card:nth-child(6) { animation-delay: .33s; }
     @media (prefers-reduced-motion: reduce) { #panel-home * { animation: none !important; transition: none !important; } }
+    /* 홈 배너 가운데: 기능 3줄 + 탭별 입력→결과 예시 (글래스) */
+    .home-hero { container-type: inline-size; }
+    .hero-mid { position: relative; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+    .hm-glass {
+      background: linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.2); border-radius: 14px;
+      backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 16px 36px -22px rgba(0,0,0,.55); color: #fff;
+    }
+    .hm-gi { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: rgba(255,255,255,.16); flex: 0 0 auto; }
+    .hm-gi svg { width: 14px; height: 14px; }
+    .hm-feats { display: flex; flex-direction: column; gap: 6px; width: 250px; flex: 0 0 auto; }
+    .hm-f { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: 12px; }
+    .hm-f b { display: block; font-size: 12.5px; font-weight: 800; letter-spacing: -.02em; }
+    .hm-f > div > span { display: block; font-size: 11px; color: rgba(255,255,255,.66); white-space: nowrap; }
+    .hm-demo { width: 540px; flex: 0 0 auto; padding: 11px 13px; }
+    .hm-tabs { display: flex; gap: 3px; padding: 3px; border-radius: 9px; background: rgba(0,0,0,.2); width: fit-content; }
+    .hm-tabs button {
+      margin: 0; padding: 3px 9px; border-radius: 6px; border: none; box-shadow: none; cursor: pointer;
+      font-size: 10.5px; font-weight: 700; color: rgba(255,255,255,.6); background: transparent; transition: background .2s, color .2s;
+    }
+    .hm-tabs button:hover { color: #fff; background: rgba(255,255,255,.08); filter: none; }
+    .hm-tabs button.on { background: rgba(255,255,255,.18); color: #fff; }
+    .hm-io { display: flex; align-items: center; gap: 9px; margin-top: 9px; transition: opacity .25s; }
+    .hm-io.fade { opacity: 0; }
+    .hm-col { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; min-width: 0; }
+    .hm-lab { grid-column: 1 / -1; font-size: 9.5px; font-weight: 800; letter-spacing: .08em; color: rgba(255,255,255,.5); }
+    .hm-fld, .hm-res { font-size: 11px; padding: 5px 7px; border-radius: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hm-fld { background: rgba(0,0,0,.18); }
+    .hm-fld em { font-style: normal; color: rgba(255,255,255,.5); margin-right: 4px; }
+    .hm-res { display: flex; align-items: center; gap: 5px; font-weight: 600; background: rgba(255,255,255,.1); }
+    .hm-ok { width: 14px; height: 14px; border-radius: 50%; background: #4ade80; color: #052e16; display: grid; place-items: center; flex: 0 0 auto; }
+    .hm-ok svg { width: 9px; height: 9px; }
+    .hm-a { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25); flex: 0 0 auto; }
+    .hm-a svg { width: 12px; height: 12px; }
+    .home-chips { display: none; }
+    .home-hero-text { flex: 0 1 auto; }
+    .home-hero .home-art { margin-left: 18px; }
+    /* 폭에 따라: 그림 → 기능 3줄 → 예시 순서로 숨김. 가운데가 다 숨으면 칩을 다시 보여줌 */
+    @container (max-width: 1440px) { .home-art { display: none; } }
+    @container (max-width: 1170px) { .hm-feats { display: none; } }
+    @container (max-width: 910px) { .hero-mid { display: none; } .home-chips { display: flex; } }
     /* 색 빼기: 홈 카드·메뉴의 아이콘/글자를 무채색으로 (선택·호버 시엔 검정/흰색 채움) */
     :root, :root[data-theme="dark"] { --hp: var(--text); --ho: var(--text); }
     .home-card[data-go="instructor"], :root[data-theme="dark"] .home-card[data-go="instructor"] { --c: var(--text); }
@@ -1135,6 +1177,21 @@
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>AI 조사·작성</span>
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 14l2 2 4-4"/></svg>운영 서류 자동 생성</span>
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>입력값은 이 브라우저에만 저장</span>
+          </div>
+        </div>
+        <div class="hero-mid" aria-label="주요 기능 소개">
+          <div class="hm-feats">
+            <div class="hm-glass hm-f"><span class="hm-gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg></span><div><b>AI가 조사·작성</b><span>키워드로 근거 보고서, 자료로 품의서 초안</span></div></div>
+            <div class="hm-glass hm-f"><span class="hm-gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 14l2 2 4-4"/></svg></span><div><b>엑셀 하나로 서류 끝</b><span>안내 메일 · 출석부 · 정산표를 한 명단으로</span></div></div>
+            <div class="hm-glass hm-f"><span class="hm-gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><div><b>내 브라우저에만 저장</b><span>API 키와 명단은 외부로 나가지 않아요</span></div></div>
+          </div>
+          <div class="hm-glass hm-demo" id="hmDemo">
+            <div class="hm-tabs" role="tablist"></div>
+            <div class="hm-io">
+              <div class="hm-col" id="hmIn"></div>
+              <div class="hm-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+              <div class="hm-col" id="hmOut"></div>
+            </div>
           </div>
         </div>
         <div class="home-art" aria-hidden="true">
@@ -5673,6 +5730,45 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
     const d = new Date(), W = "일월화수목금토";
     const el = document.getElementById("homeDate");
     if (el) el.textContent = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${W[d.getDay()]}요일`;
+  })();
+
+  /* 홈 배너 예시: 탭별 입력→결과, 5초마다 자동 전환(마우스 올리면 멈춤) */
+  (() => {
+    const demo = document.getElementById("hmDemo"); if (!demo) return;
+    const ok = '<span class="hm-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span>';
+    const D = [
+      { t: "실시 품의서", i: [["과정", "AI 리더십 과정"], ["자료", "커리큘럼·견적서.pdf"], ["일정", "11.27(목) 4시간"], ["메모", "리더 대상 후속 과정"]], o: ["추진 배경", "교육 과정·강사", "교육비 표", "그룹웨어 HTML"] },
+      { t: "입과 안내문", i: [["과정", "AI 리더십 과정"], ["일시", "11.27(목) 13:00"], ["장소", "3층 C교육장"], ["명단", "수강생.xlsx"]], o: ["안내 메일 HTML", "메일 제목", "받는 사람 목록", "사전 안내 문구"] },
+      { t: "출석부·명단", i: [["명단", "Cen-Class 엑셀"], ["과정", "AI 리더십 과정"], ["일자", "11.27(목)"], ["장소", "3층 C교육장"]], o: ["출석부 Word", "학습자 명단 Word", "이름 가나다순", "서명 칸 자동"] },
+      { t: "교육비 정산", i: [["유형", "그룹공통"], ["비용", "교육실비 공급가액"], ["수료자", "수료자.xlsx"], ["법인", "담당자 목록"]], o: ["법인별 n분의 1", "부가세 자동 계산", "담당자 자동 매핑", "엑셀 내려받기"] },
+    ];
+    const tabs = demo.querySelector(".hm-tabs"), io = demo.querySelector(".hm-io");
+    const inEl = document.getElementById("hmIn"), outEl = document.getElementById("hmOut");
+    const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    tabs.innerHTML = D.map((d, k) => `<button type="button" role="tab" data-k="${k}">${esc(d.t)}</button>`).join("");
+    let cur = -1;
+    const show = (k, anim) => {
+      const paint = () => {
+        const d = D[k];
+        inEl.innerHTML = '<span class="hm-lab">INPUT</span>' + d.i.map(([a, b]) => `<div class="hm-fld"><em>${esc(a)}</em>${esc(b)}</div>`).join("");
+        outEl.innerHTML = '<span class="hm-lab">OUTPUT</span>' + d.o.map((b) => `<div class="hm-res">${ok}${esc(b)}</div>`).join("");
+        tabs.querySelectorAll("button").forEach((b, j) => { b.classList.toggle("on", j === k); b.setAttribute("aria-selected", String(j === k)); });
+        io.classList.remove("fade");
+      };
+      cur = k;
+      if (anim) { io.classList.add("fade"); setTimeout(paint, 220); } else paint();
+    };
+    show(1, false);
+    let hover = false;
+    demo.addEventListener("mouseenter", () => { hover = true; });
+    demo.addEventListener("mouseleave", () => { hover = false; });
+    tabs.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) show(+b.dataset.k, true); });
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) setInterval(() => {
+      const home = document.getElementById("panel-home");
+      if (hover || document.hidden || !home || home.classList.contains("hidden")) return;
+      show((cur + 1) % D.length, true);
+    }, 5000);
   })();
 </script>
 </body>
