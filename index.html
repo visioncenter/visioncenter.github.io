@@ -784,6 +784,13 @@
     #apPreviewCard, #rsPreviewCard { position: static; max-height: none; overflow: visible; }
     #apPreview, #rsPreview { min-height: calc(100vh - 330px) !important; }
 
+    /* 사이드바 하단 슬로건 (다크모드는 흰색으로 반전) */
+    .sidebar-slogan { display: none; }
+    @media (min-width: 900px) {
+      .sidebar-slogan { display: flex; justify-content: center; margin: auto 0 0; padding: 18px 8px 6px; position: relative; z-index: 1; }
+      .sidebar-slogan img { width: 100%; max-width: 168px; height: auto; display: block; opacity: .82; }
+      :root[data-theme="dark"] .sidebar-slogan img { filter: invert(1); opacity: .75; }
+    }
     /* --- 홈 화면 --- */
     .sidebar-brand { cursor: pointer; border-radius: 10px; transition: background .15s; }
     .sidebar-brand:hover { background: var(--hover); }
@@ -993,7 +1000,7 @@
       <button type="button" class="maintab" data-panel="settle">교육비 정산</button>
       <span class="maintab-group sep"></span>
       <button type="button" class="maintab" data-panel="notice">공지문 메이커</button>
-      <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">이 탭 사용법</button>
+      <div class="sidebar-slogan"><img src="03_ITCEN_Slogan_Black.png" alt="Inspire with Technology" /></div>
     </div>
 
     <!-- 홈: 로고를 누르면 열림. 업무 흐름대로 각 탭 바로가기 -->
@@ -3543,7 +3550,7 @@ ${lines}
     guideTabBtns.forEach((b) => b.addEventListener("click", () => showGuideSection(b.dataset.g)));
     const currentPanelKey = () => { const k = document.querySelector(".maintabs .maintab.active")?.dataset.panel; return !k || k === "home" ? "start" : k; };
     const openGuide = (key) => { showGuideSection(typeof key === "string" ? key : currentPanelKey()); guideOverlay.style.display = "flex"; };
-    $("tabHelpBtn").addEventListener("click", () => openGuide(currentPanelKey()));
+    $("tabHelpBtn")?.addEventListener("click", () => openGuide(currentPanelKey()));
     const closeGuide = () => { guideOverlay.style.display = "none"; localStorage.setItem("edu_seen_guide", "1"); };
     guideBtn.addEventListener("click", openGuide);
     guideClose.addEventListener("click", closeGuide);
