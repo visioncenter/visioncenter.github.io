@@ -789,7 +789,7 @@
     @media (min-width: 1100px) {
       .topbar .minirow { align-items: center; }
       .vc-slogan {
-        display: block; margin-right: 16px; text-align: right; white-space: nowrap; user-select: none;
+        display: block; margin-right: 4px; text-align: right; white-space: nowrap; user-select: none;
         font-size: 12.5px; font-weight: 500; line-height: 1.5; letter-spacing: -.02em; color: var(--text);
       }
       .vc-slogan em {
@@ -799,6 +799,25 @@
       }
       :root[data-theme="dark"] .vc-slogan em { color: #7aa7ff; -webkit-text-emphasis-color: #7aa7ff; text-emphasis-color: #7aa7ff; }
     }
+    /* 사이드바 하단 도구(사용 설명서·키 변경·다크) */
+    .sidebar-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+    .side-tool {
+      margin: 0; background: transparent; color: var(--sub); border: 1px solid transparent; box-shadow: none;
+      padding: 8px 10px; border-radius: 8px; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer;
+    }
+    .side-tool:hover { background: var(--hover); color: var(--text); filter: none; }
+    @media (min-width: 900px) {
+      .sidebar-tools {
+        flex-direction: column; gap: 2px; margin: auto 0 0; padding: 12px 0 0; position: relative; z-index: 1;
+      }
+      .sidebar-tools::before { content: ""; height: 1px; margin: 0 8px 10px; background: var(--shell-line); }
+      .side-tool { width: 100%; padding: 9px 10px; }
+      .side-tool:hover { background: var(--card); box-shadow: 0 0 0 1px var(--shell-line); }
+      :root[data-theme="dark"] .side-tool:hover { background: var(--select); box-shadow: none; }
+      .wrap > .maintabs .sidebar-slogan { margin-top: 0; }
+      .wrap > .topbar .minirow { margin-left: auto !important; }
+    }
+    @media (max-width: 899px) { .sidebar-tools { margin-left: auto; } }
     /* 사이드바 하단 슬로건 (다크모드는 흰색으로 반전) */
     .sidebar-slogan { display: none; }
     @media (min-width: 900px) {
@@ -996,9 +1015,6 @@
       </div>
       <div class="minirow" style="margin-top:2px; flex:0 0 auto;">
         <div class="vc-slogan" aria-label="VisionCenter 슬로건">구성원들이 ITCG의 Vision과 <em>같은</em> 꿈을 꾸고,<br>그 속에서 <em>성장</em>감을 느낄 수 있도록 지원하는 ITCG Vision Center</div>
-        <button id="guideBtn" class="btn-sm">📖 사용 설명서</button>
-        <button id="changeKeyBtn" class="btn-sm" title="Gemini API 키 변경">🔑 키 변경</button>
-        <button id="themeToggle" class="btn-sm" title="밝게/어둡게 전환">🌙 다크</button>
       </div>
     </div>
 
@@ -1016,6 +1032,11 @@
       <button type="button" class="maintab" data-panel="settle">교육비 정산</button>
       <span class="maintab-group sep"></span>
       <button type="button" class="maintab" data-panel="notice">공지문 메이커</button>
+      <div class="sidebar-tools">
+        <button id="guideBtn" class="side-tool">📖 사용 설명서</button>
+        <button id="changeKeyBtn" class="side-tool" title="Gemini API 키 변경">🔑 키 변경</button>
+        <button id="themeToggle" class="side-tool" title="밝게/어둡게 전환">🌙 다크</button>
+      </div>
       <div class="sidebar-slogan"><img src="03_ITCEN_Slogan_Black.png" alt="Inspire with Technology" /></div>
     </div>
 
