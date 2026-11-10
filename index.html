@@ -1065,6 +1065,13 @@
     @container (max-width: 1440px) { .home-art { display: none; } }
     @container (max-width: 1170px) { .hm-feats { display: none; } }
     @container (max-width: 910px) { .hero-mid { display: none; } .home-chips { display: flex; } }
+    /* 예시 창 높이를 왼쪽 기능 3줄 높이에 맞춤 */
+    .hero-mid { align-items: stretch; }
+    .hm-demo { display: flex; flex-direction: column; }
+    .hm-io { flex: 1; align-items: stretch; }
+    .hm-col { grid-template-rows: auto 1fr 1fr; }
+    .hm-fld, .hm-res { display: flex; align-items: center; }
+    .hm-a { align-self: center; }
     /* 색 빼기: 홈 카드·메뉴의 아이콘/글자를 무채색으로 (선택·호버 시엔 검정/흰색 채움) */
     :root, :root[data-theme="dark"] { --hp: var(--text); --ho: var(--text); }
     .home-card[data-go="instructor"], :root[data-theme="dark"] .home-card[data-go="instructor"] { --c: var(--text); }
