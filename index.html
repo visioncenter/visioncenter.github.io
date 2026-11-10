@@ -3716,9 +3716,6 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
         previewEl.srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;">${html}</body></html>`;
         save();
       }
-      previewEl.addEventListener("load", () => {
-        try { previewEl.style.height = Math.ceil(previewEl.contentDocument.documentElement.getBoundingClientRect().height) + 4 + "px"; } catch (e) {} // scrollHeight는 iframe 높이보다 작아지지 않아 렌더마다 늘어나던 문제 → 실제 내용 높이로 계산
-      });
 
       ids.forEach((k) => el[k].addEventListener("input", () => {
         if (k === "enHours") hoursDirty = el.enHours.value.trim() !== "";
@@ -5378,16 +5375,22 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
 <script>
   /* 품의서 미리보기 높이를 내용 전체 길이에 맞춤(최소 = 화면 높이) → 안쪽 스크롤 없이 한눈에 */
   (() => {
-    ["apPreview", "rsPreview"].forEach((id) => {
+    // 숨겨진 탭(폭 0)에서 잰 높이는 글자가 한 줄씩 꺾여 엄청 길어짐 → 보일 때(폭이 바뀔 때) 다시 잼
+    const fitters = { apPreview: (h) => Math.max(640, innerHeight - 330, h + 8), rsPreview: (h) => Math.max(640, innerHeight - 330, h + 8), enPreview: (h) => Math.max(420, h + 4) };
+    Object.entries(fitters).forEach(([id, calc]) => {
       const f = document.getElementById(id); if (!f) return;
       const fit = () => {
         try {
+          if (!f.offsetWidth) return;
           const d = f.contentDocument; if (!d || !d.body) return;
+          f.style.height = "0px"; // 이전 높이 영향 없이 실제 내용 높이만 재기
           const h = Math.ceil(d.documentElement.getBoundingClientRect().height);
-          f.style.height = Math.max(640, innerHeight - 330, h + 8) + "px";
+          f.style.height = calc(h) + "px";
         } catch (e) {}
       };
-      f.addEventListener("load", () => { fit(); setTimeout(fit, 60); });
+      f.addEventListener("load", () => { fit(); setTimeout(fit, 80); });
+      let lastW = 0;
+      new ResizeObserver(() => { if (f.offsetWidth && f.offsetWidth !== lastW) { lastW = f.offsetWidth; fit(); } }).observe(f);
       addEventListener("resize", fit);
     });
   })();
