@@ -784,12 +784,20 @@
     #apPreviewCard, #rsPreviewCard { position: static; max-height: none; overflow: visible; }
     #apPreview, #rsPreview { min-height: calc(100vh - 330px) !important; }
 
-    /* 상단바: 사용 설명서 왼쪽 VisionCenter 슬로건 (다크모드는 반전+색상 유지) */
+    /* 상단바: 사용 설명서 왼쪽 VisionCenter 슬로건 (텍스트, 강조어 위 점) */
     .vc-slogan { display: none; }
     @media (min-width: 1100px) {
       .topbar .minirow { align-items: center; }
-      .vc-slogan { display: block; height: 32px; width: auto; margin-right: 14px; user-select: none; pointer-events: none; }
-      :root[data-theme="dark"] .vc-slogan { filter: invert(1) hue-rotate(180deg); opacity: .85; }
+      .vc-slogan {
+        display: block; margin-right: 16px; text-align: right; white-space: nowrap; user-select: none;
+        font-size: 12.5px; font-weight: 500; line-height: 1.5; letter-spacing: -.02em; color: var(--text);
+      }
+      .vc-slogan em {
+        font-style: normal; color: #3b6fe0;
+        -webkit-text-emphasis: filled dot #3b6fe0; text-emphasis: filled dot #3b6fe0;
+        -webkit-text-emphasis-position: over; text-emphasis-position: over right;
+      }
+      :root[data-theme="dark"] .vc-slogan em { color: #7aa7ff; -webkit-text-emphasis-color: #7aa7ff; text-emphasis-color: #7aa7ff; }
     }
     /* 사이드바 하단 슬로건 (다크모드는 흰색으로 반전) */
     .sidebar-slogan { display: none; }
@@ -987,7 +995,7 @@
         <div class="crumb" id="crumb"></div>
       </div>
       <div class="minirow" style="margin-top:2px; flex:0 0 auto;">
-        <img src="04_VisionCenter_Slogan.png" alt="구성원들이 ITCG의 Vision과 같은 꿈을 꾸고, 그 속에서 성장감을 느낄 수 있도록 지원하는 ITCG Vision Center" class="vc-slogan" />
+        <div class="vc-slogan" aria-label="VisionCenter 슬로건">구성원들이 ITCG의 Vision과 <em>같은</em> 꿈을 꾸고,<br>그 속에서 <em>성장</em>감을 느낄 수 있도록 지원하는 ITCG Vision Center</div>
         <button id="guideBtn" class="btn-sm">📖 사용 설명서</button>
         <button id="changeKeyBtn" class="btn-sm" title="Gemini API 키 변경">🔑 키 변경</button>
         <button id="themeToggle" class="btn-sm" title="밝게/어둡게 전환">🌙 다크</button>
