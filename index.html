@@ -774,12 +774,15 @@
     }
     #rosterListCard .ro-table-wrap { background: var(--card); }
 
-    /* --- 품의서 미리보기 넓고 길게: 미리보기 칸 비중을 키우고, 창 높이에 맞춰 늘림 --- */
-    @media (min-width: 1200px) {
+    /* --- 품의서 미리보기: 가로는 그룹웨어 품의서 실제 폭(672px+여백) 그대로, 세로는 내용 전체가 보이게 --- */
+    @media (min-width: 1440px) {
+      #panel-approval, #panel-result { grid-template-columns: minmax(0, 1fr) 756px; }
+    }
+    @media (min-width: 1200px) and (max-width: 1439px) {
       #panel-approval, #panel-result { grid-template-columns: minmax(340px, 1fr) minmax(0, 1.6fr); }
     }
-    #apPreviewCard, #rsPreviewCard { max-height: calc(100vh - 100px); display: flex; flex-direction: column; }
-    #apPreview, #rsPreview { flex: 1 1 auto; height: calc(100vh - 330px) !important; min-height: 640px !important; }
+    #apPreviewCard, #rsPreviewCard { position: static; max-height: none; overflow: visible; }
+    #apPreview, #rsPreview { min-height: calc(100vh - 330px) !important; }
     @media print {
       :root, :root[data-theme="dark"] {
         --bg: #fff; --card: #fff; --text: #191f28; --sub: #4e5968; --muted: #8b95a1;
@@ -5281,6 +5284,24 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
       const sz = bar.offsetWidth + "x" + bar.offsetHeight;
       if (sz !== lastSize) { lastSize = sz; move(true); }
     }).observe(bar);
+  })();
+</script>
+
+<script>
+  /* 품의서 미리보기 높이를 내용 전체 길이에 맞춤(최소 = 화면 높이) → 안쪽 스크롤 없이 한눈에 */
+  (() => {
+    ["apPreview", "rsPreview"].forEach((id) => {
+      const f = document.getElementById(id); if (!f) return;
+      const fit = () => {
+        try {
+          const d = f.contentDocument; if (!d || !d.body) return;
+          const h = Math.ceil(d.documentElement.getBoundingClientRect().height);
+          f.style.height = Math.max(640, innerHeight - 330, h + 8) + "px";
+        } catch (e) {}
+      };
+      f.addEventListener("load", () => { fit(); setTimeout(fit, 60); });
+      addEventListener("resize", fit);
+    });
   })();
 </script>
 </body>
