@@ -1679,10 +1679,14 @@
     }
 
     // 스트리밍 호출: 글이 도착하는 대로 onText(누적 텍스트)를 호출. 끝나면 {text, cites} 반환.
+    const thinkingUnsupported = new Set();
     async function callGeminiStream(model, apiKey, contents, onText, useSearch = true) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
       const body = { contents };
       if (useSearch) body.tools = [{ google_search: {} }]; // 키워드 추천 등은 검색 없이 더 빠르게
+      // 검색 없는 작업(품의서 채우기·문서 읽기 등)은 '깊게 생각하기'를 낮춰 속도를 크게 올림
+      // (Gemini 3 기본값은 high라 PDF가 크면 1~2분 넘게 걸리거나 504가 남). 모델이 이 옵션을 거부하면 빼고 다시 보냄.
+      if (!useSearch && !thinkingUnsupported.has(model)) body.generationConfig = { thinkingConfig: { thinkingLevel: "low" } };
       // 응답이 멈춘 채 안 오는 경우 대비: 첫 응답 90초, 조각 사이 60초 넘게 조용하면 끊고 재시도
       const ctrl = new AbortController();
       let idleTimer = setTimeout(() => ctrl.abort(), 90000);
@@ -1709,6 +1713,10 @@
           const ri = (err.details || []).find((d) => /RetryInfo/.test(d["@type"] || ""));
           if (ri && ri.retryDelay) retryDelayMs = Math.round(parseFloat(ri.retryDelay) * 1000) || 0; // "31s" → 31000
         } catch (_) {}
+        if (res.status === 400 && body.generationConfig && /thinking/i.test(detail)) {
+          thinkingUnsupported.add(model);
+          return callGeminiStream(model, apiKey, contents, onText, useSearch);
+        }
         throw makeError(detail, res.status, retryDelayMs);
       }
       const reader = res.body.getReader();
@@ -1780,6 +1788,7 @@
               if (!bestErr || !bestErr.retryable) bestErr = e; // '모델 없음'보다 실제 원인을 보여주기 위해 기억
               if (!e.retryable) throw friendlyError(e);    // 키 오류 등은 즉시 표시
               if (e.quota) { say(`${model} 사용량 한도 → 다른 모델로 바꿔서 시도 중…`); break; } // 한도는 모델별이라 기다리지 말고 넘김
+              if (e.status === 504) { say(`${model} 응답이 너무 오래 걸려요 → 더 가벼운 모델로 바꿔서 시도 중…`); break; } // 무거운 요청은 같은 모델 반복해도 똑같음
               if (attempt === 3) break;
               const wait = Math.min(e.retryDelayMs || (2000 * attempt + Math.random() * 1000), 15000);
               say(`Gemini 서버 혼잡(${e.status || "503"}) — ${Math.ceil(wait / 1000)}초 뒤 다시 시도… (${model} ${attempt + 1}/3)`);
