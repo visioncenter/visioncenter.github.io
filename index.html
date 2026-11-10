@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <title>ITCEN VisionCenter 교육 기획·운영 AI Agent</title>
   <style>
     /* 색을 전부 변수로 두어 다크모드를 한 곳에서 전환. 라이트가 기본값. (토스 스타일) */
@@ -580,162 +581,180 @@
     .en-ai .btn-sm { white-space: nowrap; margin: 0; align-self: center; }
 
     /* ================================================================
-       Glass UI — 그라데이션 배경 + Glassmorphism 카드 (기존 규칙 위에 덮어쓰기)
-       색은 변수만 바꾸고, 유리 효과는 바깥 카드(.card 등)에만 줌
+       Clean UI — 회색 바탕 위 흰 앱 셸(사이드바 + 상단 경로바), 모노톤 + 검정 주버튼
+       화면 전체 폭을 사용. 기존 규칙 위에 덮어쓰기
        ================================================================ */
     :root {
-      --bg: #e9f0fc; --card: rgba(255, 255, 255, .74); --text: #0f1b33; --sub: #44536b; --muted: #7d8aa0;
-      --line: rgba(30, 60, 120, .14); --soft-line: rgba(30, 60, 120, .09); --accent: #1f6bff; --accent-2: #0a4fd8;
-      --input-bg: rgba(255, 255, 255, .72); --soft: rgba(31, 107, 255, .09); --table-head: rgba(255, 255, 255, .55); --table-line: rgba(30, 60, 120, .13);
-      --bar-bg: rgba(30, 60, 120, .10); --qa-bg: rgba(255, 255, 255, .42);
-      --warn-bg: rgba(255, 255, 255, .45); --warn-line: rgba(30, 60, 120, .12); --chip-bg: rgba(255, 255, 255, .55);
-      --glass-border: rgba(255, 255, 255, .75);
-      --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .9);
-      --shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 18px 44px -20px rgba(16, 52, 140, .30), 0 2px 8px -4px rgba(16, 52, 140, .10);
-      --shadow-sm: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 4px 14px -8px rgba(16, 52, 140, .18);
-      --ring: 0 0 0 4px rgba(31, 107, 255, .16);
-      --btn-grad: linear-gradient(135deg, #2f7bff 0%, #1f5fff 45%, #0a3fd0 100%);
-      --blur: blur(22px) saturate(160%);
+      --bg: #f2f3f5; --card: #ffffff; --text: #191f28; --sub: #4e5968; --muted: #8b95a1;
+      --line: #e5e8eb; --soft-line: #eef0f3; --accent: #3182f6; --accent-2: #1b64da;
+      --input-bg: #ffffff; --soft: #f2f4f6; --table-head: #f9fafb; --table-line: #e5e8eb;
+      --hint: #8b95a1; --bar-bg: #eef0f3; --qa-bg: #f9fafb;
+      --warn-bg: #f9fafb; --warn-line: #eef0f3; --warn-text: #4e5968; --chip-bg: #f2f4f6;
+      --primary: #191f28; --primary-text: #ffffff; --hover: #f9fafb; --select: #f2f4f6;
+      --shell: #ffffff; --shell-line: #e8ebf0;
+      --shadow: none; --shadow-sm: none;
+      --ring: 0 0 0 3px rgba(25, 31, 40, .08);
+      --font: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
     }
     :root[data-theme="dark"] {
-      --bg: #030a1f; --card: rgba(14, 26, 60, .66); --text: #eaf0fc; --sub: #a8b7d2; --muted: #6f82a6;
-      --line: rgba(140, 180, 255, .16); --soft-line: rgba(140, 180, 255, .10); --accent: #5b9dff; --accent-2: #8fbcff;
-      --input-bg: rgba(6, 14, 38, .50); --soft: rgba(80, 140, 255, .14); --table-head: rgba(255, 255, 255, .05); --table-line: rgba(140, 180, 255, .14);
-      --bar-bg: rgba(255, 255, 255, .08); --qa-bg: rgba(255, 255, 255, .04);
-      --warn-bg: rgba(255, 255, 255, .04); --warn-line: rgba(140, 180, 255, .14); --warn-text: #a8b7d2; --chip-bg: rgba(255, 255, 255, .06);
-      --glass-border: rgba(160, 195, 255, .18);
-      --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .08);
-      --shadow: 0 1px 0 rgba(255, 255, 255, .07) inset, 0 24px 50px -24px rgba(0, 0, 0, .7);
-      --shadow-sm: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 6px 16px -10px rgba(0, 0, 0, .6);
-      --ring: 0 0 0 4px rgba(91, 157, 255, .24);
-      --btn-grad: linear-gradient(135deg, #3d8bff 0%, #1f5fff 50%, #0b3fc7 100%);
+      --bg: #0c0d10; --card: #17181c; --text: #ececef; --sub: #a3a8b3; --muted: #6f7480;
+      --line: #2a2c33; --soft-line: #222429; --accent: #5b9dff; --accent-2: #8fbcff;
+      --input-bg: #1c1d22; --soft: #22242a; --table-head: #1c1d22; --table-line: #2a2c33;
+      --hint: #6f7480; --bar-bg: #2a2c33; --qa-bg: #1c1d22;
+      --warn-bg: #1c1d22; --warn-line: #2a2c33; --warn-text: #a3a8b3; --chip-bg: #22242a;
+      --primary: #ececef; --primary-text: #111214; --hover: #1e1f24; --select: #25272d;
+      --shell: #141518; --shell-line: #24262c;
+      --ring: 0 0 0 3px rgba(255, 255, 255, .08);
     }
 
-    /* --- 배경: 고정 그라데이션 메시 + 흐르는 빛 띠 --- */
     html { background: var(--bg); }
-    body { background: transparent !important; position: relative; }
-    body::before, body::after { content: ""; position: fixed; pointer-events: none; z-index: -1; }
-    body::before {
-      inset: 0;
-      background:
-        radial-gradient(900px 600px at 0% 0%, rgba(120, 170, 255, .40), transparent 60%),
-        radial-gradient(800px 600px at 100% 10%, rgba(160, 140, 255, .25), transparent 60%),
-        radial-gradient(900px 700px at 80% 100%, rgba(90, 200, 255, .30), transparent 60%),
-        radial-gradient(700px 500px at 10% 100%, rgba(31, 107, 255, .22), transparent 60%),
-        linear-gradient(160deg, #f4f8ff 0%, #e6eefc 50%, #dfe9fb 100%);
-    }
-    body::after {
-      left: -30vw; top: 30vh; width: 160vw; height: 46vh; border-radius: 50%;
-      background: linear-gradient(90deg, transparent 0%, rgba(31, 107, 255, .25) 30%, rgba(90, 170, 255, .32) 55%, rgba(31, 107, 255, .18) 75%, transparent 100%);
-      filter: blur(70px); transform: rotate(-14deg);
-      animation: glass-drift 26s ease-in-out infinite alternate;
-    }
-    :root[data-theme="dark"] body::before {
-      background:
-        radial-gradient(1100px 700px at 100% 40%, rgba(30, 90, 230, .42), transparent 60%),
-        radial-gradient(900px 600px at 0% 90%, rgba(20, 70, 210, .34), transparent 60%),
-        radial-gradient(700px 500px at 20% 0%, rgba(10, 30, 90, .9), transparent 70%),
-        linear-gradient(170deg, #020716 0%, #04103a 55%, #06205f 100%);
-    }
-    :root[data-theme="dark"] body::after {
-      background: linear-gradient(90deg, transparent 0%, rgba(25, 95, 255, .40) 30%, rgba(70, 140, 255, .48) 55%, rgba(25, 95, 255, .32) 75%, transparent 100%);
-    }
-    @keyframes glass-drift {
-      from { transform: rotate(-14deg) translate3d(-4vw, 0, 0); }
-      to   { transform: rotate(-8deg) translate3d(4vw, -6vh, 0); }
-    }
-    @media (prefers-reduced-motion: reduce) { body::after { animation: none; } }
-    .gate-screen { background: transparent; }
+    body { background: var(--bg) !important; padding: 16px; font-family: var(--font); font-size: 14px; letter-spacing: -.01em; }
+    .gate-screen { background: var(--bg); }
 
-    /* --- 유리 패널 --- */
-    .card, .gate-card, .maintabs, .topbar, .modal-card, .notice-frame-wrap {
-      background: var(--card);
-      border: 1px solid var(--glass-border);
-      -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-      box-shadow: var(--shadow);
-    }
-    .card { border-radius: 24px; }
-    .card:hover { box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent); }
-    .gate-card { border-radius: 28px; padding: 36px; }
-    .modal-overlay { background: rgba(4, 10, 30, .35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-    .modal-card { border-radius: 24px; }
-
-    /* 상단바: 유리 바 */
-    .topbar {
-      border-radius: 22px; padding: 16px 20px; margin-bottom: 18px; align-items: center;
-    }
-    .topbar .brand-logo { margin-bottom: 8px; height: 26px; }
-    .topbar h1 { margin: 0; }
-
-    /* 로고: 라이트=원본, 다크=흰 로고 */
+    /* 로고: 라이트=검정 로고, 다크=흰 로고 */
     .brand-logo.logo-dark { display: none; }
     :root[data-theme="dark"] .brand-logo { background: none !important; padding: 0 !important; }
     :root[data-theme="dark"] .brand-logo.logo-light { display: none; }
     :root[data-theme="dark"] .brand-logo.logo-dark { display: block; }
-    .gate-card .brand-logo { margin: 0 auto 16px; }
 
-    h1 { background: linear-gradient(90deg, var(--text) 0%, var(--text) 45%, var(--accent) 100%); -webkit-background-clip: text; background-clip: text; }
+    h1 { background: none; color: var(--text); -webkit-background-clip: initial; background-clip: initial; font-weight: 800; }
 
-    /* 왼쪽 메뉴 */
-    .maintabs { border-radius: 20px; }
-    .maintabs .maintab { border-radius: 12px; }
-    .maintabs .maintab:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
-    .maintabs .maintab.active {
-      color: #fff; background: var(--btn-grad);
-      box-shadow: 0 8px 18px -8px rgba(31, 95, 255, .7), inset 0 1px 0 rgba(255, 255, 255, .25);
-    }
-    .reportnav { background: var(--input-bg); border-color: var(--soft-line); }
-    .reportnav .tabbtn.active { background: var(--btn-grad); color: #fff; }
+    /* 카드: 평평하게(그림자 없음, 얇은 선) */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; box-shadow: none; }
+    .gate-card { background: var(--card); border: 1px solid var(--shell-line); border-radius: 20px; box-shadow: 0 20px 60px -30px rgba(0, 0, 0, .18); }
+    .modal-card { border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 24px 64px -16px rgba(0, 0, 0, .25); }
+    .modal-overlay { background: rgba(0, 0, 0, .4); backdrop-filter: none; }
 
     /* 입력칸 */
+    label.field { font-size: 13px; font-weight: 700; color: var(--text); }
     input[type="text"], input[type="password"], select, textarea,
-    .en-form input[type="date"], .en-form input[type="time"], .ro-form input[type="date"], .ro-form input[type="time"], .bfield {
-      border: 1px solid var(--line); box-shadow: var(--glass-hi);
+    .en-form input[type="date"], .en-form input[type="time"], .ro-form input[type="date"], .ro-form input[type="time"] {
+      border: 1px solid var(--line); border-radius: 8px; background: var(--input-bg); font-size: 14px; padding: 10px 12px;
     }
-    input:focus, select:focus, textarea:focus { background: color-mix(in srgb, var(--input-bg) 40%, var(--card)); }
-    :root[data-theme="dark"] select option { background: #0b1636; color: var(--text); }
+    input[type="text"]:hover, input[type="password"]:hover, select:hover, textarea:hover { border-color: color-mix(in srgb, var(--text) 25%, var(--line)); }
+    input:focus, select:focus, textarea:focus { border-color: var(--text); background: var(--input-bg); box-shadow: var(--ring); }
+    .bfield { border: 1px solid var(--line); border-radius: 10px; background: var(--input-bg); }
+    .bfield:focus-within { border-color: var(--text); background: var(--input-bg); }
+    input[type="checkbox"], .checks input { accent-color: var(--primary); }
+    :root[data-theme="dark"] select option { background: var(--card); color: var(--text); }
 
-    /* 버튼 */
-    button { background: var(--btn-grad); border-radius: 14px; box-shadow: 0 10px 22px -10px rgba(31, 95, 255, .75), inset 0 1px 0 rgba(255, 255, 255, .25); }
-    button:disabled { background: var(--muted); }
+    /* 버튼: 주버튼 검정, 보조버튼 흰 바탕 + 회색 선 */
+    button { background: var(--primary); color: var(--primary-text); border-radius: 8px; padding: 11px 20px; font-size: 14px; box-shadow: none; }
+    button:hover { filter: none; background: color-mix(in srgb, var(--primary) 86%, var(--bg)); }
+    button:active { transform: none; box-shadow: none; }
+    button:disabled { background: var(--line); color: var(--muted); opacity: 1; }
+    button.ghost { background: var(--card); color: var(--text); border: 1px solid var(--line); }
+    .solid-btn { background: var(--primary); color: var(--primary-text); border-radius: 10px; }
     .btn-sm {
-      background: color-mix(in srgb, var(--card) 70%, transparent); color: var(--accent);
-      border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--glass-border));
-      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+      padding: 8px 13px; font-size: 13px; font-weight: 600;
     }
-    .btn-sm:hover { background: var(--soft); }
-    .btn-sm.solid, .btn-sm.active, .solid-btn { background: var(--btn-grad); color: #fff; border-color: transparent; }
-    .btn-sm.solid:hover { background: var(--btn-grad); }
-    button.ghost { background: transparent; }
+    .btn-sm:hover { background: var(--hover); transform: none; box-shadow: none; }
+    .btn-sm.solid, .btn-sm.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
+    .btn-sm.solid:hover { background: color-mix(in srgb, var(--primary) 86%, var(--bg)); filter: none; }
+    .toolbar a, #report a, #sources a, .guide-steps a { color: var(--accent); }
 
-    /* 안쪽 블록(중첩 유리 대신 반투명 면) */
-    #report > .sec, #report > .chart, .instr-card, .en-item, #followup .qa, .rs-info, .gate-help, .pdf-dropzone {
-      background: var(--input-bg); border: 1px solid var(--soft-line); box-shadow: var(--glass-hi);
+    /* 안쪽 블록 */
+    #report > .sec, #report > .chart, .instr-card, .en-item, #followup .qa, .rs-info, .gate-help {
+      background: var(--card); border: 1px solid var(--line); box-shadow: none; border-radius: 12px;
     }
-    #report .sec.summary { background: var(--soft); }
-    .instr-card { border-radius: 20px; }
-    .instr-card .instr-stat { background: var(--chip-bg); }
-    .bar > span, .search-progress-fill { background: var(--btn-grad); }
-    .guide-tabs .guide-tab.active, .guide-steps li::before { background: var(--btn-grad); }
-    .ro-table th { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
-    #noticeFrame { background: transparent; }
-    .notice-frame-bar { border-bottom-color: var(--soft-line); }
+    #report .sec.summary { background: var(--soft); border-left: 3px solid var(--primary); }
+    #report .sec > h3, #report .chart .chart-title, #followup .qa .q, #followup .qa .a h3 { color: var(--text); }
+    #report ul li::before { background: var(--muted); }
+    #report ul li strong.term { background: var(--soft); color: var(--text); }
+    .instr-card { background: var(--hover); border-color: var(--soft-line); }
+    .instr-card .instr-stat { background: var(--card); }
+    .pdf-dropzone { background: var(--hover); border: 1px dashed var(--line); border-radius: 10px; }
+    .pdf-dropzone:hover, .pdf-dropzone.dragover { border-color: var(--text); background: var(--soft); color: var(--text); }
+    .bar > span, .search-progress-fill { background: var(--primary); }
+    .search-spinner { border-top-color: var(--primary); }
+    .guide-steps li::before { background: var(--primary); color: var(--primary-text); }
+    .guide-tabs .guide-tab { border-radius: 8px; }
+    .guide-tabs .guide-tab.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
+    .section-title { color: var(--text); font-size: 14px; font-weight: 800; }
+    .section-title::before { display: none; }
+    .chip { border-radius: 8px; }
+    .chip:hover { border-color: var(--text); color: var(--text); background: var(--hover); }
+    .checks label:hover { background: var(--hover); }
+    .en-ai textarea { background: var(--hover) !important; border-color: var(--line) !important; }
+    .reportnav { background: var(--soft); border: none; border-radius: 10px; padding: 4px; }
+    .reportnav .tabbtn { border-radius: 7px; }
+    .reportnav .tabbtn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
+    .reportnav .tabbtn:hover { background: transparent; color: var(--text); }
 
+    /* --- 앱 셸: 사이드바 + 상단 경로바, 화면 전체 폭 --- */
+    .sidebar-brand { display: none; }
+    .crumb { display: none; }
+    @media (min-width: 900px) {
+      body { padding: 16px; }
+      .wrap {
+        max-width: none; display: grid; grid-template-columns: 236px minmax(0, 1fr); grid-template-rows: auto 1fr;
+        column-gap: 0; align-items: start; min-height: calc(100vh - 32px);
+        background: var(--shell); border: 1px solid var(--shell-line); border-radius: 20px; overflow: clip;
+      }
+      .wrap > * { grid-column: 2; }
+      .wrap > .tabpanel { padding: 24px 28px 32px; }
 
-    /* --- 탭 이동 슬라이딩 효과: 은은한 하이라이트가 선택한 탭으로 미끄러지듯 이동 --- */
+      .wrap > .maintabs {
+        grid-column: 1; grid-row: 1 / span 99; align-self: stretch; position: sticky; top: 0;
+        height: calc(100vh - 34px); overflow-y: auto;
+        display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 22px 14px 16px;
+        background: var(--shell); border: none; border-right: 1px solid var(--shell-line); border-radius: 0;
+      }
+      .sidebar-brand { display: block; padding: 2px 8px 22px; position: relative; z-index: 1; }
+      .sidebar-brand .brand-logo { height: 22px; margin: 0 0 8px; }
+      .sidebar-brand .brand-name { font-size: 12px; color: var(--muted); font-weight: 600; line-height: 1.45; }
+      .maintabs .maintab-group { padding: 14px 10px 6px; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+      .maintabs .maintab-group:first-of-type { padding-top: 0; }
+      .maintabs .maintab-group.sep { margin: 10px 8px; background: var(--shell-line); }
+      .maintabs .maintab {
+        padding: 9px 10px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--sub);
+      }
+      .maintabs .maintab:hover { background: var(--hover); color: var(--text); }
+      .maintabs .maintab-help {
+        margin: auto 0 0; border-top: none; border-radius: 8px; padding: 9px 10px; font-size: 13px; font-weight: 500; color: var(--sub);
+      }
+      .maintabs .maintab-help:hover { background: var(--hover); color: var(--text); }
+
+      .wrap > .topbar {
+        grid-column: 2; grid-row: 1; position: sticky; top: 0; z-index: 5;
+        display: flex; align-items: center; justify-content: space-between;
+        margin: 0; padding: 12px 20px 12px 28px; min-height: 56px;
+        background: color-mix(in srgb, var(--shell) 92%, transparent); backdrop-filter: blur(8px);
+        border: none; border-bottom: 1px solid var(--shell-line); border-radius: 0;
+      }
+      .topbar > div:first-child .brand-logo, :root[data-theme="dark"] .topbar > div:first-child .brand-logo, .topbar > div:first-child h1 { display: none; }
+      .crumb { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--sub); font-weight: 500; }
+      .crumb b { color: var(--text); font-weight: 700; }
+      .crumb .gt { color: var(--muted); font-size: 12px; }
+      .topbar .minirow { margin: 0 !important; gap: 6px; }
+      .topbar .btn-sm { background: var(--soft); border-color: transparent; padding: 7px 12px; }
+      .topbar .btn-sm:hover { background: var(--line); }
+    }
+    @media (max-width: 899px) {
+      .maintabs { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+      .topbar { border-bottom: 1px solid var(--line); }
+    }
+
+    /* 왼쪽 메뉴 선택 표시: 회색 하이라이트가 미끄러지듯 이동 */
     .maintabs { position: relative; }
     .maintabs .maintab, .maintabs .maintab-group, .maintabs .maintab-help { position: relative; z-index: 1; }
-    .maintabs.has-slider .maintab.active { background: transparent; box-shadow: none; color: var(--accent); }
+    .maintabs.has-slider .maintab.active { background: transparent; box-shadow: none; color: var(--text); font-weight: 700; }
     .tab-slider {
       position: absolute; z-index: 0; pointer-events: none; left: 0; top: 0; width: 0; height: 0; opacity: 0;
-      border-radius: 12px;
-      background: color-mix(in srgb, var(--accent) 13%, transparent);
-      border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
-      transition: top .32s cubic-bezier(.3, .7, .2, 1), left .32s cubic-bezier(.3, .7, .2, 1),
-                  width .32s cubic-bezier(.3, .7, .2, 1), height .32s cubic-bezier(.3, .7, .2, 1), opacity .2s;
+      border-radius: 8px; background: var(--select);
+      transition: top .3s cubic-bezier(.3, .7, .2, 1), left .3s cubic-bezier(.3, .7, .2, 1),
+                  width .3s cubic-bezier(.3, .7, .2, 1), height .3s cubic-bezier(.3, .7, .2, 1), opacity .2s;
     }
     .tab-slider.no-anim { transition: none; }
     @media (prefers-reduced-motion: reduce) { .tab-slider { transition: none; } }
+
+    /* 미리보기·공지문 */
+    .en-preview { border-radius: 10px; border-color: var(--line); }
+    .notice-frame-wrap { border: 1px solid var(--line); border-radius: 14px; box-shadow: none; background: var(--card); }
+    #noticeFrame { height: calc(100vh - 150px); }
+    #apPreviewCard, #rsPreviewCard, #stPreviewCard { top: 72px; max-height: calc(100vh - 110px); }
+
     @media print {
       :root, :root[data-theme="dark"] {
         --bg: #fff; --card: #fff; --text: #191f28; --sub: #4e5968; --muted: #8b95a1;
@@ -745,8 +764,8 @@
       :root[data-theme="dark"] .brand-logo.logo-light { display: block; }
       :root[data-theme="dark"] .brand-logo.logo-dark { display: none; }
       html, body { background: #fff !important; }
-      body::before, body::after { display: none; }
-      .card { -webkit-backdrop-filter: none; backdrop-filter: none; background: #fff; border: none; }
+      .wrap { border: none !important; }
+      .card { background: #fff; border: none; }
     }
   </style>
 </head>
@@ -754,7 +773,7 @@
   <!-- 초기 진입 화면: Gemini API 키를 입력해야 앱 화면이 나타남(저장된 키가 있으면 자동 통과) -->
   <div id="gateScreen" class="gate-screen">
     <div class="gate-card">
-      <img src="01_ITCEN_Logo_Basic.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" />
+      <img src="01_ITCEN_Logo_Black.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" />
       <h1>ITCEN VisionCenter 교육 기획·운영 AI Agent</h1>
       <p class="sub">시작하려면 Gemini API 키를 입력하세요.</p>
       <details class="gate-help" open>
@@ -787,8 +806,9 @@
   <div class="wrap" id="appMain" style="display:none;">
     <div class="topbar no-print">
       <div>
-        <img src="01_ITCEN_Logo_Basic.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" />
+        <img src="01_ITCEN_Logo_Black.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" />
         <h1>ITCEN VisionCenter 교육 기획·운영 AI Agent</h1>
+        <div class="crumb" id="crumb"></div>
       </div>
       <div class="minirow" style="margin-top:2px; flex:0 0 auto;">
         <button id="guideBtn" class="btn-sm">📖 사용 설명서</button>
@@ -798,18 +818,19 @@
     </div>
 
     <div class="maintabs no-print">
+      <div class="sidebar-brand"><img src="01_ITCEN_Logo_Black.png" alt="ITCEN" class="brand-logo logo-light" /><img src="01_ITCEN_Logo_White.png" alt="ITCEN" class="brand-logo logo-dark" /><div class="brand-name">VisionCenter<br>교육 기획·운영 AI Agent</div></div>
       <span class="maintab-group">교육 기획</span>
-      <button type="button" class="maintab active" data-panel="research">📊 교육 조사</button>
-      <button type="button" class="maintab" data-panel="instructor">🎤 강사·강의 찾기</button>
+      <button type="button" class="maintab active" data-panel="research">교육 조사</button>
+      <button type="button" class="maintab" data-panel="instructor">강사·강의 찾기</button>
       <span class="maintab-group">교육 운영</span>
-      <button type="button" class="maintab" data-panel="enroll">✉️ 입과 안내문</button>
-      <button type="button" class="maintab" data-panel="roster">📋 출석부·명단</button>
-      <button type="button" class="maintab" data-panel="approval">📝 실시 품의서</button>
-      <button type="button" class="maintab" data-panel="result">📑 결과 품의서</button>
-      <button type="button" class="maintab" data-panel="settle">💰 교육비 정산</button>
+      <button type="button" class="maintab" data-panel="enroll">입과 안내문</button>
+      <button type="button" class="maintab" data-panel="roster">출석부·명단</button>
+      <button type="button" class="maintab" data-panel="approval">실시 품의서</button>
+      <button type="button" class="maintab" data-panel="result">결과 품의서</button>
+      <button type="button" class="maintab" data-panel="settle">교육비 정산</button>
       <span class="maintab-group sep"></span>
-      <button type="button" class="maintab" data-panel="notice">🖼️ 공지문 메이커</button>
-      <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">📖 이 탭 사용법</button>
+      <button type="button" class="maintab" data-panel="notice">공지문 메이커</button>
+      <button type="button" class="maintab-help" id="tabHelpBtn" title="지금 보고 있는 탭의 사용법">이 탭 사용법</button>
     </div>
 
     <div id="panel-research" class="tabpanel">
@@ -5219,7 +5240,17 @@ ${same && ap.target ? `[교육대상] ${ap.target}\n` : ""}${same && ap.intro ? 
       Object.assign(sl.style, { left: b.offsetLeft + "px", top: b.offsetTop + "px", width: b.offsetWidth + "px", height: b.offsetHeight + "px", opacity: 1 });
       if (instant) { sl.offsetWidth; sl.classList.remove("no-anim"); }
     };
-    new MutationObserver(() => move(false)).observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
+    // 상단 경로바: "그룹 > 탭 이름"
+    const crumb = document.getElementById("crumb");
+    const setCrumb = () => {
+      const b = bar.querySelector(".maintab.active"); if (!crumb || !b) return;
+      let g = b.previousElementSibling;
+      while (g && !(g.classList.contains("maintab-group") && !g.classList.contains("sep") && g.textContent.trim())) g = g.previousElementSibling;
+      const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+      crumb.innerHTML = (g ? `<span>${esc(g.textContent.trim())}</span><span class="gt">›</span>` : "") + `<b>${esc(b.textContent.trim())}</b>`;
+    };
+    setCrumb();
+    new MutationObserver(() => { move(false); setCrumb(); }).observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
     let lastSize = "";
     new ResizeObserver(() => {
       const sz = bar.offsetWidth + "x" + bar.offsetHeight;
