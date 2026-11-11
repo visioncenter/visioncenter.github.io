@@ -105,53 +105,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hl-pop .row button{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:12px}
 .hl-pop .pad{display:flex;gap:4px;margin-top:8px;font-size:11.5px;color:var(--ink3);align-items:center}
 .tb.on{background:var(--accent);color:#fff}
-#mail.move-mode [data-field],#mail.move-mode [data-item],#mail.move-mode [data-block]{cursor:move;user-select:none}
-#mail.move-mode [data-block]:hover{outline:none}
-#mail.move-mode .mv-hover{outline:1.5px dashed var(--accent)!important;outline-offset:2px}
-#mail.move-mode .mv-sel{outline:2px solid var(--accent)!important;outline-offset:2px}
-#mail.move-mode [data-ph]:empty::before{content:none}
-.mv-bar{position:sticky;top:0;z-index:20;display:none;align-items:center;gap:8px;margin:0 auto 10px;max-width:720px;background:#16191F;color:#fff;border-radius:10px;padding:7px 12px;font-size:12px}
-.mv-bar.on{display:flex}
-.mv-bar b{color:#fff}.mv-bar span{color:#A9B0BE}
-.mv-bar button{margin-left:auto;background:#2B303A;color:#fff;border:0;border-radius:7px;padding:5px 9px;font-size:12px;cursor:pointer}
-.mv-bar button+button{margin-left:0}
-.tb-color{position:relative;height:32px;width:34px;border-radius:8px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink2)}
-.tb-color:hover{background:var(--line2)}
-.tb-color b{font-size:14px;line-height:1}
-.tb-color i{display:block;width:16px;height:3px;border-radius:2px;margin-top:2px}
-.tb-color input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.tb-right{margin-left:auto}
-.canvas{overflow:auto;padding:24px 20px 80px;background:radial-gradient(circle at 1px 1px,#DADDE5 1px,transparent 0) 0 0/18px 18px,var(--bg)}
-.frame{margin:0 auto;width:760px;max-width:100%;transition:width .25s}
-.frame.mobile{width:400px}
-.edit-tip{max-width:760px;margin:0 auto 12px;font-size:12px;color:var(--ink3);text-align:center}
-#mail [data-field]{outline:none;border-radius:3px}
-#mail [data-field]:hover{box-shadow:0 0 0 2px rgba(59,130,246,.22)}
-#mail [data-field]:focus{box-shadow:0 0 0 2px rgba(59,130,246,.65)}
-#mail .ph-img{display:inline-block}
-.modal-bg{position:fixed;inset:0;background:rgba(15,20,30,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
-.modal-bg.on{display:flex}
-.modal{background:#fff;border-radius:16px;width:min(780px,100%);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
-.modal.sm{width:min(420px,100%)}
-.modal-h{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;font-weight:700}
-.modal-h .x{margin-left:auto}
-.modal-b{padding:16px 20px;overflow:auto}
-.modal-f{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
-.code{width:100%;height:50vh;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;border:1px solid var(--line);border-radius:10px;padding:12px;background:#0F172A;color:#E2E8F0;resize:none}
-.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#16191F;color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-#exportBuf,#measure{position:fixed;left:-99999px;top:0;width:700px}
-@media (max-width:1000px){.main{grid-template-columns:1fr}.app{height:auto}.panel{border-right:0}}
-
-.frame{position:relative}
-.edit-tip kbd{font-family:inherit;background:#fff;border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:11px}
-#mail [data-ph]:empty::before{content:attr(data-ph);color:#B4BAC6;font-weight:500;pointer-events:none}
-#mail [data-block]{position:relative;cursor:default}
-#mail [data-block]:hover{outline:1.5px dashed rgba(31,91,255,.35);outline-offset:6px;border-radius:4px}
-#mail [data-imgt]{cursor:pointer}
-#ov{position:absolute;inset:0;pointer-events:none;display:none;z-index:5}
-#ov.on{display:block}
-.ov-box{position:absolute;border:2px solid var(--accent);border-radius:10px;box-shadow:0 0 0 4px var(--accent-soft)}
+#mail .mv-sel{outline:2px solid var(--accent)!important;outline-offset:2px}
+body.mv-dragging,body.mv-dragging *{user-select:none!important;-webkit-user-select:none!important}
+body.mv-dragging.mv-moving,body.mv-dragging.mv-moving *{cursor:grabbing!important}
+.mv-marq{position:fixed;display:none;z-index:50;border:1.5px solid var(--accent);background:rgba(31,91,255,.08);pointer-events:none;border-radius:3px}
+.mv-bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 auto 10px;max-width:760px;background:#16191F;color:#fff;border-radius:10px;padding:6px 8px 6px 12px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.mv-bar b{color:#fff;margin-right:4px}.mv-bar #mvInfo{color:#A9B0BE;margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.mv-bar button{background:#2B303A;color:#fff;border:0;border-radius:7px;height:28px;min-width:28px;padding:0 8px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.mv-bar button:hover:not(:disabled){background:#3A404C}
+.mv-bar button:disabled{opacity:.35;cursor:default}
+.mv-bar button svg{width:16px;height:16px}
+.mv-bar .mv-sep{width:1px;height:18px;background:#3A404C;margin:0 3px}
 .ov-bar{position:absolute;display:flex;align-items:center;gap:2px;background:#16191F;color:#fff;border-radius:10px;padding:4px;pointer-events:auto;box-shadow:0 6px 20px rgba(0,0,0,.18);white-space:nowrap}
 .ov-name{font-size:12px;font-weight:700;padding:0 8px 0 6px;color:#fff}
 .ov-tip{font-size:11px;color:#A9B0BE;padding:0 8px}
@@ -283,11 +247,11 @@ button,input,select,textarea{font:inherit;color:inherit}
         <button class="tb" data-cmd="justifyCenter" title="가운데"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M5 18h14"/></svg></button>
         <button class="tb" id="btnLink" title="링크"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>
         <button class="tb" data-cmd="removeFormat" title="서식 지우기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/><path d="M3 21L21 3" stroke="#E1544B"/></svg></button>
-        <div class="tb-right"><button class="tb" id="btnMove" title="요소를 끌어서 자유롭게 위치 이동 (PPT처럼)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>자유 이동</button><div class="seg" id="segDevice" style="width:140px"><button data-v="pc" class="on">PC</button><button data-v="mobile">모바일</button></div></div>
+        <div class="tb-right"><div class="seg" id="segDevice" style="width:140px"><button data-v="pc" class="on">PC</button><button data-v="mobile">모바일</button></div></div>
       </div>
       <div class="canvas">
         <div class="edit-tip">블록을 클릭해 선택 → 위 툴바로 이동·복제·삭제·옵션 · <b>+</b>로 블록 추가 · 항목에 마우스를 올리면 항목 추가/삭제 · 이미지는 클릭해서 교체 · <kbd>Del</kbd> 삭제 <kbd>Ctrl</kbd>+<kbd>Z</kbd> 되돌리기</div>
-        <div class="mv-bar" id="mvBar"><b>✥ 자유 이동</b><span id="mvInfo">글자·카드·블록을 끌어서 옮기세요 · 방향키 1px, Shift+방향키 10px · Shift+끌기 = 블록 통째로</span><button id="mvReset">선택 위치 초기화</button><button id="mvResetAll">모두 초기화</button><button id="mvDone">완료</button></div>
+        <div class="mv-bar" id="mvBar"><b>✥ 배치</b><span id="mvInfo"></span><button data-al="left" title="왼쪽 맞춤" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 3v18"/><rect x="7" y="6" width="12" height="4" rx="1"/><rect x="7" y="14" width="7" height="4" rx="1"/></svg></button><button data-al="center" title="가운데 맞춤 (가로)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18"/><rect x="5" y="6" width="14" height="4" rx="1"/><rect x="8" y="14" width="8" height="4" rx="1"/></svg></button><button data-al="right" title="오른쪽 맞춤" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 3v18"/><rect x="5" y="6" width="12" height="4" rx="1"/><rect x="10" y="14" width="7" height="4" rx="1"/></svg></button><span class="mv-sep"></span><button data-al="top" title="위쪽 맞춤" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 4h18"/><rect x="6" y="7" width="4" height="12" rx="1"/><rect x="14" y="7" width="4" height="7" rx="1"/></svg></button><button data-al="middle" title="가운데 맞춤 (세로)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18"/><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="8" width="4" height="8" rx="1"/></svg></button><button data-al="bottom" title="아래쪽 맞춤" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20h18"/><rect x="6" y="5" width="4" height="12" rx="1"/><rect x="14" y="10" width="4" height="7" rx="1"/></svg></button><span class="mv-sep"></span><button data-dist="hdist" title="가로 간격 동일하게 (3개 이상)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 4v16M21 4v16"/><rect x="9" y="7" width="6" height="10" rx="1"/></svg></button><button data-dist="vdist" title="세로 간격 동일하게 (3개 이상)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 3h16M4 21h16"/><rect x="7" y="9" width="10" height="6" rx="1"/></svg></button><span class="mv-sep"></span><button id="mvReset" title="선택한 요소를 원래 자리로" disabled>위치 초기화</button><button id="mvResetAll" title="옮긴 요소 전부 원래 자리로">모두 초기화</button></div>
         <div class="frame" id="frame"><div id="mail"></div><div id="ov"></div><button id="addEnd" data-plus="end"><span>+</span> 블록 추가</button><input type="file" id="imgInput" accept="image/*" hidden></div>
       </div>
     </section>
@@ -608,7 +572,7 @@ const mvEl=k=>{ const [t,v]=[k.slice(0,1),k.slice(2)], a=t==='f'?'data-field':t=
   if(el&&t==='f'){ const w=el.closest('[data-wrap]'); if(w&&w.querySelectorAll('[data-field]').length===1&&!w.closest('[data-item]')===!el.closest('[data-item]')) return w; } return el; };
 function applyMoves(){
   const M=S.mv||{}; Object.keys(M).forEach(k=>{ const el=mvEl(k), m=M[k]; if(!el||(!m.x&&!m.y)) return; el.style.position='relative'; el.style.left=m.x+'px'; el.style.top=m.y+'px'; });
-  if(typeof moveOn!=='undefined'&&moveOn) mail.querySelectorAll('[contenteditable]').forEach(e=>e.setAttribute('contenteditable','false'));
+  mvMark();
 }
 
 /* ---------- form ---------- */
@@ -1092,39 +1056,121 @@ document.addEventListener('mouseup',()=>{
   let j=dropAt; if(j>i) j--; if(j!==i){ snap(); moveBlock(i,j); buildForm(); render(); }
 });
 
-/* ---------- 자유 이동 모드 ---------- */
-let moveOn=false, mvSelK=null, mvDrag=null;
+/* ---------- 자유 이동 (항상 켜짐: 끌면 이동, 클릭하면 편집) ---------- */
+// 요소를 눌러 끌기 = 이동 · 클릭 = 글자 편집 · Shift/Ctrl+클릭 = 여러 개 선택 · 빈 곳에서 끌기 = 범위 선택 · Alt+끌기 = 블록 통째로
+var mvSel=[], mvPend=null, mvDrag=null, mvMarq=null, mvJust=false;
 const mvTarget=(t,blockOnly)=>{ if(!t||!mail.contains(t)) return null; return (blockOnly?t.closest('[data-block]'):t.closest('[data-field],[data-item],[data-block]'))||null; };
-function setMove(on){
-  moveOn=on; $('#btnMove').classList.toggle('on',on); $('#mvBar').classList.toggle('on',on); mail.classList.toggle('move-mode',on);
-  if(on){ sel=null; hidePop(); getSelection().removeAllRanges(); }
-  mvSelK=null; render(); ov.classList.toggle('on',false); if(on) ov.style.display='none'; else ov.style.display='';
+function mvMark(){ if(!mvSel) return;
+  mail.querySelectorAll('.mv-sel').forEach(e=>e.classList.remove('mv-sel'));
+  mvSel=mvSel.filter(k=>mvEl(k)); mvSel.forEach(k=>mvEl(k).classList.add('mv-sel'));
+  const n=mvSel.length, m=(S.mv||{})[mvSel[0]];
+  $('#mvInfo').textContent=!n?'요소를 끌면 이동 · 빈 곳에서 끌면 범위 선택 · Shift+클릭 추가 선택 · Alt+끌기 블록째':n>1?`${n}개 선택 · 방향키로 미세 이동`:`선택됨 · x ${m?.x||0}, y ${m?.y||0}`;
+  $$('#mvBar [data-al]').forEach(b=>b.disabled=!n); $$('#mvBar [data-dist]').forEach(b=>b.disabled=n<3); $('#mvReset').disabled=!n;
 }
-const mvMark=()=>{ mail.querySelectorAll('.mv-sel').forEach(e=>e.classList.remove('mv-sel')); const el=mvSelK&&mvEl(mvSelK); if(el) el.classList.add('mv-sel');
-  const m=mvSelK&&(S.mv||{})[mvSelK]; $('#mvInfo').textContent=mvSelK?`선택됨 · x ${m?.x||0}px, y ${m?.y||0}px · 방향키 1px, Shift+방향키 10px`:'글자·카드·블록을 끌어서 옮기세요 · 방향키 1px, Shift+방향키 10px · Shift+끌기 = 블록 통째로'; };
-function mvSet(k,x,y){ S.mv=S.mv||{}; if(!x&&!y) delete S.mv[k]; else S.mv[k]={x:Math.round(x),y:Math.round(y)}; const el=mvEl(k); if(el){ el.style.position=(x||y)?'relative':''; el.style.left=(x||y)?Math.round(x)+'px':''; el.style.top=(x||y)?Math.round(y)+'px':''; } save(); mvMark(); }
-$('#btnMove').onclick=()=>setMove(!moveOn);
-$('#mvDone').onclick=()=>setMove(false);
-$('#mvReset').onclick=()=>{ if(!mvSelK){ toast('먼저 옮긴 요소를 클릭해 주세요'); return; } snap(); mvSet(mvSelK,0,0); };
-$('#mvResetAll').onclick=()=>{ if(!S.mv||!Object.keys(S.mv).length) return; snap(); S.mv={}; render(); mvMark(); toast('모든 위치를 원래대로 돌렸어요'); };
-mail.addEventListener('pointerover',e=>{ if(!moveOn) return; mail.querySelectorAll('.mv-hover').forEach(x=>x.classList.remove('mv-hover')); const el=mvTarget(e.target,e.shiftKey); if(el) mvEl(mvKey(el))?.classList.add('mv-hover'); });
-mail.addEventListener('pointerleave',()=>mail.querySelectorAll('.mv-hover').forEach(x=>x.classList.remove('mv-hover')));
+function mvSet(k,x,y){ S.mv=S.mv||{}; x=Math.round(x); y=Math.round(y); if(!x&&!y) delete S.mv[k]; else S.mv[k]={x,y}; const el=mvEl(k); if(el){ el.style.position=(x||y)?'relative':''; el.style.left=(x||y)?x+'px':''; el.style.top=(x||y)?y+'px':''; } }
+const mvGet=k=>(S.mv||{})[k]||{x:0,y:0};
+function mvClear(){ if(!mvSel.length) return; mvSel=[]; mvMark(); }
+const editingField=t=>{ const ae=document.activeElement; return ae&&ae.isContentEditable&&mail.contains(ae)&&ae.contains(t); };
+// 클릭(이동 없음) → 기존 편집 동작 그대로
+function mvClickEdit(e,target){
+  const bl=target.closest('[data-block]'); if(!bl) return; const id=bl.dataset.block, f=target.closest('[data-field]');
+  const off=f?caretOffset(f,e.clientX,e.clientY):null;
+  if(id!==sel){ const imgT=target.closest('[data-imgt]'); select(id, f?f.dataset.field:null, off); if(imgT) pickImage(imgT.dataset.imgt); }
+  else if(f) setCaret(f,off);
+}
 mail.addEventListener('pointerdown',e=>{
-  if(!moveOn) return; const el=mvTarget(e.target,e.shiftKey); e.preventDefault(); e.stopPropagation();
-  if(!el){ mvSelK=null; mvMark(); return; }
-  const k=mvKey(el); mvSelK=k; const m=(S.mv||{})[k]||{x:0,y:0};
-  snap(); mvDrag={k,sx:e.clientX,sy:e.clientY,x0:m.x,y0:m.y,moved:false}; mail.setPointerCapture(e.pointerId); mvMark();
+  if(e.button!==0) return;
+  if(editingField(e.target)&&!e.altKey) return;            // 글자 편집 중인 칸 안에서는 평소처럼 글자 선택
+  const el=mvTarget(e.target,e.altKey); if(!el) return;
+  const k=mvKey(el); if(!k) return;
+  mvPend={k,target:e.target,sx:e.clientX,sy:e.clientY,add:e.shiftKey||e.ctrlKey||e.metaKey,ev:{clientX:e.clientX,clientY:e.clientY}};
 },true);
-mail.addEventListener('pointermove',e=>{ if(!moveOn||!mvDrag) return; const dx=e.clientX-mvDrag.sx, dy=e.clientY-mvDrag.sy; if(!mvDrag.moved&&Math.abs(dx)+Math.abs(dy)<3) return; mvDrag.moved=true; mvSet(mvDrag.k,mvDrag.x0+dx,mvDrag.y0+dy); });
-mail.addEventListener('pointerup',e=>{ if(!mvDrag) return; if(!mvDrag.moved) hist.pop(); mvDrag=null; });
-['mousedown','click','dblclick'].forEach(ev=>mail.addEventListener(ev,e=>{ if(moveOn){ e.preventDefault(); e.stopPropagation(); } },true));
+mail.addEventListener('mousedown',e=>{ if(mvPend){ e.preventDefault(); e.stopPropagation(); } },true);
+mail.addEventListener('click',e=>{ if(mvJust){ mvJust=false; e.preventDefault(); e.stopPropagation(); } },true);
+document.addEventListener('pointermove',e=>{
+  if(mvMarq){ mvMarqMove(e); return; }
+  if(mvPend&&!mvDrag){
+    const dx=e.clientX-mvPend.sx, dy=e.clientY-mvPend.sy; if(Math.abs(dx)+Math.abs(dy)<4) return;
+    const k=mvPend.k;
+    if(!mvSel.includes(k)) mvSel = mvPend.add ? [...mvSel,k] : [k];
+    // 부모·자식이 같이 잡히면 바깥 것만 움직임
+    const els=mvSel.map(x=>[x,mvEl(x)]); mvSel=els.filter(([x,el])=>!els.some(([y,o])=>y!==x&&o!==el&&o.contains(el))).map(([x])=>x);
+    snap(); document.activeElement?.blur?.(); getSelection().removeAllRanges();
+    mvDrag={sx:mvPend.sx,sy:mvPend.sy,start:mvSel.map(x=>[x,{...mvGet(x)}])};
+    document.body.classList.add('mv-dragging','mv-moving'); ov.style.visibility='hidden'; itemBar.style.display='none'; hidePop(); mvMark();
+  }
+  if(mvDrag){ const dx=e.clientX-mvDrag.sx, dy=e.clientY-mvDrag.sy; mvDrag.start.forEach(([k,m])=>mvSet(k,m.x+dx,m.y+dy)); mvMark(); }
+});
+document.addEventListener('pointerup',e=>{
+  if(mvMarq){ mvMarqEnd(); return; }
+  const p=mvPend; mvPend=null; if(!p) return;
+  if(mvDrag){ mvDrag=null; mvJust=true; setTimeout(()=>mvJust=false,0); document.body.classList.remove('mv-dragging','mv-moving'); ov.style.visibility=''; save(); placeOverlay(); return; }
+  if(p.add){ // Shift/Ctrl+클릭: 선택에 넣고 빼기
+    mvSel=mvSel.includes(p.k)?mvSel.filter(x=>x!==p.k):[...mvSel,p.k]; document.activeElement?.blur?.(); mvJust=true; setTimeout(()=>mvJust=false,0); mvMark(); return; }
+  mvSel=[p.k]; const wasSel=p.target.closest('[data-block]')?.dataset.block===sel; mvClickEdit(p.ev,p.target); if(!wasSel){ mvJust=true; setTimeout(()=>mvJust=false,0); } mvMark();
+});
+// 빈 곳(메일 바깥 여백·캔버스)에서 끌면 범위 선택
+const marq=document.createElement('div'); marq.className='mv-marq'; document.body.appendChild(marq);
+$('.canvas').addEventListener('pointerdown',e=>{
+  if(e.button!==0) return; const path=e.composedPath();
+  if(path.includes(ov)||path.includes($('#addEnd'))||path.includes($('#mvBar'))) return;
+  if(mail.contains(e.target)&&mvTarget(e.target,false)) return;
+  if(e.target.closest('.edit-tip')) return;
+  mvMarq={sx:e.clientX,sy:e.clientY,add:e.shiftKey||e.ctrlKey||e.metaKey,base:mvSel.slice(),on:false};
+});
+$('.canvas').addEventListener('mousedown',e=>{ if(mvMarq){ e.preventDefault(); document.activeElement?.blur?.(); } });
+function mvMarqMove(e){
+  const q=mvMarq, x1=Math.min(q.sx,e.clientX), y1=Math.min(q.sy,e.clientY), x2=Math.max(q.sx,e.clientX), y2=Math.max(q.sy,e.clientY);
+  if(!q.on&&(x2-x1)+(y2-y1)<5) return; q.on=true; document.body.classList.add('mv-dragging'); e.preventDefault(); getSelection().removeAllRanges();
+  Object.assign(marq.style,{display:'block',left:x1+'px',top:y1+'px',width:(x2-x1)+'px',height:(y2-y1)+'px'});
+  const inside=el=>{ const r=el.getBoundingClientRect(); return r.width>0&&r.left>=x1&&r.right<=x2&&r.top>=y1&&r.bottom<=y2; };
+  const hits=[];
+  mail.querySelectorAll('[data-block]').forEach(b=>{
+    if(inside(b)){ hits.push(mvKey(b)); return; }
+    const items=[...b.querySelectorAll('[data-item]')].filter(inside); items.forEach(i=>hits.push(mvKey(i)));
+    b.querySelectorAll('[data-field]').forEach(f=>{ if(items.some(i=>i.contains(f))) return; const k=mvKey(f), el=mvEl(k); if(el&&inside(el)) hits.push(k); });
+  });
+  mvSel=q.add?[...new Set([...q.base,...hits])]:[...new Set(hits)]; mvMark();
+}
+function mvMarqEnd(){ const q=mvMarq; mvMarq=null; marq.style.display='none'; document.body.classList.remove('mv-dragging'); if(q.on){ document.activeElement?.blur?.(); if(sel){ sel=null; hidePop(); render(); } } else if(!q.add) mvClear(); }
+// 정렬 · 간격 맞추기
+function mvBox(el){ const r=el.getBoundingClientRect(); return {l:r.left,t:r.top,r:r.right,b:r.bottom,w:r.width,h:r.height}; }
+function mvContainer(el){ // 하나만 선택했을 때 기준 = 감싸는 항목/블록(블록이면 본문 영역)의 안쪽
+  const p=el.parentElement?.closest('[data-item],[data-block]')||el.parentElement; const r=p.getBoundingClientRect(), cs=getComputedStyle(p);
+  const l=r.left+parseFloat(cs.paddingLeft)+parseFloat(cs.borderLeftWidth), t=r.top+parseFloat(cs.paddingTop)+parseFloat(cs.borderTopWidth);
+  const rr=r.right-parseFloat(cs.paddingRight)-parseFloat(cs.borderRightWidth), b=r.bottom-parseFloat(cs.paddingBottom)-parseFloat(cs.borderBottomWidth);
+  return {l,t,r:rr,b,w:rr-l,h:b-t};
+}
+function mvAlign(how){
+  if(!mvSel.length){ toast('먼저 요소를 선택해 주세요'); return; }
+  const L=mvSel.map(k=>({k,el:mvEl(k)})).filter(o=>o.el); L.forEach(o=>o.b=mvBox(o.el));
+  const R = L.length===1 ? mvContainer(L[0].el) : { l:Math.min(...L.map(o=>o.b.l)), t:Math.min(...L.map(o=>o.b.t)), r:Math.max(...L.map(o=>o.b.r)), b:Math.max(...L.map(o=>o.b.b)) };
+  snap(); let moved=false;
+  if(how==='hdist'||how==='vdist'){
+    const h=how==='hdist', S2=L.slice().sort((a,b)=>h?a.b.l-b.b.l:a.b.t-b.b.t);
+    const span=h?S2.at(-1).b.r-S2[0].b.l:S2.at(-1).b.b-S2[0].b.t, tot=S2.reduce((s,o)=>s+(h?o.b.w:o.b.h),0), gap=(span-tot)/(S2.length-1);
+    let pos=h?S2[0].b.l:S2[0].b.t;
+    S2.forEach(o=>{ const d=pos-(h?o.b.l:o.b.t); const m=mvGet(o.k); if(Math.abs(d)>=.5){ moved=true; mvSet(o.k,m.x+(h?d:0),m.y+(h?0:d)); } pos+=(h?o.b.w:o.b.h)+gap; });
+  }else L.forEach(o=>{
+    const b=o.b; let dx=0, dy=0;
+    if(how==='left') dx=R.l-b.l; if(how==='right') dx=R.r-b.r; if(how==='center') dx=(R.l+R.r)/2-(b.l+b.r)/2;
+    if(how==='top') dy=R.t-b.t; if(how==='bottom') dy=R.b-b.b; if(how==='middle') dy=(R.t+R.b)/2-(b.t+b.b)/2;
+    if(Math.abs(dx)>=.5||Math.abs(dy)>=.5){ moved=true; const m=mvGet(o.k); mvSet(o.k,m.x+dx,m.y+dy); }
+  });
+  if(!moved){ hist.pop(); toast(L.length===1&&/left|right|center/.test(how)?'이미 칸 너비를 꽉 채운 요소예요 · 글자 정렬은 위 툴바 정렬 버튼으로':'이미 맞춰져 있어요'); return; }
+  save(); mvMark(); placeOverlay();
+}
+$('#mvBar').addEventListener('mousedown',e=>e.preventDefault());
+$('#mvBar').addEventListener('click',e=>{ const b=e.target.closest('[data-al],[data-dist]'); if(b) mvAlign(b.dataset.al||b.dataset.dist); });
+$('#mvReset').onclick=()=>{ if(!mvSel.length) return; snap(); mvSel.forEach(k=>mvSet(k,0,0)); save(); mvMark(); placeOverlay(); };
+$('#mvResetAll').onclick=()=>{ if(!S.mv||!Object.keys(S.mv).length){ toast('옮긴 요소가 없어요'); return; } snap(); S.mv={}; render(); toast('모든 위치를 원래대로 돌렸어요'); };
 document.addEventListener('keydown',e=>{
-  if(!moveOn) return;
-  if(e.key==='Escape'){ if(mvSelK){ mvSelK=null; mvMark(); } else setMove(false); e.preventDefault(); return; }
-  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key]; if(!d||!mvSelK) return;
-  if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'')) return;
-  e.preventDefault(); e.stopImmediatePropagation(); const m=(S.mv||{})[mvSelK]||{x:0,y:0}, st=e.shiftKey?10:1;
-  if(!e.repeat) snap(); mvSet(mvSelK,m.x+d[0]*st,m.y+d[1]*st);
+  if(!mvSel.length) return; const ae=document.activeElement;
+  if(ae&&(ae.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(ae.tagName))) return;
+  if(e.key==='Escape'){ mvClear(); return; }
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key]; if(!d) return;
+  e.preventDefault(); e.stopImmediatePropagation(); const st=e.shiftKey?10:1;
+  if(!e.repeat) snap(); mvSel.forEach(k=>{ const m=mvGet(k); mvSet(k,m.x+d[0]*st,m.y+d[1]*st); }); save(); mvMark(); placeOverlay();
 },true);
 
 /* undo for structure (Ctrl+Z when not typing) */
@@ -1145,6 +1191,7 @@ mail.addEventListener('input',()=>requestAnimationFrame(placeOverlay));
 function exportHtml(){
   const buf=$('#exportBuf'); buf.innerHTML=mail.innerHTML;
   const empty=el=>!el.innerText.replace(/\u00a0/g,' ').trim() && !el.querySelector('img') && el.tagName!=='IMG';
+  buf.querySelectorAll('.mv-sel').forEach(el=>el.classList.remove('mv-sel'));
   buf.querySelectorAll('[data-eo]').forEach(el=>el.remove());
   buf.querySelectorAll('div[data-imgt]').forEach(el=>el.remove());
   buf.querySelectorAll('[data-field]').forEach(el=>{ if(empty(el)){ const w=el.closest('[data-wrap]'); (w||el).remove(); } });
