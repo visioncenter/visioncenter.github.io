@@ -5269,17 +5269,18 @@ background:
       function allocTableHtml(R, o = {}) {
         if (!R.rows.length) return "";
         const gub = o.gubun !== false, kor = !!o.kor, cw = kor ? 150 : 50;
-        const rows = [...(gub ? [["구분", 64]] : []), ["법인", cw], ["인원", 41], ["공급가액", 90], ["부가세", 86], ["합계", 90], ["담당자", 75], ["이메일", 162]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY));
+        const rows = [...(gub ? [["구분", 64]] : []), ["법인", cw], ["인원", 41], ["공급가액", 90], ["부가세", 86], ["합계", 90], ["담당자", 75], ["이메일", 170]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY));
         const out = [rows];
         const gubun = R.allocNames.length ? R.allocNames.map((n) => CP(esc(n))).join(`\n${CP("+")}\n`) : CP("교육비");
         R.rows.forEach((r, i) => {
           const tr = [];
           if (gub && i === 0) tr.push(TD(64, gubun, "", ` rowspan="${R.rows.length}"`));
-          tr.push(TD(cw, CP(esc(corpLabel(r.corp, kor)))), TD(41, CP(String(r.count))), TD(90, CP(won(r.supply) + "&nbsp;", "right")), TD(86, CP(won(r.vat) + "&nbsp;", "right")), TD(90, CP(won(r.total) + "&nbsp;", "right")), TD(75, CP(esc(r.manager) || "<br />")), TD(162, CP(esc(r.email) || "<br />")));
+          tr.push(TD(cw, CP(esc(corpLabel(r.corp, kor)))), TD(41, CP(String(r.count))), TD(90, CP(won(r.supply) + "&nbsp;", "right")), TD(86, CP(won(r.vat) + "&nbsp;", "right")), TD(90, CP(won(r.total) + "&nbsp;", "right")), TD(75, CP(esc(r.manager) || "<br />")), TD(170, CP(esc(r.email) || "<br />")));
           out.push(tr);
         });
-        out.push([gub ? TD(64 + cw, CP("합계", "center", true), LGRAY, ` colspan="2"`) : TD(cw, CP("합계", "center", true), LGRAY), TD(41, CP(String(R.ctot.count), "center", true), LGRAY), TD(90, CP(won(R.ctot.supply) + "&nbsp;", "right", true), YEL), TD(86, CP(won(R.ctot.vat) + "&nbsp;", "right", true), YEL), TD(90, CP(won(R.ctot.total) + "&nbsp;", "right", true), YEL), TD(75, CP("<br />"), LGRAY), TD(162, CP("<br />"), LGRAY)]);
-        return TBL(gub ? 568 + cw : 504 + cw, out);
+        out.push([gub ? TD(64 + cw, CP("합계", "center", true), LGRAY, ` colspan="2"`) : TD(cw, CP("합계", "center", true), LGRAY), TD(41, CP(String(R.ctot.count), "center", true), LGRAY), TD(90, CP(won(R.ctot.supply) + "&nbsp;", "right", true), YEL), TD(86, CP(won(R.ctot.vat) + "&nbsp;", "right", true), YEL), TD(90, CP(won(R.ctot.total) + "&nbsp;", "right", true), YEL), TD(75, CP("<br />"), LGRAY), TD(170, CP("<br />"), LGRAY)]);
+        // 열 너비 합 = 표 너비 (기본 616+50 = 666px, 3. 비용 사용내역 표와 같은 너비)
+        return TBL(gub ? 616 + cw : 552 + cw, out);
       }
       function usageTableHtml(R) {
         const out = [[["항목", 171], ["공급가액", 123], ["부가세", 123], ["합계", 123], ["비고", 123]].map(([t, w]) => TD(w, CP(t, "center", true), GRAY))];
