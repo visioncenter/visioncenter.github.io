@@ -116,6 +116,43 @@ body.mv-dragging.mv-moving,body.mv-dragging.mv-moving *{cursor:grabbing!importan
 .mv-bar button:disabled{opacity:.35;cursor:default}
 .mv-bar button svg{width:16px;height:16px}
 .mv-bar .mv-sep{width:1px;height:18px;background:#3A404C;margin:0 3px}
+.tb-color{position:relative;height:32px;width:34px;border-radius:8px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink2)}
+.tb-color:hover{background:var(--line2)}
+.tb-color b{font-size:14px;line-height:1}
+.tb-color i{display:block;width:16px;height:3px;border-radius:2px;margin-top:2px}
+.tb-color input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.tb-right{margin-left:auto}
+.canvas{overflow:auto;padding:24px 20px 80px;background:radial-gradient(circle at 1px 1px,#DADDE5 1px,transparent 0) 0 0/18px 18px,var(--bg)}
+.frame{margin:0 auto;width:760px;max-width:100%;transition:width .25s}
+.frame.mobile{width:400px}
+.edit-tip{max-width:760px;margin:0 auto 12px;font-size:12px;color:var(--ink3);text-align:center}
+#mail [data-field]{outline:none;border-radius:3px}
+#mail [data-field]:hover{box-shadow:0 0 0 2px rgba(59,130,246,.22)}
+#mail [data-field]:focus{box-shadow:0 0 0 2px rgba(59,130,246,.65)}
+#mail .ph-img{display:inline-block}
+.modal-bg{position:fixed;inset:0;background:rgba(15,20,30,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:16px;width:min(780px,100%);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal.sm{width:min(420px,100%)}
+.modal-h{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;font-weight:700}
+.modal-h .x{margin-left:auto}
+.modal-b{padding:16px 20px;overflow:auto}
+.modal-f{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.code{width:100%;height:50vh;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;border:1px solid var(--line);border-radius:10px;padding:12px;background:#0F172A;color:#E2E8F0;resize:none}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#16191F;color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#exportBuf,#measure{position:fixed;left:-99999px;top:0;width:700px}
+@media (max-width:1000px){.main{grid-template-columns:1fr}.app{height:auto}.panel{border-right:0}}
+
+.frame{position:relative}
+.edit-tip kbd{font-family:inherit;background:#fff;border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:11px}
+#mail [data-ph]:empty::before{content:attr(data-ph);color:#B4BAC6;font-weight:500;pointer-events:none}
+#mail [data-block]{position:relative;cursor:default}
+#mail [data-block]:hover{outline:1.5px dashed rgba(31,91,255,.35);outline-offset:6px;border-radius:4px}
+#mail [data-imgt]{cursor:pointer}
+#ov{position:absolute;inset:0;pointer-events:none;display:none;z-index:5}
+#ov.on{display:block}
+.ov-box{position:absolute;border:2px solid var(--accent);border-radius:10px;box-shadow:0 0 0 4px var(--accent-soft)}
 .ov-bar{position:absolute;display:flex;align-items:center;gap:2px;background:#16191F;color:#fff;border-radius:10px;padding:4px;pointer-events:auto;box-shadow:0 6px 20px rgba(0,0,0,.18);white-space:nowrap}
 .ov-name{font-size:12px;font-weight:700;padding:0 8px 0 6px;color:#fff}
 .ov-tip{font-size:11px;color:#A9B0BE;padding:0 8px}
