@@ -1131,6 +1131,176 @@
       .wrap { border: none !important; }
       .card { background: #fff; border: none; }
     }
+
+    /* ===================== 교육 조사 탭 리디자인 (2026-11) =====================
+       입력은 한 장의 카드에 1~4단계로, 결과는 왼쪽 목차 + 오른쪽 문서형 본문으로 */
+    @media (min-width: 900px) {
+      #panel-research { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 18px; }
+    }
+    #panel-research > .card { padding: 26px 28px; border-radius: 16px; }
+    #panel-research .rs-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+    #panel-research .rs-h { font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: var(--text); margin: 0; }
+    #panel-research .rs-sub { margin: 4px 0 0; font-size: 13.5px; color: var(--sub); }
+    #panel-research .rs-preset { display: flex; gap: 6px; align-items: center; }
+    #panel-research .rs-preset select { width: 210px; height: 36px; padding: 0 10px; font-size: 13px; margin: 0; }
+    #panel-research .rs-preset .btn-sm { height: 36px; margin: 0; white-space: nowrap; }
+
+    #panel-research .rs-step { display: flex; align-items: center; gap: 8px; margin: 24px 0 10px; font-size: 14.5px; font-weight: 700; color: var(--text); }
+    #panel-research .rs-step .num {
+      width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: var(--primary-text);
+      font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+    }
+    #panel-research .rs-step .opt { font-weight: 500; color: var(--muted); font-size: 12.5px; }
+    #panel-research .rs-step-tools { margin-left: auto; display: flex; gap: 14px; font-size: 12.5px; font-weight: 600; }
+    #panel-research .rs-step-tools a { color: var(--accent); cursor: pointer; }
+
+    #panel-research .rs-topic { display: flex; gap: 8px; }
+    #panel-research .rs-topic input { flex: 1; min-width: 0; height: 50px; font-size: 16px; padding: 0 16px; margin: 0; border-radius: 12px; }
+    #panel-research .rs-topic .btn-sm { height: 50px; padding: 0 18px; margin: 0; white-space: nowrap; border-radius: 12px; }
+    #panel-research #kwStatus:empty { display: none; }
+    #panel-research .chips:empty { display: none; }
+
+    #panel-research .checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin: 0; }
+    #panel-research .checks label {
+      display: flex; align-items: center; gap: 10px; margin: 0; padding: 11px 14px; min-height: 46px;
+      border: 1px solid var(--line); border-radius: 10px; background: var(--card); font-size: 14px; line-height: 1.35;
+      cursor: pointer; transition: border-color .12s, background .12s;
+    }
+    #panel-research .checks label:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--card); }
+    #panel-research .checks label:has(input:checked) { border-color: var(--accent); background: var(--soft); font-weight: 600; }
+    #panel-research .checks input { margin: 0; flex: 0 0 auto; width: 16px; height: 16px; accent-color: var(--accent); }
+
+    #panel-research .rs-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 14px; }
+    #panel-research .rs-opts label.field { margin: 0 0 6px; font-size: 12.5px; font-weight: 600; color: var(--sub); }
+    #panel-research .rs-opts select { width: 100%; height: 42px; margin: 0; font-size: 14px; }
+    #panel-research #custom { width: 100%; min-height: 76px; margin: 0; font-size: 14px; line-height: 1.6; }
+
+    #panel-research .rs-actions {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--soft-line);
+    }
+    #panel-research .rs-actions .hint { margin: 0; }
+    #panel-research #status { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    #panel-research #status:empty { display: none; }
+    #panel-research #run { min-width: 200px; height: 50px; margin: 0; font-size: 15.5px; font-weight: 700; border-radius: 12px; }
+
+    /* --- 결과: 목차 + 문서형 본문 --- */
+    #panel-research .rs-result-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+    #panel-research .rs-savebar { gap: 6px; flex-wrap: wrap; }
+    #panel-research .rs-savebar .btn-sm { margin: 0; }
+    #panel-research .rs-body { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 36px; align-items: start; }
+    #panel-research .rs-body:has(> #reportNav:empty) { grid-template-columns: minmax(0, 1fr); }
+    #panel-research .rs-main { min-width: 0; max-width: 940px; }
+
+    #panel-research #reportNav.reportnav {
+      position: sticky; top: 16px; display: flex; flex-direction: column; gap: 0;
+      margin: 0; padding: 0; background: none; border: none; border-left: 2px solid var(--soft-line); border-radius: 0;
+    }
+    #panel-research #reportNav:empty { display: none; }
+    #panel-research .reportnav .rn-title { font-size: 12px; font-weight: 700; color: var(--muted); padding: 0 0 8px 16px; letter-spacing: .04em; }
+    #panel-research .reportnav .tabbtn {
+      text-align: left; white-space: normal; margin: 0 0 0 -2px; padding: 8px 10px 8px 16px; border: none; border-left: 2px solid transparent;
+      border-radius: 0; background: none; color: var(--sub); font-size: 13.5px; font-weight: 500; line-height: 1.45; box-shadow: none;
+    }
+    #panel-research .reportnav .tabbtn:hover { color: var(--text); background: none; }
+    #panel-research .reportnav .tabbtn.active { color: var(--accent); border-left-color: var(--accent); font-weight: 700; background: none; box-shadow: none; }
+
+    #panel-research #report { display: block; font-size: 15px; line-height: 1.75; color: var(--text); }
+    #panel-research #report > .sec {
+      background: none; border: none; border-radius: 0; box-shadow: none;
+      padding: 0 0 30px; margin: 0 0 30px; border-bottom: 1px solid var(--soft-line); scroll-margin-top: 20px;
+    }
+    #panel-research #report > .sec:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    #panel-research #report > .sec.hidden { display: block; }
+    #panel-research #report .sec > h3 {
+      display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 0; border: none;
+      font-size: 18px; font-weight: 800; letter-spacing: -.02em; line-height: 1.4; color: var(--text);
+    }
+    #panel-research #report .sec-num {
+      flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px; background: var(--soft); color: var(--accent);
+      font-size: 13.5px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
+    }
+    #panel-research #report > .sec.summary {
+      background: var(--soft); border: none; border-radius: 14px; padding: 20px 24px; margin-bottom: 34px;
+    }
+    #panel-research #report > .sec.summary > h3 { font-size: 15px; color: var(--accent); margin-bottom: 6px; }
+    #panel-research #report p { margin: 8px 0; }
+
+    #panel-research #report ul { margin: 0; padding: 0; list-style: none; }
+    #panel-research #report ul li {
+      display: block; position: relative; margin: 0; padding: 11px 0 11px 18px; border-bottom: 1px solid var(--soft-line);
+    }
+    #panel-research #report ul li:last-child { border-bottom: none; }
+    #panel-research #report ul li::before { top: 22px; left: 2px; width: 6px; height: 6px; background: var(--accent); opacity: .55; }
+    #panel-research #report ul li strong.term {
+      display: block; margin: 0 0 2px; padding: 0; background: none; border-radius: 0;
+      font-size: 15px; font-weight: 700; color: var(--text); white-space: normal;
+    }
+    #panel-research #report .sec.summary ul li { border-bottom: none; padding: 5px 0 5px 18px; }
+    #panel-research #report .sec.summary ul li::before { top: 16px; }
+
+    #panel-research #report ol { margin: 0; padding: 0; list-style: none; counter-reset: rsol; }
+    #panel-research #report ol li { counter-increment: rsol; position: relative; margin: 0; padding: 11px 0 11px 42px; border-bottom: 1px solid var(--soft-line); }
+    #panel-research #report ol li:last-child { border-bottom: none; }
+    #panel-research #report ol li::before {
+      content: counter(rsol); position: absolute; left: 0; top: 12px; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--primary); color: var(--primary-text); font-size: 12.5px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; line-height: 1;
+    }
+
+    #panel-research #report table.tbl {
+      width: 100%; margin: 6px 0; font-size: 13.5px; border-collapse: separate; border-spacing: 0;
+      border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    }
+    #panel-research #report table.tbl th, #panel-research #report table.tbl td {
+      border: none; border-bottom: 1px solid var(--soft-line); padding: 11px 14px; line-height: 1.6; vertical-align: top;
+    }
+    #panel-research #report table.tbl th + th, #panel-research #report table.tbl td + td { border-left: 1px solid var(--soft-line); }
+    #panel-research #report table.tbl tbody tr:last-child td { border-bottom: none; }
+    #panel-research #report table.tbl thead th { font-size: 12.5px; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--sub); background: var(--table-head); }
+    #panel-research #report table.tbl td:first-child { font-weight: 600; }
+
+    #panel-research #report .chart { background: var(--input-bg); border: none; border-radius: 12px; padding: 18px 20px; margin: 14px 0 0; box-shadow: none; }
+    #panel-research #report > .chart { margin: 0 0 30px; }
+    #panel-research #report .chart .chart-title { display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    #panel-research #report .chart-total { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+    #panel-research .bar-row { font-size: 13.5px; margin: 9px 0; gap: 12px; }
+    #panel-research .bar-label { flex: 0 0 120px; color: var(--sub); }
+    #panel-research .bar { height: 10px; border-radius: 99px; }
+    #panel-research .bar > span { background: var(--accent); border-radius: 99px; }
+    #panel-research .bar-val { font-weight: 600; color: var(--text); }
+
+    #panel-research #sources { margin-top: 30px; padding: 18px 22px; border: none; border-radius: 12px; background: var(--input-bg); font-size: 13.5px; line-height: 1.6; }
+    #panel-research #sources:empty { display: none; }
+    #panel-research #followup:empty { display: none; }
+    #panel-research #resultTools { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--soft-line); }
+    #panel-research #resultTools .section-title { margin: 0 0 10px; }
+    #panel-research #resultTools .minirow { margin: 0; }
+    #panel-research #resultTools .minirow .btn-sm { margin: 0; }
+    #panel-research .rs-ask { display: flex; gap: 8px; align-items: stretch; }
+    #panel-research .rs-ask textarea { flex: 1; min-width: 0; min-height: 64px; margin: 0; font-size: 14px; }
+    #panel-research .rs-ask .btn-sm { margin: 0; padding: 0 20px; white-space: nowrap; }
+
+    /* 아래 보조 카드(예산·ROI·기록·표지): 2열, 같은 줄은 같은 높이 */
+    #panel-research > .card:not(.card-wide) { display: flex; flex-direction: column; }
+    #panel-research > .card:not(.card-wide) .section-title { font-size: 15.5px; margin: 0 0 6px; }
+    #panel-research .bgrid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+
+    @media (max-width: 899px) {
+      #panel-research > .card { padding: 20px; }
+      #panel-research .rs-body { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+      #panel-research #reportNav.reportnav { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; border-left: none; }
+      #panel-research .reportnav .rn-title { display: none; }
+      #panel-research .reportnav .tabbtn { margin: 0; border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; font-size: 12.5px; }
+      #panel-research .reportnav .tabbtn.active { border-color: var(--accent); }
+      #panel-research .rs-topic, #panel-research .rs-actions, #panel-research .rs-ask { flex-direction: column; align-items: stretch; }
+      #panel-research #run { width: 100%; }
+    }
+    @media print {
+      #panel-research .rs-body { display: block; }
+      #panel-research .rs-main { max-width: none; }
+      #panel-research #report > .sec { break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
@@ -1305,161 +1475,151 @@
     </div>
     <div id="panel-research" class="tabpanel hidden">
 
-    <div class="card card-wide no-print">
+    <div class="card card-wide no-print rs-setup">
       <!-- 회사 맥락은 IT 대기업으로 고정 -->
       <input type="hidden" id="industry" value="IT, 대기업" />
-      <div class="row">
-        <div style="flex: 1;">
-          <label class="field" for="topic">교육 주제 키워드</label>
-          <input type="text" id="topic" placeholder="예: 현업 대상 AI 활용" />
+      <div class="rs-head">
+        <div>
+          <div class="rs-h">조사 설정</div>
+          <p class="rs-sub">주제를 넣고 필요한 항목만 고르면, 웹검색 근거로 기획 보고서를 만들어요.</p>
         </div>
-        <div style="flex: 3;">
-          <label class="field" for="custom">추가 요청사항 (자유 입력, 선택)</label>
-          <textarea id="custom" style="min-height:90px;" placeholder="예: ESG 관점도 함께 다뤄줘 / 경쟁사 A사 사례를 꼭 포함 / 예산은 1천만원 이내 기준으로"></textarea>
+        <!-- 자주 쓰는 옵션 조합을 저장/불러오기 -->
+        <div class="rs-preset" title="지금 고른 항목·옵션 조합을 이름 붙여 저장해두고 다음에 한 번에 불러옵니다.">
+          <select id="presetSel"><option value="">저장된 프리셋 선택…</option></select>
+          <button id="presetSave" class="btn-sm">현재 설정 저장</button>
+          <button id="presetDel" class="btn-sm">삭제</button>
         </div>
       </div>
-      <button id="kwBtn" class="btn-sm" style="margin-top:10px;">🔍 연관 키워드 추천</button>
-      <span id="kwStatus" class="hint" style="margin-left:8px;"></span>
+
+      <div class="rs-step"><span class="num">1</span>교육 주제</div>
+      <div class="rs-topic">
+        <input type="text" id="topic" placeholder="예: 현업 대상 AI 활용" />
+        <button id="kwBtn" class="btn-sm">🔍 연관 키워드 추천</button>
+      </div>
+      <span id="kwStatus" class="hint"></span>
       <div class="chips" id="kwChips"></div>
-    </div>
 
-    <!-- 사용자가 필요에 맞게 조사 범위를 고르는 칸 -->
-    <div class="card card-wide no-print">
-      <!-- 자주 쓰는 옵션 조합을 저장/불러오기 -->
-      <div class="section-title">조건 프리셋</div>
-      <div class="minirow">
-        <select id="presetSel"><option value="">저장된 프리셋 선택…</option></select>
-        <button id="presetSave" class="btn-sm">현재 설정 저장</button>
-        <button id="presetDel" class="btn-sm">삭제</button>
+      <div class="rs-step"><span class="num">2</span>조사할 항목
+        <span class="rs-step-tools"><a id="selectAll">전체 선택</a><a id="selectNone">전체 해제</a></span>
       </div>
-      <div class="hint">지금 고른 항목·옵션 조합을 이름 붙여 저장해두고 다음에 한 번에 불러옵니다.</div>
+      <div class="checks" id="checks"></div>
 
-      <div class="row" style="margin-top:16px;">
-        <!-- 왼쪽: 조사할 항목 체크박스 -->
-        <div>
-          <label class="field" style="margin-top:0;">조사할 항목 (필요한 것만 체크)</label>
-          <div class="checks" id="checks"></div>
-          <div class="toolbar">
-            <a id="selectAll">전체 선택</a><a id="selectNone">전체 해제</a>
-          </div>
-        </div>
-        <!-- 오른쪽: 출력 타입·조사 범위 등 드롭다운 옵션 + 추가 요청사항 -->
-        <div>
-          <label class="field" for="outtype" style="margin-top:0;">출력 타입 (용도)</label>
+      <div class="rs-step"><span class="num">3</span>조건</div>
+      <div class="rs-opts">
+        <div class="rs-opt"><label class="field" for="outtype">출력 타입 (용도)</label>
           <select id="outtype">
             <option value="exec" selected>경영진 보고용 (핵심·근거 중심)</option>
             <option value="plan">실무 기획안 (실행 디테일 중심)</option>
             <option value="meeting">회의 공유용 한 장 요약</option>
             <option value="research">상세 리서치 리포트</option>
           </select>
-
-          <div class="row">
-            <div>
-              <label class="field" for="scope">조사 범위</label>
-              <select id="scope">
+        </div>
+        <div class="rs-opt"><label class="field" for="scope">조사 범위</label>
+          <select id="scope">
                 <option value="domestic">국내 중심</option>
                 <option value="global">국내 + 해외 참고</option>
               </select>
-            </div>
-            <div>
-              <label class="field" for="depth">결과 분량</label>
-              <select id="depth">
+        </div>
+        <div class="rs-opt"><label class="field" for="depth">결과 분량</label>
+          <select id="depth">
                 <option value="brief">간단 요약</option>
                 <option value="standard" selected>표준</option>
                 <option value="detailed">자세히</option>
               </select>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label class="field" for="period">정보 기준 기간</label>
-              <select id="period">
+        </div>
+        <div class="rs-opt"><label class="field" for="period">정보 기준 기간</label>
+          <select id="period">
                 <option value="any" selected>제한 없음</option>
                 <option value="6m">최근 6개월</option>
                 <option value="1y">최근 1년</option>
                 <option value="2y">최근 2년</option>
               </select>
-            </div>
-            <div>
-              <label class="field" for="size">회사 규모·유형</label>
-              <select id="size">
+        </div>
+        <div class="rs-opt"><label class="field" for="size">회사 규모·유형</label>
+          <select id="size">
                 <option value="any" selected>전체</option>
                 <option value="large">대기업</option>
                 <option value="mid">중견·중소기업</option>
                 <option value="public">공공·공기업</option>
                 <option value="startup">스타트업</option>
               </select>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label class="field" for="level">교육 대상 직급</label>
-              <select id="level">
+        </div>
+        <div class="rs-opt"><label class="field" for="level">교육 대상 직급</label>
+          <select id="level">
                 <option value="any" selected>무관 / 전체</option>
                 <option value="new">신입</option>
                 <option value="staff">실무자</option>
                 <option value="manager">관리자</option>
                 <option value="exec">임원</option>
               </select>
-            </div>
-            <div>
-              <label class="field" for="scale">교육 규모</label>
-              <select id="scale">
+        </div>
+        <div class="rs-opt"><label class="field" for="scale">교육 규모</label>
+          <select id="scale">
                 <option value="any" selected>미지정</option>
                 <option value="small">소규모 워크숍(~20명)</option>
                 <option value="team">팀 단위(~50명)</option>
                 <option value="dept">부서·본부 단위</option>
                 <option value="company">전사 대상</option>
               </select>
-            </div>
-          </div>
         </div>
       </div>
 
-      <button id="run">조사하기</button>
-      <div id="status"></div>
-      <div class="hint">웹 검색을 사용하므로 10~40초 걸릴 수 있어요.</div>
+      <div class="rs-step"><span class="num">4</span>추가 요청사항 <span class="opt">선택</span></div>
+      <textarea id="custom" placeholder="예: ESG 관점도 함께 다뤄줘 / 경쟁사 A사 사례를 꼭 포함 / 예산은 1천만원 이내 기준으로"></textarea>
+
+      <div class="rs-actions">
+        <div>
+          <div id="status"></div>
+          <div class="hint">웹 검색을 사용해서 10~40초 걸릴 수 있어요.</div>
+        </div>
+        <button id="run">조사하기</button>
+      </div>
     </div>
 
-    <div class="card card-wide">
+    <div class="card card-wide rs-result">
       <!-- 인쇄할 때만 보이는 표지 -->
       <div id="printHead"></div>
 
-      <label class="field no-print">결과</label>
-      <div id="reportNav" class="no-print reportnav"></div>
-      <div id="report"><span class="muted">아직 결과가 없습니다.</span></div>
-      <div id="sources"></div>
-
-      <!-- 후속 질문·슬라이드 결과(보고서의 일부이므로 인쇄에도 포함) -->
-      <div id="followup"></div>
-
-      <div class="no-print" id="resultTools" style="display:none;">
-        <div class="section-title" style="margin-top:4px;">AI로 추가 문서 만들기</div>
-        <div class="minirow">
-          <button id="slide" class="btn-sm">📊 슬라이드 개요</button>
-          <button id="docApproval" class="btn-sm">📋 품의서 초안</button>
-          <button id="docPlan" class="btn-sm">🗂 교육 계획서</button>
-          <button id="docSurvey" class="btn-sm">📝 설문 문항(사전·사후)</button>
-          <button id="docQA" class="btn-sm">🎤 임원 예상질문 & 방어</button>
-          <button id="docRedteam" class="btn-sm">🥊 레드팀 허점 검토</button>
-        </div>
-
-        <div class="section-title" style="margin-top:14px;">저장 · 공유</div>
-        <div class="minirow">
+      <div class="rs-result-head no-print">
+        <div class="rs-h">조사 결과</div>
+        <div class="rs-savebar" id="rsSaveBar" style="display:none;">
           <button id="copy" class="btn-sm">복사</button>
           <button id="dlMd" class="btn-sm">.md 저장</button>
           <button id="dlDoc" class="btn-sm">Word(.doc) 저장</button>
           <button id="print" class="btn-sm">인쇄 / PDF</button>
           <button id="shareBtn" class="btn-sm">🔗 공유 링크 복사</button>
         </div>
+      </div>
 
-        <!-- 결과에 대해 이어서 질문 -->
-        <label class="field" for="followupQ" style="margin-top:14px;">이어서 질문하기</label>
-        <textarea id="followupQ" placeholder="예: 위 사례 중 IT업계 것만 더 자세히 / 예산을 절반으로 줄이려면?"></textarea>
-        <button id="followupBtn" class="btn-sm solid" style="margin-top:8px;">질문 보내기</button>
-        <div id="followupStatus" class="hint"></div>
+      <div class="rs-body">
+        <div id="reportNav" class="no-print reportnav"></div>
+        <div class="rs-main">
+          <div id="report"><span class="muted">아직 결과가 없습니다. 위에서 주제를 넣고 조사하기를 눌러 주세요.</span></div>
+          <div id="sources"></div>
+
+          <!-- 후속 질문·슬라이드 결과(보고서의 일부이므로 인쇄에도 포함) -->
+          <div id="followup"></div>
+
+          <div class="no-print" id="resultTools" style="display:none;">
+            <div class="section-title">AI로 추가 문서 만들기</div>
+            <div class="minirow">
+              <button id="slide" class="btn-sm">📊 슬라이드 개요</button>
+              <button id="docApproval" class="btn-sm">📋 품의서 초안</button>
+              <button id="docPlan" class="btn-sm">🗂 교육 계획서</button>
+              <button id="docSurvey" class="btn-sm">📝 설문 문항(사전·사후)</button>
+              <button id="docQA" class="btn-sm">🎤 임원 예상질문 & 방어</button>
+              <button id="docRedteam" class="btn-sm">🥊 레드팀 허점 검토</button>
+            </div>
+
+            <!-- 결과에 대해 이어서 질문 -->
+            <div class="section-title" style="margin-top:22px;">이어서 질문하기</div>
+            <div class="rs-ask">
+              <textarea id="followupQ" placeholder="예: 위 사례 중 IT업계 것만 더 자세히 / 예산을 절반으로 줄이려면?"></textarea>
+              <button id="followupBtn" class="btn-sm solid">질문 보내기</button>
+            </div>
+            <div id="followupStatus" class="hint"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2820,7 +2980,9 @@ ${lines}
         `<span class="bar"><span style="width:${Math.round((r.val / max) * 100)}%"></span></span>` +
         `<span class="bar-val">${r.val}분</span></div>`
       ).join("");
-      return `<div class="chart"><div class="chart-title">⏱️ 제안 시간 배분</div>${bars}</div>`;
+      const total = rows.reduce((a, r) => a + r.val, 0);
+      const totalTxt = total >= 60 ? `${Math.floor(total / 60)}시간${total % 60 ? ` ${total % 60}분` : ""}` : `${total}분`;
+      return `<div class="chart"><div class="chart-title">⏱️ 제안 시간 배분 <span class="chart-total">총 ${totalTxt}</span></div>${bars}</div>`;
     }
     function renderMarkdown(md) {
       const lines = escapeHtml(md).split(/\r?\n/);
@@ -2861,7 +3023,8 @@ ${lines}
         if ((m = line.match(/^#{1,3}\s+(.*)/))) {
           closeSection(); secIndex++;
           const cls = secIndex === 1 ? "sec summary" : "sec" + (secHasTable[secIndex] ? " wide" : "");
-          html += `<section class="${cls}"><h3>${inline(m[1])}</h3>`;
+          const hm = inline(m[1]).match(/^(\d+)[.)]\s*(.*)$/);
+          html += `<section class="${cls}"><h3>${hm ? `<span class="sec-num">${hm[1]}</span><span class="sec-t">${hm[2]}</span>` : `<span class="sec-t">${inline(m[1])}</span>`}</h3>`;
           inSection = true;
           inNews = /뉴스/.test(m[1]); // 뉴스 섹션이면 제목을 검색 링크로 만든다
           continue;
@@ -2917,22 +3080,30 @@ ${lines}
       const secs = Array.from(reportEl.children).filter(
         (el) => el.classList.contains("sec") || el.classList.contains("chart")
       );
-      if (secs.length <= 1) { reportNavEl.innerHTML = ""; secs.forEach((el) => el.classList.remove("hidden")); return; }
+      secs.forEach((el) => el.classList.remove("hidden")); // 문서처럼 전체를 쭉 보여주고, 목차는 이동용
+      if (reportNavEl._io) { reportNavEl._io.disconnect(); reportNavEl._io = null; }
+      if (secs.length <= 1) { reportNavEl.innerHTML = ""; return; }
       const labelOf = (el) => {
-        const t = el.querySelector("h3, .chart-title");
-        return (t ? t.textContent : "섹션").replace(/^\d+\.\s*/, "");
+        const t = el.querySelector(".sec-t") || el.querySelector("h3, .chart-title");
+        return (t ? t.textContent : "섹션").replace(/^\d+\.\s*/, "").trim();
       };
-      const setActive = (i) => {
-        secs.forEach((el, idx) => el.classList.toggle("hidden", i !== -1 && idx !== i));
-        reportNavEl.querySelectorAll(".tabbtn").forEach((b) => b.classList.toggle("active", +b.dataset.i === i));
-      };
-      reportNavEl.innerHTML =
-        secs.map((el, i) => `<button type="button" class="tabbtn" data-i="${i}">${escapeHtml(labelOf(el))}</button>`).join("") +
-        `<button type="button" class="tabbtn" data-i="-1">🗂 전체보기</button>`;
-      reportNavEl.querySelectorAll(".tabbtn").forEach((btn) =>
-        btn.addEventListener("click", () => setActive(+btn.dataset.i))
-      );
-      setActive(0);
+      reportNavEl.innerHTML = '<div class="rn-title">목차</div>' +
+        secs.map((el, i) => `<button type="button" class="tabbtn" data-i="${i}">${escapeHtml(labelOf(el))}</button>`).join("");
+      const btns = Array.from(reportNavEl.querySelectorAll(".tabbtn"));
+      const mark = (i) => btns.forEach((b, idx) => b.classList.toggle("active", idx === i));
+      btns.forEach((btn) => btn.addEventListener("click", () => {
+        secs[+btn.dataset.i].scrollIntoView({ behavior: "smooth", block: "start" });
+        mark(+btn.dataset.i);
+      }));
+      mark(0);
+      // 스크롤 위치에 맞춰 목차 강조
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver((ents) => {
+          ents.forEach((e) => { if (e.isIntersecting) mark(secs.indexOf(e.target)); });
+        }, { rootMargin: "-15% 0px -70% 0px" });
+        secs.forEach((el) => io.observe(el));
+        reportNavEl._io = io;
+      }
     }
 
     // 본문 텍스트 → 보고서 카드 렌더 + 표지/출처/도구 노출 (조사·기록불러오기 공통)
@@ -2943,11 +3114,17 @@ ${lines}
       let body = text, chartHtml = "";
       const cm = text.match(/```\s*시간배분\s*\n([\s\S]*?)```/);
       if (cm) { chartHtml = renderChart(cm[1]); body = text.replace(cm[0], "").trim(); }
-      reportEl.innerHTML = text ? (renderMarkdown(body) + chartHtml) : "(빈 응답)";
+      reportEl.innerHTML = text ? renderMarkdown(body) : "(빈 응답)";
+      if (chartHtml) {
+        // 그래프는 '시간·차시' 섹션 안에 넣어서 빈 섹션이 생기지 않게
+        const home = Array.from(reportEl.querySelectorAll(":scope > .sec")).find((sec) => /시간|차시/.test(sec.querySelector("h3")?.textContent || ""));
+        (home || reportEl).insertAdjacentHTML("beforeend", chartHtml);
+      }
       buildReportNav();
       printHeadEl.innerHTML = buildCoverHtml(topic);
       renderSources(lastCites);
       resultToolsEl.style.display = text ? "block" : "none";
+      $("rsSaveBar").style.display = text ? "flex" : "none";
       if (save && text) saveHistoryRecord({ topic, industry: lastIndustry, text, cites: lastCites });
     }
 
@@ -2970,6 +3147,7 @@ ${lines}
 
       runBtn.disabled = true;
       resultToolsEl.style.display = "none";
+      $("rsSaveBar").style.display = "none";
       sourcesEl.innerHTML = ""; followupEl.innerHTML = "";
       reportEl.innerHTML = '<span class="muted">조사 중…</span>';
       statusEl.textContent = "";
