@@ -2276,7 +2276,7 @@
     }
     gateEnterBtn.addEventListener("click", enterGate);
     apiKeyEl.addEventListener("keydown", (e) => { if (e.key === "Enter" && gateScreenEl.style.display !== "none") enterGate(); });
-    changeKeyBtn.addEventListener("click", () => { try { localStorage.removeItem("gemini_exhausted_models"); } catch (_) {} showGate(); }); // 키(프로젝트)가 바뀌면 한도 기록도 새로
+    changeKeyBtn.addEventListener("click", () => { try { localStorage.removeItem("gemini_exhausted_models"); localStorage.removeItem("gemini_search_exhausted"); } catch (_) {} showGate(); }); // 키(프로젝트)가 바뀌면 한도 기록도 새로
     if (localStorage.getItem("gemini_api_key")) passGate(); else showGate();
 
     // 혼잡(과부하) 시 순서대로 시도할 모델 목록. 이름이 바뀌면 여기만 고치면 됩니다.
@@ -2301,6 +2301,10 @@
       try { localStorage.setItem(EXHAUSTED_KEY, JSON.stringify(o)); } catch (_) {}
       if (typeof renderModelPicker === "function") renderModelPicker();
     }
+    // 웹검색(그라운딩) 한도는 모델 공통이라 따로 기록 → 오늘은 바로 '검색 없이 작성'으로
+    const SEARCH_OUT_KEY = "gemini_search_exhausted";
+    const isSearchExhausted = () => { try { return localStorage.getItem(SEARCH_OUT_KEY) === ptToday(); } catch (_) { return false; } };
+    function markSearchExhausted() { try { localStorage.setItem(SEARCH_OUT_KEY, ptToday()); } catch (_) {} }
     // 모델별 표시 정보. daily = 무료 등급 하루 요청 한도(대략치, 2026-11 기준. 바뀌면 여기 숫자만 수정)
     const MODEL_INFO = {
       "gemini-3.8-flash": { name: "Gemini 3.8 Flash", desc: "가장 똑똑함 · 교육 조사·강사 찾기에 추천", daily: 20 },
@@ -2441,11 +2445,13 @@
       }
       kick();
       if (!res.ok || !res.body) {
-        let detail = `HTTP ${res.status}`, retryDelayMs = 0, perDay = false;
+        let detail = `HTTP ${res.status}`, retryDelayMs = 0, perDay = false, quotaIds = [];
         try {
           const err = (await res.json()).error || {};
           detail = err.message || detail;
           // 어떤 한도에 걸렸는지(분당/하루) — QuotaFailure의 quotaId에 PerDay가 있으면 하루 한도
+          quotaIds = (err.details || []).filter((d) => /QuotaFailure/.test(d["@type"] || ""))
+            .flatMap((d) => (d.violations || []).map((v) => v.quotaId || "")).filter(Boolean);
           perDay = (err.details || []).some((d) => /QuotaFailure/.test(d["@type"] || "") &&
             (d.violations || []).some((v) => /PerDay/i.test(v.quotaId || "")));
           const ri = (err.details || []).find((d) => /RetryInfo/.test(d["@type"] || ""));
@@ -2457,6 +2463,7 @@
         }
         const qe = makeError(detail, res.status, retryDelayMs);
         qe.perDay = perDay;
+        qe.quotaIds = quotaIds;
         throw qe;
       }
       const reader = res.body.getReader();
@@ -2511,13 +2518,15 @@
       else if (/Failed to fetch|NetworkError/i.test(msg)) ko = "인터넷 연결 또는 회사 네트워크에서 Google 접속이 막혔을 수 있어요.";
       const out = new Error(ko ? `${ko} (${msg})` : msg);
       out.retryable = e?.retryable;
+      out.quota = e?.quota; out.perDay = e?.perDay; out.quotaIds = e?.quotaIds || [];
+      if (out.quotaIds.length) out.message += ` [한도 종류: ${[...new Set(out.quotaIds)].join(", ")}]`;
       return out;
     }
     async function runGemini(apiKey, contents, onText, useSearch = true, statusTarget = statusEl) {
       // 1차: 모델을 돌아가며 시도(503 혼잡이면 같은 모델 최대 3번, 429 한도면 바로 다음 모델)
       // 2차: 전부 막히면 한 번 더 길게 쉬었다가 전체를 다시 돈다 → 순간 혼잡은 대부분 여기서 풀림
       const say = (t) => { if (statusTarget) statusTarget.textContent = t; };
-      let bestErr = null, lastErr = null;
+      let bestErr = null, lastErr = null, allQuota = true;
       const base = useSearch ? MODELS : MODELS_LIGHT;
       const pref = getModelPref();
       let order = pref === "auto" ? base : [pref, ...base.filter((m) => m !== pref)]; // 고른 모델 먼저, 나머지는 예비
@@ -2534,10 +2543,16 @@
               lastErr = e;
               const modelGone = /no longer available|not found|not supported|is not available/i.test(e.message || "");
               if (modelGone) { unavailableModels.add(model); break; } // 이 모델은 못 씀 → 다음 모델로
+              if (!e.quota) allQuota = false;
               if (!bestErr || !bestErr.retryable) bestErr = e; // '모델 없음'보다 실제 원인을 보여주기 위해 기억
               if (!e.retryable) throw friendlyError(e);    // 키 오류 등은 즉시 표시
               if (e.quota) {                              // 한도는 모델별이라 기다리지 말고 넘김
-                if (e.perDay) markExhausted(model); else allDaily = false;
+                const searchQuota = (e.quotaIds || []).some((q) => /search|ground/i.test(q));
+                if (searchQuota) {                                   // 키 공통 웹검색 한도 → 다른 모델도 똑같으니 바로 중단
+                  markSearchExhausted();
+                  const fe = friendlyError(e); fe.allQuota = true; throw fe;
+                }
+                else if (e.perDay) markExhausted(model); else allDaily = false;
                 say(`${model} 사용량 한도 → 다른 모델로 바꿔서 시도 중…`); break;
               }
               allDaily = false;
@@ -2554,7 +2569,9 @@
           for (let sec = 20; sec > 0; sec--) { say(`모든 모델이 혼잡해요. ${sec}초 쉬었다가 한 번 더 시도할게요… ⏳`); await sleep(1000); }
         }
       }
-      throw friendlyError(bestErr || lastErr);
+      const fe = friendlyError(bestErr || lastErr);
+      fe.allQuota = allQuota && !!(bestErr || lastErr)?.quota; // 모든 모델이 한도 → 검색 한도(키 공통)일 가능성
+      throw fe;
     }
     // 멀티턴 대화용 contents 누적 (후속 질문에서 맥락 유지)
     const userTurn = (text) => ({ role: "user", parts: [{ text }] });
@@ -2934,6 +2951,14 @@ ${lines}
       if (save && text) saveHistoryRecord({ topic, industry: lastIndustry, text, cites: lastCites });
     }
 
+    // 웹검색 한도가 바닥났을 때 쓰는 '검색 없이 작성' 모드
+    const NO_SEARCH_RULE = `
+
+[중요] 지금은 웹검색을 쓸 수 없어. 네가 이미 알고 있는 일반 지식으로만 작성해.
+- 출처 링크·URL·기사 제목·구체적 통계 수치·최신 사례를 지어내지 마. 확실하지 않은 수치는 '추정'이라고 밝혀.
+- 최신 동향은 '최신 정보는 웹 확인 필요'라고 표시해.`;
+    const NO_SEARCH_BANNER = '<div class="guide-tip" style="margin:0 0 14px;">⚠️ <b>오늘 웹검색 한도를 다 써서 검색 없이 AI 지식만으로 작성했어요.</b> 최신 동향·수치·사례는 직접 확인이 필요해요. 한국시간 오후 4~5시쯤 한도가 초기화되면 다시 조사해 보세요.</div>';
+
     async function research() {
       const apiKey = apiKeyEl.value.trim();
       const topic = topicEl.value.trim();
@@ -2954,13 +2979,27 @@ ${lines}
         const prompt = buildPrompt(topic, industry);
         // 글이 도착하는 대로 실시간 렌더(스트리밍). 끝나면 표/그래프/출처까지 정식 렌더.
         // 첫 글자가 도착하면 로딩 팝업을 바로 닫아서, 써지는 과정을 실시간으로 보여줌
-        let modalClosed = false;
-        const { text, cites } = await runGemini(apiKey, [userTurn(prompt)], (full) => {
-          if (!modalClosed) { modalClosed = true; closeSearchModal(); statusEl.textContent = "작성 중… ✍️"; }
-          reportEl.innerHTML = renderMarkdown(full);
-        });
+        let modalClosed = false, noSearch = false;
+        const onText = (full) => {
+          if (!modalClosed) { modalClosed = true; closeSearchModal(); statusEl.textContent = noSearch ? "웹검색 없이 작성 중… ✍️" : "작성 중… ✍️"; }
+          reportEl.innerHTML = (noSearch ? NO_SEARCH_BANNER : "") + renderMarkdown(full);
+        };
+        let res;
+        try {
+          if (isSearchExhausted()) { const e = new Error("search exhausted"); e.allQuota = true; throw e; } // 오늘 이미 검색 한도 소진 → 헛시도 없이 바로 전환
+          res = await runGemini(apiKey, [userTurn(prompt)], onText);
+        }
+        catch (e) {
+          // 모든 모델이 한도 초과 = 키 공통 웹검색 한도가 바닥났을 가능성 → 검색 없이 AI 지식으로라도 작성
+          if (!e.allQuota) throw e;
+          noSearch = true;
+          statusEl.textContent = "웹검색 한도 초과 → 검색 없이 작성으로 전환…";
+          res = await runGemini(apiKey, [userTurn(prompt + NO_SEARCH_RULE)], onText, false);
+        }
+        const { text, cites } = res;
         if (!text) { reportEl.textContent = "(빈 응답)"; statusEl.textContent = ""; return; }
         finalizeReport(text, cites, topic, industry, true);
+        if (noSearch) reportEl.insertAdjacentHTML("afterbegin", NO_SEARCH_BANNER);
         conversation = [userTurn(prompt), modelTurn(text)];
         statusEl.textContent = "완료 ✓";
       } catch (err) {
@@ -3893,7 +3932,7 @@ ${lines}
       }
       modelListEl.innerHTML = html;
       const tip = $("modelResetTip");
-      if (tip) tip.innerHTML = `⏰ 무료 한도는 미국 태평양 시간 자정에 초기화돼요(다음 초기화: <b>${quotaResetLabel()}</b>).<br>🔑 횟수는 API 키(구글 프로젝트) 단위로 쌓여요. 같은 키를 다른 PC에서도 쓰면 실제 남은 횟수는 더 적을 수 있어요.`;
+      if (tip) tip.innerHTML = (isSearchExhausted() ? `🔍 <b>오늘 웹검색 한도 소진</b> — 교육 조사는 검색 없이 AI 지식만으로 작성돼요.<br>` : "") + `⏰ 무료 한도는 미국 태평양 시간 자정에 초기화돼요(다음 초기화: <b>${quotaResetLabel()}</b>).<br>🔑 횟수는 API 키(구글 프로젝트) 단위로 쌓여요. 같은 키를 다른 PC에서도 쓰면 실제 남은 횟수는 더 적을 수 있어요.`;
     }
     modelListEl.addEventListener("change", (e) => {
       if (e.target.name !== "modelPick") return;
