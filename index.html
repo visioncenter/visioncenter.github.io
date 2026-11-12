@@ -2234,12 +2234,27 @@
     }
     gateEnterBtn.addEventListener("click", enterGate);
     apiKeyEl.addEventListener("keydown", (e) => { if (e.key === "Enter" && gateScreenEl.style.display !== "none") enterGate(); });
-    changeKeyBtn.addEventListener("click", showGate);
+    changeKeyBtn.addEventListener("click", () => { try { localStorage.removeItem("gemini_exhausted_models"); } catch (_) {} showGate(); }); // 키(프로젝트)가 바뀌면 한도 기록도 새로
     if (localStorage.getItem("gemini_api_key")) passGate(); else showGate();
 
     // 혼잡(과부하) 시 순서대로 시도할 모델 목록. 이름이 바뀌면 여기만 고치면 됩니다.
     // 2026-11 기준 무료 등급에서 쓸 수 있는 모델(구형 2.5 계열은 신규 사용자에게 막힘)
     const MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash-lite"];
+    // 검색 없는 가벼운 작업(품의서 채우기·문서 읽기·키워드 추천 등)은 하루 한도가 넉넉한 Flash-Lite부터 써서
+    // 하루 한도가 작은 Flash(무료 하루 약 20회)는 교육 조사·강사 찾기에 아껴 둔다
+    const MODELS_LIGHT = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.7-flash"];
+    // 하루 한도를 다 쓴 모델은 오늘(태평양 시간 자정 리셋) 다시 시도하지 않고 바로 건너뜀 → 헛도는 시간·요청 절약
+    const ptToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
+    const EXHAUSTED_KEY = "gemini_exhausted_models";
+    function loadExhausted() {
+      try { const o = JSON.parse(localStorage.getItem(EXHAUSTED_KEY)) || {}; return o.day === ptToday() ? o : { day: ptToday(), models: [] }; }
+      catch (_) { return { day: ptToday(), models: [] }; }
+    }
+    function markExhausted(model) {
+      const o = loadExhausted();
+      if (!o.models.includes(model)) o.models.push(model);
+      try { localStorage.setItem(EXHAUSTED_KEY, JSON.stringify(o)); } catch (_) {}
+    }
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
     // --- 검색 중 팝업: 실제 진행률은 알 수 없어서(스트리밍 총 길이를 모름) 90%까지만
@@ -2344,10 +2359,13 @@
       }
       kick();
       if (!res.ok || !res.body) {
-        let detail = `HTTP ${res.status}`, retryDelayMs = 0;
+        let detail = `HTTP ${res.status}`, retryDelayMs = 0, perDay = false;
         try {
           const err = (await res.json()).error || {};
           detail = err.message || detail;
+          // 어떤 한도에 걸렸는지(분당/하루) — QuotaFailure의 quotaId에 PerDay가 있으면 하루 한도
+          perDay = (err.details || []).some((d) => /QuotaFailure/.test(d["@type"] || "") &&
+            (d.violations || []).some((v) => /PerDay/i.test(v.quotaId || "")));
           const ri = (err.details || []).find((d) => /RetryInfo/.test(d["@type"] || ""));
           if (ri && ri.retryDelay) retryDelayMs = Math.round(parseFloat(ri.retryDelay) * 1000) || 0; // "31s" → 31000
         } catch (_) {}
@@ -2355,7 +2373,9 @@
           thinkingUnsupported.add(model);
           return callGeminiStream(model, apiKey, contents, onText, useSearch);
         }
-        throw makeError(detail, res.status, retryDelayMs);
+        const qe = makeError(detail, res.status, retryDelayMs);
+        qe.perDay = perDay;
+        throw qe;
       }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -2402,6 +2422,7 @@
       const msg = String(e?.message || e || "");
       let ko = "";
       if (/API key not valid|API_KEY_INVALID|invalid api key/i.test(msg)) ko = "API 키가 올바르지 않아요. 왼쪽 메뉴 아래 API 키 변경에서 AIza로 시작하는 키를 다시 넣어주세요.";
+      else if (e?.perDay) ko = "오늘 Gemini 무료 사용량을 다 썼어요. 한국시간 오후 4~5시쯤(미국 자정) 초기화되니 그 뒤에 다시 시도해 주세요.";
       else if (/quota|RESOURCE_EXHAUSTED|rate limit|429/i.test(msg)) ko = "Gemini 무료 사용량 한도(1분·하루)에 걸렸어요. 1~2분 뒤 다시 시도해 주세요.";
       else if (/high demand|overload|503|try again/i.test(msg)) ko = "지금 Gemini 서버가 혼잡해요. 잠시 뒤 다시 시도해 주세요.";
       else if (/no longer available|not found|not supported|is not available/i.test(msg)) ko = "AI 모델을 쓸 수 없어요. 관리자에게 알려주세요.";
@@ -2415,8 +2436,13 @@
       // 2차: 전부 막히면 한 번 더 길게 쉬었다가 전체를 다시 돈다 → 순간 혼잡은 대부분 여기서 풀림
       const say = (t) => { if (statusTarget) statusTarget.textContent = t; };
       let bestErr = null, lastErr = null;
+      const order = useSearch ? MODELS : MODELS_LIGHT;
       for (let round = 1; round <= 2; round++) {
-        for (const model of MODELS) {
+        const skip = loadExhausted().models;
+        let list = order.filter((m) => !skip.includes(m));
+        if (!list.length) list = order; // 전부 소진 표시면 혹시 모르니 그대로 시도(리셋 직후 등)
+        let allDaily = true;
+        for (const model of list) {
           for (let attempt = 1; attempt <= 3; attempt++) {
             try { return await callGeminiStream(model, apiKey, contents, onText, useSearch); }
             catch (e) {
@@ -2425,7 +2451,11 @@
               if (modelGone) break;                       // 이 모델은 못 씀 → 다음 모델로
               if (!bestErr || !bestErr.retryable) bestErr = e; // '모델 없음'보다 실제 원인을 보여주기 위해 기억
               if (!e.retryable) throw friendlyError(e);    // 키 오류 등은 즉시 표시
-              if (e.quota) { say(`${model} 사용량 한도 → 다른 모델로 바꿔서 시도 중…`); break; } // 한도는 모델별이라 기다리지 말고 넘김
+              if (e.quota) {                              // 한도는 모델별이라 기다리지 말고 넘김
+                if (e.perDay) markExhausted(model); else allDaily = false;
+                say(`${model} 사용량 한도 → 다른 모델로 바꿔서 시도 중…`); break;
+              }
+              allDaily = false;
               if (e.status === 504) { say(`${model} 응답이 너무 오래 걸려요 → 더 가벼운 모델로 바꿔서 시도 중…`); break; } // 무거운 요청은 같은 모델 반복해도 똑같음
               if (attempt === 3) break;
               const wait = Math.min(e.retryDelayMs || (2000 * attempt + Math.random() * 1000), 15000);
@@ -2434,6 +2464,7 @@
             }
           }
         }
+        if (allDaily) break; // 전부 '하루 한도'면 20초 기다려도 소용없음 → 바로 안내
         if (round === 1) {
           for (let sec = 20; sec > 0; sec--) { say(`모든 모델이 혼잡해요. ${sec}초 쉬었다가 한 번 더 시도할게요… ⏳`); await sleep(1000); }
         }
