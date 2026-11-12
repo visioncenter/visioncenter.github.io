@@ -4181,7 +4181,7 @@ ${iconBox("📢", "rgb(255, 255, 255)")}</td>
             if (seen.has(mail.toLowerCase())) continue;
             seen.add(mail.toLowerCase()); list.push(`${name}<${mail}>`);
           }
-          rcptEl.value = list.length ? list.join("; ") + ";" : "";
+          rcptEl.value = list.length ? list.join(";") + ";" : "";
           rcptCountEl.textContent = list.length ? `(${list.length}명)` : "";
           // 과정 정보 채우기
           const first = data[0] || [];
