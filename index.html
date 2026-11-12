@@ -402,6 +402,31 @@
       border: none; border-radius: 18px; cursor: pointer;
     }
 
+    /* AI 모델 선택 팝업 */
+    .model-list { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; }
+    .model-opt {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; cursor: pointer;
+      border: 1px solid var(--line); border-radius: 12px; background: var(--card); transition: border-color .12s, background .12s;
+    }
+    .model-opt:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+    .model-opt.selected { border-color: var(--accent); background: var(--soft); }
+    .model-opt input { margin: 3px 0 0; accent-color: var(--accent); flex: 0 0 auto; }
+    .model-opt .mo-body { flex: 1; min-width: 0; }
+    .model-opt .mo-name { font-weight: 700; font-size: 14.5px; }
+    .model-opt .mo-desc { color: var(--sub); font-size: 12.5px; margin-top: 2px; }
+    .model-opt .mo-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 7px; font-size: 12px; color: var(--muted); }
+    .mo-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 11.5px; }
+    .mo-badge.ok { background: color-mix(in srgb, #16a34a 14%, transparent); color: #15803d; }
+    .mo-badge.out { background: color-mix(in srgb, #dc2626 13%, transparent); color: #b91c1c; }
+    .mo-badge.na { background: var(--chip-bg); color: var(--sub); }
+    :root[data-theme="dark"] .mo-badge.ok { color: #4ade80; }
+    :root[data-theme="dark"] .mo-badge.out { color: #f87171; }
+    .mo-bar { flex: 0 0 72px; height: 5px; border-radius: 99px; background: var(--soft-line); overflow: hidden; }
+    .mo-bar > i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+    .mo-bar.full > i { background: #dc2626; }
+    .model-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; align-items: center; }
+    .model-actions .ms-status { font-size: 12.5px; color: var(--sub); }
+
     /* 검색 중 팝업: 스피너 + 돌아가는 문구 + 연출용 진행률 바 */
     .search-modal-card { max-width: 360px; text-align: center; padding: 32px 28px; }
     .search-spinner {
@@ -1177,6 +1202,7 @@
       </div>
       <div class="sidebar-tools">
         <button id="guideBtn" class="side-tool"><svg class="st-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg><span>사용 설명서</span></button>
+        <button id="modelBtn" class="side-tool" title="AI 모델 선택·사용 현황"><svg class="st-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg><span id="modelBtnLabel">AI 모델: 자동</span></button>
         <button id="changeKeyBtn" class="side-tool" title="Gemini API 키 변경"><svg class="st-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/></svg><span>API 키 변경</span></button>
         <button id="themeToggle" class="side-tool" title="밝게/어둡게 전환"><svg class="st-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span>다크모드</span></button>
       </div>
@@ -2172,6 +2198,22 @@
       </div>
     </div>
 
+    <!-- AI 모델 선택·사용 현황 -->
+    <div id="modelOverlay" class="modal-overlay no-print" style="display:none;">
+      <div class="modal-card">
+        <button id="modelClose" class="modal-close" aria-label="닫기">✕</button>
+        <h2>AI 모델 선택</h2>
+        <p class="modal-sub">고른 모델을 먼저 쓰고, 한도에 걸리거나 혼잡하면 나머지 모델로 자동으로 넘어가요.<br>사용 횟수는 이 브라우저에서 센 값이고, 하루 한도는 무료 등급 기준 대략치예요.</p>
+        <div id="modelList" class="model-list"></div>
+        <div class="model-actions">
+          <button id="modelCheckBtn" class="btn-sm" type="button">🔎 사용 가능 여부 확인</button>
+          <span id="modelCheckStatus" class="ms-status"></span>
+        </div>
+        <div class="guide-tip" id="modelResetTip"></div>
+        <button id="modelDone" class="solid-btn">확인</button>
+      </div>
+    </div>
+
     <!-- 검색 중 표시: 재미있는 문구가 돌아가는 가짜(연출용) 진행률 팝업 -->
     <div id="searchModal" class="modal-overlay no-print" style="display:none;">
       <div class="modal-card search-modal-card">
@@ -2239,10 +2281,13 @@
 
     // 혼잡(과부하) 시 순서대로 시도할 모델 목록. 이름이 바뀌면 여기만 고치면 됩니다.
     // 2026-11 기준 무료 등급에서 쓸 수 있는 모델(구형 2.5 계열은 신규 사용자에게 막힘)
-    const MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash-lite"];
+    // 무료 한도는 모델별로 따로라서, 모델을 여러 개 두면 하루 총 사용 가능 횟수가 늘어남
+    const MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
     // 검색 없는 가벼운 작업(품의서 채우기·문서 읽기·키워드 추천 등)은 하루 한도가 넉넉한 Flash-Lite부터 써서
     // 하루 한도가 작은 Flash(무료 하루 약 20회)는 교육 조사·강사 찾기에 아껴 둔다
-    const MODELS_LIGHT = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.7-flash"];
+    // Gemma는 웹검색(google_search)을 못 써서 검색 없는 작업에만 사용
+    const MODELS_LIGHT = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it", "gemma-4-26b-a4b-it", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
+    const NO_SEARCH_MODELS = new Set(["gemma-4-31b-it", "gemma-4-26b-a4b-it"]);
     // 하루 한도를 다 쓴 모델은 오늘(태평양 시간 자정 리셋) 다시 시도하지 않고 바로 건너뜀 → 헛도는 시간·요청 절약
     const ptToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
     const EXHAUSTED_KEY = "gemini_exhausted_models";
@@ -2254,6 +2299,43 @@
       const o = loadExhausted();
       if (!o.models.includes(model)) o.models.push(model);
       try { localStorage.setItem(EXHAUSTED_KEY, JSON.stringify(o)); } catch (_) {}
+      if (typeof renderModelPicker === "function") renderModelPicker();
+    }
+    // 모델별 표시 정보. daily = 무료 등급 하루 요청 한도(대략치, 2026-11 기준. 바뀌면 여기 숫자만 수정)
+    const MODEL_INFO = {
+      "gemini-3.8-flash": { name: "Gemini 3.8 Flash", desc: "가장 똑똑함 · 교육 조사·강사 찾기에 추천", daily: 20 },
+      "gemini-3.7-flash": { name: "Gemini 3.7 Flash", desc: "3.8과 비슷한 성능 · 3.8 한도 소진 시 대안", daily: 20 },
+      "gemini-3.6-flash": { name: "Gemini 3.6 Flash", desc: "한 단계 이전 Flash · 3.8·3.7 한도 소진 시 대안", daily: 20 },
+      "gemini-3.5-flash": { name: "Gemini 3.5 Flash", desc: "이전 세대 Flash · 마지막 예비용", daily: 20 },
+      "gemini-3.5-flash-lite": { name: "Gemini 3.5 Flash-Lite", desc: "빠르고 한도 넉넉 · 품의서·문서 읽기 같은 가벼운 작업용", daily: 500 },
+      "gemini-3.1-flash-lite": { name: "Gemini 3.1 Flash-Lite", desc: "가장 가벼운 Gemini · 3.5 Flash-Lite와 한도 따로", daily: 500 },
+      "gemma-4-31b-it": { name: "Gemma 4 31B", desc: "구글 오픈모델 · 웹검색 안 됨(가벼운 작업 전용)", daily: 0 },
+      "gemma-4-26b-a4b-it": { name: "Gemma 4 26B A4B", desc: "Gemma 중 더 빠른 버전 · 웹검색 안 됨(가벼운 작업 전용)", daily: 0 },
+    };
+    // 오늘(태평양 시간 기준) 모델별 성공 호출 수
+    const USAGE_KEY = "gemini_usage";
+    function loadUsage() {
+      try { const o = JSON.parse(localStorage.getItem(USAGE_KEY)) || {}; return o.day === ptToday() ? o : { day: ptToday(), counts: {} }; }
+      catch (_) { return { day: ptToday(), counts: {} }; }
+    }
+    function addUsage(model) {
+      const o = loadUsage();
+      o.counts[model] = (o.counts[model] || 0) + 1;
+      try { localStorage.setItem(USAGE_KEY, JSON.stringify(o)); } catch (_) {}
+      if (typeof renderModelPicker === "function") renderModelPicker();
+    }
+    // 사용자가 고른 모델("auto"면 작업 종류별 기본 순서)
+    const MODEL_PREF_KEY = "gemini_model_pref";
+    const getModelPref = () => { const v = localStorage.getItem(MODEL_PREF_KEY); return v && MODEL_INFO[v] ? v : "auto"; };
+    const unavailableModels = new Set(); // 이번 세션에서 '모델 없음'으로 확인된 것
+    // 한도 초기화 시각(태평양 자정)을 이 컴퓨터 시간으로 표시
+    function quotaResetLabel() {
+      const now = new Date();
+      const ptNow = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+      const next = new Date(ptNow); next.setHours(24, 0, 0, 0);
+      const real = new Date(next.getTime() + (now.getTime() - ptNow.getTime()));
+      const sameDay = real.toDateString() === now.toDateString();
+      return `${sameDay ? "오늘" : "내일"} ${real.toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit" })}`;
     }
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -2339,7 +2421,7 @@
       if (useSearch) body.tools = [{ google_search: {} }]; // 키워드 추천 등은 검색 없이 더 빠르게
       // '깊게 생각하기'를 낮춰 속도를 크게 올림 — 검색 작업(교육 조사·강사 찾기)도 포함
       // (Gemini 3 기본값은 high라 첫 글자까지 수십 초, PDF가 크면 1~2분 넘게 걸리거나 504가 남). 모델이 이 옵션을 거부하면 빼고 다시 보냄.
-      if (!thinkingUnsupported.has(model)) body.generationConfig = { thinkingConfig: { thinkingLevel: "low" } };
+      if (!thinkingUnsupported.has(model) && !NO_SEARCH_MODELS.has(model)) body.generationConfig = { thinkingConfig: { thinkingLevel: "low" } };
       // 응답이 멈춘 채 안 오는 경우 대비: 첫 응답 90초, 조각 사이 60초 넘게 조용하면 끊고 재시도
       const ctrl = new AbortController();
       let idleTimer = setTimeout(() => ctrl.abort(), 90000);
@@ -2436,7 +2518,10 @@
       // 2차: 전부 막히면 한 번 더 길게 쉬었다가 전체를 다시 돈다 → 순간 혼잡은 대부분 여기서 풀림
       const say = (t) => { if (statusTarget) statusTarget.textContent = t; };
       let bestErr = null, lastErr = null;
-      const order = useSearch ? MODELS : MODELS_LIGHT;
+      const base = useSearch ? MODELS : MODELS_LIGHT;
+      const pref = getModelPref();
+      let order = pref === "auto" ? base : [pref, ...base.filter((m) => m !== pref)]; // 고른 모델 먼저, 나머지는 예비
+      if (useSearch) order = order.filter((m) => !NO_SEARCH_MODELS.has(m)); // 검색 작업엔 Gemma 제외
       for (let round = 1; round <= 2; round++) {
         const skip = loadExhausted().models;
         let list = order.filter((m) => !skip.includes(m));
@@ -2444,11 +2529,11 @@
         let allDaily = true;
         for (const model of list) {
           for (let attempt = 1; attempt <= 3; attempt++) {
-            try { return await callGeminiStream(model, apiKey, contents, onText, useSearch); }
+            try { const r = await callGeminiStream(model, apiKey, contents, onText, useSearch); addUsage(model); return r; }
             catch (e) {
               lastErr = e;
               const modelGone = /no longer available|not found|not supported|is not available/i.test(e.message || "");
-              if (modelGone) break;                       // 이 모델은 못 씀 → 다음 모델로
+              if (modelGone) { unavailableModels.add(model); break; } // 이 모델은 못 씀 → 다음 모델로
               if (!bestErr || !bestErr.retryable) bestErr = e; // '모델 없음'보다 실제 원인을 보여주기 위해 기억
               if (!e.retryable) throw friendlyError(e);    // 키 오류 등은 즉시 표시
               if (e.quota) {                              // 한도는 모델별이라 기다리지 말고 넘김
@@ -3786,6 +3871,61 @@ ${lines}
     guideDone.addEventListener("click", closeGuide);
     guideOverlay.addEventListener("click", (e) => { if (e.target === guideOverlay) closeGuide(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && guideOverlay.style.display === "flex") closeGuide(); });
+
+    // --- AI 모델 선택·사용 현황 ---
+    const modelOverlay = $("modelOverlay"), modelListEl = $("modelList");
+    function renderModelPicker() {
+      const pref = getModelPref(), usage = loadUsage().counts, out = loadExhausted().models;
+      const lbl = $("modelBtnLabel");
+      if (lbl) lbl.textContent = "AI 모델: " + (pref === "auto" ? "자동" : MODEL_INFO[pref].name.replace("Gemini ", ""));
+      if (!modelListEl) return;
+      const row = (id, name, desc, meta) => `<label class="model-opt${pref === id ? " selected" : ""}"><input type="radio" name="modelPick" value="${id}"${pref === id ? " checked" : ""}><div class="mo-body"><div class="mo-name">${name}</div><div class="mo-desc">${desc}</div>${meta}</div></label>`;
+      let html = row("auto", "자동 (추천)", "교육 조사·강사 찾기는 3.8 Flash부터, 가벼운 작업은 Flash-Lite·Gemma부터 쓰고 막히면 자동 전환", "");
+      for (const id of [...new Set([...MODELS, ...MODELS_LIGHT])]) {
+        const info = MODEL_INFO[id] || { name: id, desc: "", daily: 0 };
+        const n = usage[id] || 0, isOut = out.includes(id), isNa = unavailableModels.has(id);
+        const badge = isNa ? '<span class="mo-badge na">⚠️ 사용할 수 없음</span>'
+          : isOut ? `<span class="mo-badge out">⛔ 오늘 한도 소진 · ${quotaResetLabel()} 초기화</span>`
+          : '<span class="mo-badge ok">✅ 사용 가능</span>';
+        const pct = info.daily ? Math.min(100, Math.round((isOut ? info.daily : n) / info.daily * 100)) : 0;
+        const meta = `<div class="mo-meta">${badge}${info.daily || isOut ? `<span class="mo-bar${isOut ? " full" : ""}"><i style="width:${pct}%"></i></span>` : ""}<span>오늘 ${n}회${info.daily ? ` / 약 ${info.daily}회` : " · 한도 넉넉"}</span></div>`;
+        html += row(id, info.name, info.desc, meta);
+      }
+      modelListEl.innerHTML = html;
+      const tip = $("modelResetTip");
+      if (tip) tip.innerHTML = `⏰ 무료 한도는 미국 태평양 시간 자정에 초기화돼요(다음 초기화: <b>${quotaResetLabel()}</b>).<br>🔑 횟수는 API 키(구글 프로젝트) 단위로 쌓여요. 같은 키를 다른 PC에서도 쓰면 실제 남은 횟수는 더 적을 수 있어요.`;
+    }
+    modelListEl.addEventListener("change", (e) => {
+      if (e.target.name !== "modelPick") return;
+      try { localStorage.setItem(MODEL_PREF_KEY, e.target.value); } catch (_) {}
+      renderModelPicker();
+    });
+    // 모델 목록 조회는 생성 요청이 아니라서 사용 한도를 쓰지 않음
+    $("modelCheckBtn").addEventListener("click", async () => {
+      const st = $("modelCheckStatus"), btn = $("modelCheckBtn");
+      const key = apiKeyEl.value.trim();
+      if (!key) { st.textContent = "API 키를 먼저 넣어 주세요."; return; }
+      btn.disabled = true; st.textContent = "확인 중…";
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(key)}`);
+        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error?.message || `HTTP ${res.status}`);
+        const names = new Set(((await res.json()).models || []).map((m) => String(m.name).replace(/^models\//, "")));
+        const all = [...new Set([...MODELS, ...MODELS_LIGHT])];
+        all.forEach((m) => { if (names.has(m)) unavailableModels.delete(m); else unavailableModels.add(m); });
+        const na = all.filter((m) => unavailableModels.has(m));
+        st.textContent = na.length ? `${na.length}개 모델을 이 키로 쓸 수 없어요.` : "모든 모델을 쓸 수 있어요 ✓ (한도 소진 여부는 사용 기록 기준)";
+      } catch (err) {
+        st.textContent = friendlyError(err).message;
+      } finally { btn.disabled = false; renderModelPicker(); }
+    });
+    const openModelPicker = () => { renderModelPicker(); $("modelCheckStatus").textContent = ""; modelOverlay.style.display = "flex"; };
+    const closeModelPicker = () => { modelOverlay.style.display = "none"; };
+    $("modelBtn").addEventListener("click", openModelPicker);
+    $("modelClose").addEventListener("click", closeModelPicker);
+    $("modelDone").addEventListener("click", closeModelPicker);
+    modelOverlay.addEventListener("click", (e) => { if (e.target === modelOverlay) closeModelPicker(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modelOverlay.style.display === "flex") closeModelPicker(); });
+    renderModelPicker();
 
     // --- 초기화 ---
     applyTheme(localStorage.getItem("edu_theme") || "light");

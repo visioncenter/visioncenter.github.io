@@ -205,6 +205,9 @@
 | `const MODELS = [...]` | 쓸 Gemini 모델 목록(혼잡 시 순서대로 전환, 현재 3.8 → 3.7 → 3.5 Flash-Lite). **모델명 바뀌면 여기만 수정** |
 | `callGeminiStream(...)` | 실제 스트리밍 API 호출(SSE 파싱). `useSearch=false`면 검색 끔 |
 | `runGemini(apiKey, contents, onText, useSearch)` | 재시도+보조모델 전환 래퍼. 못 쓰는 모델은 건너뜀. 모든 AI 호출이 여기 통함 |
+| `MODELS_LIGHT` / `MODEL_INFO` | 검색 없는 작업용 모델 순서(Flash-Lite 우선) / 모델 이름·설명·무료 하루 한도(대략치) — **한도 바뀌면 daily 숫자만 수정** |
+| `loadExhausted/markExhausted` · `loadUsage/addUsage` | 오늘(태평양 자정 기준) 한도 소진 모델·모델별 사용 횟수(localStorage) |
+| `renderModelPicker` / `getModelPref` | 사이드바 **AI 모델** 팝업(모델 고르기·사용 현황·사용 가능 여부 확인). 고른 모델 먼저, 막히면 나머지로 자동 전환 |
 | `friendlyError(e)` | API 오류를 한국어 안내로 변환(한도·키 오류·혼잡·네트워크 차단) |
 | `chunkText/chunkCites/chunkSupports` | 스트리밍 조각에서 본문/출처 추출 |
 | `showGuideSection` | 사용 설명서 모달 탭 전환 |
