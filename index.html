@@ -3897,7 +3897,7 @@ ${others ? `[이미 있는 다른 항목] ${others} — 이것들과 겹치지 �
 - title: 무엇을 하라는 항목인지 15자 이내 명사형 (예: "사전 설문 참여", "개인 노트북 지참").
 - body: 1~2문장. 수강생이 해야 할 핵심 행동 한 구절만 **굵게** 감싼다. URL은 body에 넣지 않는다.
 - box: URL이 있으면 반드시 "# 참여 링크"(성격에 맞게 소제목 조정) 줄과 "- URL" 줄로 넣는다. 준비물·절차처럼 여러 개를 나열할 게 있으면 "# 소제목" + "- 항목" 줄로. 둘 다 없으면 빈 문자열.
-- 줄바꿈은 \n 으로.
+- 문자열 안 줄바꿈은 실제 줄바꿈 대신 \\n 으로 이스케이프한다.
 
 [출력] 아래 JSON 하나만. 설명·코드블록 없이.
 {"title":"...","body":"...","box":"..."}`;
@@ -3906,7 +3906,10 @@ ${others ? `[이미 있는 다른 항목] ${others} — 이것들과 겹치지 �
           const { text } = await runGemini(apiKey, [userTurn(prompt)], null, false, aiSt);
           const m = text.match(/\{[\s\S]*\}/);
           if (!m) throw new Error("AI 응답을 이해하지 못했어요. 다시 시도해 주세요.");
-          const j = JSON.parse(m[0]);
+          // 문자열 안에 실제 줄바꿈·탭이 섞여 오면 JSON.parse가 실패하므로 \\n 등으로 바꿔서 다시 읽음
+          let j;
+          try { j = JSON.parse(m[0]); }
+          catch (_) { j = JSON.parse(m[0].replace(/"(?:[^"\\]|\\.)*"/g, (str) => str.replace(/\r?\n/g, "\\n").replace(/\t/g, "\\t"))); }
           box.querySelector(".en-t").value = (j.title || "").trim();
           box.querySelector(".en-b").value = (j.body || "").trim();
           box.querySelector(".en-x").value = (j.box || "").trim();
