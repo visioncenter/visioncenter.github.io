@@ -2322,9 +2322,9 @@
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
       const body = { contents };
       if (useSearch) body.tools = [{ google_search: {} }]; // 키워드 추천 등은 검색 없이 더 빠르게
-      // 검색 없는 작업(품의서 채우기·문서 읽기 등)은 '깊게 생각하기'를 낮춰 속도를 크게 올림
-      // (Gemini 3 기본값은 high라 PDF가 크면 1~2분 넘게 걸리거나 504가 남). 모델이 이 옵션을 거부하면 빼고 다시 보냄.
-      if (!useSearch && !thinkingUnsupported.has(model)) body.generationConfig = { thinkingConfig: { thinkingLevel: "low" } };
+      // '깊게 생각하기'를 낮춰 속도를 크게 올림 — 검색 작업(교육 조사·강사 찾기)도 포함
+      // (Gemini 3 기본값은 high라 첫 글자까지 수십 초, PDF가 크면 1~2분 넘게 걸리거나 504가 남). 모델이 이 옵션을 거부하면 빼고 다시 보냄.
+      if (!thinkingUnsupported.has(model)) body.generationConfig = { thinkingConfig: { thinkingLevel: "low" } };
       // 응답이 멈춘 채 안 오는 경우 대비: 첫 응답 90초, 조각 사이 60초 넘게 조용하면 끊고 재시도
       const ctrl = new AbortController();
       let idleTimer = setTimeout(() => ctrl.abort(), 90000);
@@ -2837,7 +2837,10 @@ ${lines}
       try {
         const prompt = buildPrompt(topic, industry);
         // 글이 도착하는 대로 실시간 렌더(스트리밍). 끝나면 표/그래프/출처까지 정식 렌더.
+        // 첫 글자가 도착하면 로딩 팝업을 바로 닫아서, 써지는 과정을 실시간으로 보여줌
+        let modalClosed = false;
         const { text, cites } = await runGemini(apiKey, [userTurn(prompt)], (full) => {
+          if (!modalClosed) { modalClosed = true; closeSearchModal(); statusEl.textContent = "작성 중… ✍️"; }
           reportEl.innerHTML = renderMarkdown(full);
         });
         if (!text) { reportEl.textContent = "(빈 응답)"; statusEl.textContent = ""; return; }
