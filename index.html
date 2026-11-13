@@ -2580,7 +2580,7 @@
     // 스트리밍 호출: 글이 도착하는 대로 onText(누적 텍스트)를 호출. 끝나면 {text, cites} 반환.
     const thinkingUnsupported = new Set();
     async function callGeminiStream(model, apiKey, contents, onText, useSearch = true) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
       const body = { contents };
       if (useSearch) body.tools = [{ google_search: {} }]; // 키워드 추천 등은 검색 없이 더 빠르게
       // '깊게 생각하기'를 낮춰 속도를 크게 올림 — 검색 작업(교육 조사·강사 찾기)도 포함
@@ -2595,7 +2595,7 @@
       try {
         res = await fetch(url, {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
           body: JSON.stringify(body),
           signal: ctrl.signal,
         });
@@ -2948,7 +2948,12 @@ ${lines}
 
     // --- 마크다운 → 보고서 HTML 변환 (제목/불릿/굵게/구분선만 처리) ---
     function escapeHtml(s) {
-      return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+      return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+    // 링크 주소 검사: http/https만 허용(공유 링크 등 외부에서 들어온 javascript: 주소·따옴표 차단)
+    function safeUrl(u) {
+      try { const x = new URL(String(u || "")); return /^https?:$/.test(x.protocol) ? x.href.replace(/"/g, "%22") : ""; }
+      catch (_) { return ""; }
     }
     function inline(s) {
       return s
@@ -3064,12 +3069,12 @@ ${lines}
     }
     function renderSources(cites) {
       const seen = new Set();
-      const links = (cites || []).filter((c) => c.uri && !seen.has(c.uri) && seen.add(c.uri));
+      const links = (cites || []).filter((c) => safeUrl(c.uri) && !seen.has(c.uri) && seen.add(c.uri));
       if (!links.length) { sourcesEl.innerHTML = ""; return; }
       sourcesEl.innerHTML = "<b>🔗 검색 출처 (클릭 가능 — 실제 확인된 링크)</b><ol>" +
         links.map((w) => {
           const host = hostOf(w.uri);
-          return `<li><a href="${w.uri}" target="_blank" rel="noopener">${escapeHtml(w.title || w.uri)}</a>` +
+          return `<li><a href="${safeUrl(w.uri)}" target="_blank" rel="noopener">${escapeHtml(w.title || w.uri)}</a>` +
             (host ? ` <span class="host">— ${escapeHtml(host)}</span>` : "") + "</li>";
         }).join("") + "</ol>" +
         `<div class="hint">발행일은 검색 API가 일관되게 제공하지 않습니다. 필요한 경우 본문(뉴스 항목)에 표기됩니다.</div>`;
@@ -3298,7 +3303,12 @@ ${lines}
       const arr = loadHistory();
       arr.unshift({ id: Date.now(), ts: new Date().toISOString(), topic: rec.topic, industry: rec.industry, text: rec.text, cites: rec.cites });
       while (arr.length > 20) arr.pop(); // 최근 20건만 보관
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
+      // 브라우저 저장 공간(약 5MB, 공지문 메이커와 같이 씀)이 차면 오래된 기록부터 빼고 다시 저장.
+      // 저장이 끝내 안 돼도 조사 결과 화면은 그대로 두고 예외를 던지지 않는다.
+      while (arr.length) {
+        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); break; }
+        catch (_) { if (arr.length === 1) { console.warn("이전 기록 저장 공간 부족"); break; } arr.pop(); }
+      }
       renderHistory();
     }
     function renderHistory() {
@@ -3677,12 +3687,12 @@ ${lines}
 
     function renderInstrSources(cites) {
       const seen = new Set();
-      const links = (cites || []).filter((c) => c.uri && !seen.has(c.uri) && seen.add(c.uri));
+      const links = (cites || []).filter((c) => safeUrl(c.uri) && !seen.has(c.uri) && seen.add(c.uri));
       if (!links.length) { instrSourcesEl.innerHTML = ""; return; }
       instrSourcesEl.innerHTML = "<b>🔗 검색 출처 (참고용)</b><ol>" +
         links.map((w) => {
           const host = hostOf(w.uri);
-          return `<li><a href="${w.uri}" target="_blank" rel="noopener">${escapeHtml(w.title || w.uri)}</a>` +
+          return `<li><a href="${safeUrl(w.uri)}" target="_blank" rel="noopener">${escapeHtml(w.title || w.uri)}</a>` +
             (host ? ` <span class="host">— ${escapeHtml(host)}</span>` : "") + "</li>";
         }).join("") + "</ol>";
     }
@@ -4081,7 +4091,6 @@ ${lines}
     guideTabBtns.forEach((b) => b.addEventListener("click", () => showGuideSection(b.dataset.g)));
     const currentPanelKey = () => { const k = document.querySelector(".maintabs .maintab.active")?.dataset.panel; return !k || k === "home" ? "start" : k; };
     const openGuide = (key) => { showGuideSection(typeof key === "string" ? key : currentPanelKey()); guideOverlay.style.display = "flex"; };
-    $("tabHelpBtn")?.addEventListener("click", () => openGuide(currentPanelKey()));
     const closeGuide = () => { guideOverlay.style.display = "none"; localStorage.setItem("edu_seen_guide", "1"); };
     guideBtn.addEventListener("click", openGuide);
     guideClose.addEventListener("click", closeGuide);
@@ -4124,7 +4133,7 @@ ${lines}
       if (!key) { st.textContent = "API 키를 먼저 넣어 주세요."; return; }
       btn.disabled = true; st.textContent = "확인 중…";
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(key)}`);
+        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", { headers: { "x-goog-api-key": key } });
         if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error?.message || `HTTP ${res.status}`);
         const names = new Set(((await res.json()).models || []).map((m) => String(m.name).replace(/^models\//, "")));
         const all = [...new Set([...MODELS, ...MODELS_LIGHT])];
