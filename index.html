@@ -2442,11 +2442,15 @@
     // 혼잡(과부하) 시 순서대로 시도할 모델 목록. 이름이 바뀌면 여기만 고치면 됩니다.
     // 2026-11 기준 무료 등급에서 쓸 수 있는 모델(구형 2.5 계열은 신규 사용자에게 막힘)
     // 무료 한도는 모델별로 따로라서, 모델을 여러 개 두면 하루 총 사용 가능 횟수가 늘어남
-    const MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+    // ⚠️ 무료 등급에서 웹검색(google_search 그라운딩)은 Gemini 2.x 계열만 가능 — 'Gemini 3 and newer' 검색 그라운딩 한도가 0이라
+    //    3.x 모델에 검색을 붙이면 첫 요청부터 429(quota exceeded)가 남 (AI Studio 비율 제한 화면 기준, 2026-11 확인)
+    //    → 검색 작업(교육 조사·강사 찾기)은 2.5 Flash / 2.5 Flash-Lite만 사용 (각 하루 약 20회, 검색 그라운딩은 하루 1,500회)
+    const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
     // 검색 없는 가벼운 작업(품의서 채우기·문서 읽기·키워드 추천 등)은 하루 한도가 넉넉한 Flash-Lite부터 써서
     // 하루 한도가 작은 Flash(무료 하루 약 20회)는 교육 조사·강사 찾기에 아껴 둔다
     // Gemma는 웹검색(google_search)을 못 써서 검색 없는 작업에만 사용
-    const MODELS_LIGHT = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it", "gemma-4-26b-a4b-it", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
+    const MODELS_LIGHT = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it", "gemma-4-26b-a4b-it", "gemini-3.8-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
+    const SEARCH_MODELS = new Set(MODELS);
     const NO_SEARCH_MODELS = new Set(["gemma-4-31b-it", "gemma-4-26b-a4b-it"]);
     // 하루 한도를 다 쓴 모델은 오늘(태평양 시간 자정 리셋) 다시 시도하지 않고 바로 건너뜀 → 헛도는 시간·요청 절약
     const ptToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
@@ -2468,10 +2472,10 @@
     function markSearchExhausted() { try { localStorage.setItem(SEARCH_OUT_KEY, ptToday()); } catch (_) {} }
     // 모델별 표시 정보. daily = 무료 등급 하루 요청 한도(대략치, 2026-11 기준. 바뀌면 여기 숫자만 수정)
     const MODEL_INFO = {
-      "gemini-3.8-flash": { name: "Gemini 3.8 Flash", desc: "가장 똑똑함 · 교육 조사·강사 찾기에 추천", daily: 20 },
-      "gemini-3.7-flash": { name: "Gemini 3.7 Flash", desc: "3.8과 비슷한 성능 · 3.8 한도 소진 시 대안", daily: 20 },
-      "gemini-3.6-flash": { name: "Gemini 3.6 Flash", desc: "한 단계 이전 Flash · 3.8·3.7 한도 소진 시 대안", daily: 20 },
-      "gemini-3.5-flash": { name: "Gemini 3.5 Flash", desc: "이전 세대 Flash · 마지막 예비용", daily: 20 },
+      "gemini-2.5-flash": { name: "Gemini 2.5 Flash", desc: "웹검색 가능 · 교육 조사·강사 찾기 기본 모델", daily: 20 },
+      "gemini-2.5-flash-lite": { name: "Gemini 2.5 Flash-Lite", desc: "웹검색 가능 · 2.5 Flash 한도 소진 시 검색 작업 대안", daily: 20 },
+      "gemini-3.8-flash": { name: "Gemini 3.8 Flash", desc: "가장 똑똑함 · 무료 등급은 웹검색 불가 → 품의서·문서 작업용", daily: 20 },
+      "gemini-3.6-flash": { name: "Gemini 3.6 Flash", desc: "한 단계 이전 Flash · 무료 등급은 웹검색 불가", daily: 20 },
       "gemini-3.5-flash-lite": { name: "Gemini 3.5 Flash-Lite", desc: "빠르고 한도 넉넉 · 품의서·문서 읽기 같은 가벼운 작업용", daily: 500 },
       "gemini-3.1-flash-lite": { name: "Gemini 3.1 Flash-Lite", desc: "가장 가벼운 Gemini · 3.5 Flash-Lite와 한도 따로", daily: 500 },
       "gemma-4-31b-it": { name: "Gemma 4 31B", desc: "구글 오픈모델 · 웹검색 안 됨(가벼운 작업 전용)", daily: 0 },
@@ -2586,7 +2590,7 @@
       if (useSearch) body.tools = [{ google_search: {} }]; // 키워드 추천 등은 검색 없이 더 빠르게
       // '깊게 생각하기'를 낮춰 속도를 크게 올림 — 검색 작업(교육 조사·강사 찾기)도 포함
       // (Gemini 3 기본값은 high라 첫 글자까지 수십 초, PDF가 크면 1~2분 넘게 걸리거나 504가 남). 모델이 이 옵션을 거부하면 빼고 다시 보냄.
-      if (!thinkingUnsupported.has(model) && !NO_SEARCH_MODELS.has(model)) body.generationConfig = { thinkingConfig: { thinkingLevel: "low" } };
+      if (!thinkingUnsupported.has(model) && !NO_SEARCH_MODELS.has(model) && !/^gemini-2/.test(model)) body.generationConfig = { thinkingConfig: { thinkingLevel: "low" } };
       // 응답이 멈춘 채 안 오는 경우 대비: 첫 응답 90초, 조각 사이 60초 넘게 조용하면 끊고 재시도
       const ctrl = new AbortController();
       let idleTimer = setTimeout(() => ctrl.abort(), 90000);
@@ -2690,7 +2694,9 @@
       let bestErr = null, lastErr = null, allQuota = true, allDaily = true;
       const base = useSearch ? MODELS : MODELS_LIGHT;
       const pref = getModelPref();
-      let order = pref === "auto" ? base : [pref, ...base.filter((m) => m !== pref)]; // 고른 모델 먼저, 나머지는 예비
+      // 고른 모델 먼저, 나머지는 예비. 검색 작업인데 검색 못 하는 모델(3.x·Gemma)을 골랐으면 무시하고 기본 순서로
+      const prefOk = pref !== "auto" && (!useSearch || SEARCH_MODELS.has(pref));
+      let order = prefOk ? [pref, ...base.filter((m) => m !== pref)] : base;
       if (useSearch) order = order.filter((m) => !NO_SEARCH_MODELS.has(m)); // 검색 작업엔 Gemma 제외
       for (let round = 1; round <= 2; round++) {
         const skip = loadExhausted().models;
@@ -4110,7 +4116,7 @@ ${lines}
       if (lbl) lbl.textContent = "AI 모델: " + (pref === "auto" ? "자동" : MODEL_INFO[pref].name.replace("Gemini ", ""));
       if (!modelListEl) return;
       const row = (id, name, desc, meta) => `<label class="model-opt${pref === id ? " selected" : ""}"><input type="radio" name="modelPick" value="${id}"${pref === id ? " checked" : ""}><div class="mo-body"><div class="mo-name">${name}</div><div class="mo-desc">${desc}</div>${meta}</div></label>`;
-      let html = row("auto", "자동 (추천)", "교육 조사·강사 찾기는 3.8 Flash부터, 가벼운 작업은 Flash-Lite·Gemma부터 쓰고 막히면 자동 전환", "");
+      let html = row("auto", "자동 (추천)", "교육 조사·강사 찾기는 웹검색 되는 2.5 Flash부터, 가벼운 작업은 Flash-Lite·Gemma부터 쓰고 막히면 자동 전환", "");
       for (const id of [...new Set([...MODELS, ...MODELS_LIGHT])]) {
         const info = MODEL_INFO[id] || { name: id, desc: "", daily: 0 };
         const n = usage[id] || 0, isOut = out.includes(id), isNa = unavailableModels.has(id);
