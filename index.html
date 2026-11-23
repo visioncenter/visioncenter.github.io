@@ -2117,7 +2117,7 @@
         </div>
 
         <div class="ap-sec">① 비용 항목 <span id="stCostSum" class="hint" style="font-weight:400; margin:0;"></span></div>
-        <div class="hint" style="margin-top:0;">실제 쓴 금액의 <b>공급가액</b>만 넣으면 돼요. 부가세는 공급가액×10%(원 미만 버림). <b>배분</b> 체크를 해제한 항목은 법인 배분에서 빠져요.</div>
+        <div class="hint" style="margin-top:0;">실제 쓴 금액의 <b>공급가액</b>만 넣으면 돼요. 부가세는 공급가액×10%(원 미만 버림). 법인 배분은 합계(공급가액+부가세)를 인원수로 나눠서 끝자리가 딱 맞아요. <b>배분</b> 체크를 해제한 항목은 법인 배분에서 빠져요.</div>
         <div id="stCosts"></div>
         <div class="minirow" style="margin-top:8px; gap:6px;">
           <button type="button" class="btn-sm" id="stAddCost">＋ 비용 추가</button>
@@ -2331,10 +2331,10 @@
             <li><b>비용 항목</b>실제 쓴 금액의 <b>공급가액</b>을 넣어요. <b>📝 실시 품의서 교육비 가져오기</b>로 예비비를 뺀 항목을 불러올 수 있어요. 부가세는 공급가액×10%(원 미만 버림)로 자동 계산돼요.</li>
             <li><b>수료자 엑셀 올리기</b>'법인' 열로 인원을 세요. '수료여부'처럼 수료 열이 있으면 수료자만, 없으면 수강취소를 뺀 인원을 세요. 인원은 직접 고치거나 ＋ 법인 추가로 넣어도 돼요.</li>
             <li><b>담당자·이메일</b>처음 한 번 <b>🏢 법인 담당자 목록</b>을 펼쳐 "법인명, 약칭, 담당자, 이메일"을 한 줄씩 붙여넣고 저장하세요. 그다음부터 엑셀의 법인명(㈜아이티센엔텍, 클로잇 등)이 약칭으로 바뀌고 담당자·이메일이 자동으로 채워져요. 법인 칸 드롭다운에서 골라도 돼요.</li>
-            <li><b>결과 확인</b>법인 공급가액 = 배분 대상 공급가액 × 법인 인원 ÷ 전체 인원(원 미만 버림), 부가세는 법인별 공급가액×10% 버림. <b>⬇ 엑셀 다운로드</b>로 정산표를 받고, 결과 품의서에 자동 반영돼요.</li>
+            <li><b>결과 확인</b>법인 합계 = 배분 대상 합계(공급가액+부가세) × 법인 인원 ÷ 전체 인원, 법인 공급가액 = 법인 합계÷1.1(반올림), 부가세 = 법인 합계−공급가액. 법인별 합이 전체 공급가액·부가세·합계와 정확히 맞아요. <b>⬇ 엑셀 다운로드</b>로 정산표를 받고, 결과 품의서에 자동 반영돼요.</li>
           </ol>
           <div class="guide-tip">
-            ⚠️ 인원수로 딱 나눠지지 않으면 끝수(몇 원)를 인원이 가장 많은 법인에 더하고 화면에 알려줘요. 법인별 부가세 버림 때문에 부가세 합계가 전체 금액의 10%와 몇 원 다를 수 있어요.<br />
+            ⚠️ 인원수로 딱 나눠지지 않으면 끝수(몇 원)를 인원이 가장 많은 법인에 더하고 화면에 알려줘요. 공급가액 반올림으로 생기는 1원 차이도 같은 법인에서 맞춰요.<br />
             🔒 명단·담당자 정보는 이 브라우저에만 저장돼요.
           </div>
         </section>
@@ -5664,8 +5664,14 @@ background:
         const alloc = items.filter((c) => c.alloc);
         const corps = s.corps.filter((c) => c.count > 0);
         const vatable = alloc.filter((c) => c.vat).reduce((a, c) => a + c.supply, 0), plain = alloc.filter((c) => !c.vat).reduce((a, c) => a + c.supply, 0);
-        const A = allocate(vatable, corps), B = allocate(plain, corps);
-        const rows = corps.map((c, i) => { const supply = A.parts[i] + B.parts[i], vat = vatOf(A.parts[i]); return { ...c, supply, vat, total: supply + vat }; });
+        // 부가세 대상: 합계(공급가액+부가세)를 인원수로 먼저 나누고, 법인별로 공급가액 = 합계÷1.1(반올림), 부가세 = 합계−공급가액
+        // → 법인별 합의 공급가액·부가세·합계가 전체 금액과 정확히 맞음
+        const vatTotal = alloc.filter((c) => c.vat).reduce((a, c) => a + c.vatAmt, 0);
+        const A = allocate(vatable + vatTotal, corps), B = allocate(plain, corps);
+        const aSup = A.parts.map((g) => Math.round(g / 1.1));
+        const supDiff = vatable - aSup.reduce((a, b) => a + b, 0);
+        if (supDiff && corps.length) { const bi = corps.reduce((best, c, i) => (c.count > corps[best].count ? i : best), 0); aSup[bi] += supDiff; }
+        const rows = corps.map((c, i) => { const vat = A.parts[i] - aSup[i], supply = aSup[i] + B.parts[i]; return { ...c, supply, vat, total: supply + vat }; });
         const ctot = rows.reduce((a, r) => ({ count: a.count + r.count, supply: a.supply + r.supply, vat: a.vat + r.vat, total: a.total + r.total }), { count: 0, supply: 0, vat: 0, total: 0 });
         const rem = A.rem + B.rem, remCorp = rem ? corps[A.remIdx >= 0 ? A.remIdx : B.remIdx]?.corp : "";
         return { s, items, tot, alloc, allocNames: alloc.map((c) => c.item), rows, ctot, rem, remCorp, perHead: ctot.count ? (vatable + plain) / ctot.count : 0 };
@@ -5731,9 +5737,8 @@ background:
         const sum = $("stSummary");
         if (!R.alloc.length || !R.rows.length) sum.innerHTML = !R.alloc.length ? "배분할 비용 항목을 넣어주세요." : "법인별 수료 인원을 넣어주세요. (수료자 엑셀을 올리거나 ＋ 법인 추가)";
         else {
-          sum.innerHTML = `배분 대상 <b>${esc(R.allocNames.join(" + "))}</b> · 공급가액 <b>${won(R.ctot.supply)}원</b> ÷ <b>${R.ctot.count}명</b> = 1인당 <b>${won(Math.floor(R.perHead))}원</b>${R.perHead % 1 ? " (원 미만 있음)" : ""}`
+          sum.innerHTML = `배분 대상 <b>${esc(R.allocNames.join(" + "))}</b> · 합계 <b>${won(R.ctot.total)}원</b> ÷ <b>${R.ctot.count}명</b> = 1인당 <b>${won(Math.floor(R.ctot.total / R.ctot.count))}원</b>${(R.ctot.total / R.ctot.count) % 1 ? " (원 미만 있음)" : ""}`
             + (R.rem ? `<br /><span class="warn">⚠️ 인원수로 딱 나눠지지 않아 끝수 ${won(R.rem)}원을 인원이 가장 많은 ${esc(R.remCorp)}에 더했어요.</span>` : "")
-            + (R.ctot.vat !== vatOf(R.ctot.supply) ? `<br /><span class="warn">ℹ️ 부가세를 법인별로 버림 계산해서 합계가 전체 부가세(${won(vatOf(R.ctot.supply))})와 ${won(vatOf(R.ctot.supply) - R.ctot.vat)}원 달라요.</span>` : "")
             + (R.ctot.supply !== R.tot.supply ? `<br />배분에서 뺀 항목: ${esc(R.items.filter((c) => !c.alloc).map((c) => c.item).join(", "))}` : "");
         }
         const html = allocTableHtml(R, viewOpts());
